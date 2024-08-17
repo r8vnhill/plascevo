@@ -11,4 +11,3 @@ trait GeneBasedEvolutionaryAlgorithm[T, G <: Gene[T, G]]
     val populationSize: Int
 
     val survivalRate: Double
-
