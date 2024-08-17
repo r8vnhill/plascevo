@@ -18,4 +18,10 @@ trait Representation[T, F <: Feature[T, F]] extends Verifiable with FlatMappable
      *
      * This value represents the number of features contained within the representation.
      */
-    val size: Int
+    def size: Int
+    
+    /** Checks if the representation is empty.
+     *
+     * @return `true` if the representation is empty, `false` otherwise.
+     */
+    def isEmpty: Boolean = size == 0
