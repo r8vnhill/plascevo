@@ -22,7 +22,7 @@ trait EvolutionState[T, F <: Feature[T, F], R <: Representation[T, F]] extends F
      *
      * This is the collection of all individuals in the current generation of the evolutionary algorithm.
      */
-    val population: List[Individual[T, F, R]]
+    val population: Population[T, F, R]
 
     /** The number of individuals in the population.
      *
@@ -56,7 +56,8 @@ trait EvolutionState[T, F <: Feature[T, F], R <: Representation[T, F]] extends F
      * @param f The function to apply to each individual.
      * @return A new `EvolutionState` with the transformed population.
      */
-    def map(f: Individual[T, F, R] => Individual[T, F, R]): EvolutionState[T, F, R] = withPopulation(population.map(f))
+    def map(f: Individual[T, F, R] => Individual[T, F, R]): EvolutionState[T, F, R] = 
+        withPopulation(population.map(f))
 
     /** Folds the features of the population from the right.
      *
@@ -91,7 +92,7 @@ trait EvolutionState[T, F <: Feature[T, F], R <: Representation[T, F]] extends F
      *
      * @return A list of all features in the population.
      */
-    override def flatten(): List[T] = population.flatMap(_.representation.flatten())
+    override def flatten(): Seq[T] = population.flatMap(_.representation.flatten())
 
     /** Creates a new `EvolutionState` with a given population.
      *
@@ -101,4 +102,4 @@ trait EvolutionState[T, F <: Feature[T, F], R <: Representation[T, F]] extends F
      * @param newPopulation The new population to be used in the state.
      * @return A new `EvolutionState` with the updated population.
      */
-    def withPopulation(newPopulation: List[Individual[T, F, R]]): EvolutionState[T, F, R]
+    def withPopulation(newPopulation: Population[T, F, R]): EvolutionState[T, F, R]

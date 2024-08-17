@@ -95,7 +95,6 @@ package object plascevo:
             List.fill(size)(individualGen.sample.get)
         }
 
-
     /** Generates a pair of ordered values according to the specified conditions.
      *
      * The `orderedPairGen` method produces a generator (`Gen`) that creates pairs of values `(T, T)` from two given
@@ -146,3 +145,13 @@ package object plascevo:
         strict: Boolean = false,
         reversed: Boolean = false
     )(using ord: Ordering[T]): Gen[(T, T)] = orderedPairGen(a, a, strict, reversed)
+
+    /** Generates a positive integer within a specified range.
+     *
+     * The `positiveIntGen` function produces a generator (`Gen`) that creates positive integers between `1` and the 
+     * specified maximum value. This is useful for scenarios where a strictly positive integer is required.
+     *
+     * @param max The maximum value for the generated integers, inclusive. Defaults to `Int.MaxValue`.
+     * @return A generator that produces positive integers within the range `[1, max]`.
+     */
+    def positiveIntGen(max: Int = Int.MaxValue): Gen[Int] = Gen.chooseNum(1, max)

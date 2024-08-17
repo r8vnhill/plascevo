@@ -47,8 +47,6 @@ class FlatMappableTest extends AbstractPlascevoTest:
         elementsAndFlattened <- Gen.listOfN(size, Gen.listOf(Gen.chooseNum(Int.MinValue, Int.MaxValue)))
     } yield {
         val flattened = elementsAndFlattened.flatten
-        val flatMappable = new FlatMappable[Int] {
-            override def flatten(): List[Int] = flattened
-        }
+        val flatMappable: FlatMappable[Int] = () => flattened
         (flatMappable, flattened)
     }

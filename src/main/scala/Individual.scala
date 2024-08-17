@@ -60,7 +60,7 @@ class Individual[T, F <: Feature[T, F], R <: Representation[T, F]](
      *
      * @return A list containing all the features in the individual's representation.
      */
-    override def flatten(): List[T] = representation.flatten()
+    override def flatten(): Seq[T] = representation.flatten()
 
     /** Checks if the individual's fitness has been evaluated.
      *

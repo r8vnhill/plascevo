@@ -25,7 +25,7 @@ trait FlatMappable[+T]:
      *
      * @return A `List` containing all the elements in the structure.
      */
-    def flatten(): List[T]
+    def flatten(): Seq[T]
 
     /** Applies a function to each element in the structure and flattens the resulting lists.
      *
@@ -33,4 +33,4 @@ trait FlatMappable[+T]:
      * @tparam U The type of elements in the resulting list.
      * @return A `List` containing all the elements produced by applying `f` to each element and flattening the results.
      */
-    def flatMap[U](f: T => List[U]): List[U] = flatten().flatMap(f)
+    def flatMap[U](f: T => Seq[U]): Seq[U] = flatten().flatMap(f)
