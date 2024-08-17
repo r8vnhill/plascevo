@@ -21,7 +21,7 @@ package object plascevo:
      *            entire range.
      * @return A generator that produces non-NaN `Double` values.
      */
-    def arbNonNaNDouble(arb: Gen[Double] = Gen.chooseNum(Double.MinValue, Double.MaxValue)): Gen[Double] =
+    def nonNaNDoubleGen(arb: Gen[Double] = Gen.chooseNum(Double.MinValue, Double.MaxValue)): Gen[Double] =
         arb.suchThat(!_.isNaN)
 
 /** Generates an instance of `Individual` for evolutionary algorithms.
