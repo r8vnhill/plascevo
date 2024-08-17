@@ -56,7 +56,7 @@ trait EvolutionState[T, F <: Feature[T, F], R <: Representation[T, F]] extends F
      * @param f The function to apply to each individual.
      * @return A new `EvolutionState` with the transformed population.
      */
-    def map(f: Individual[T, F, R] => Individual[T, F, R]): EvolutionState[T, F, R] = 
+    def map(f: Individual[T, F, R] => Individual[T, F, R]): EvolutionState[T, F, R] =
         withPopulation(population.map(f))
 
     /** Folds the features of the population from the right.

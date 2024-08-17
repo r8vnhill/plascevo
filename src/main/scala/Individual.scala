@@ -17,7 +17,7 @@ import java.util.Objects
  * @tparam F The kind of feature stored in the representation, which must implement [[Feature]].
  * @tparam R The type of representation used by the individual, which must implement [[Representation]].
  */
-class Individual[T, F <: Feature[T, F], R <: Representation[T, F]](
+case class Individual[T, F <: Feature[T, F], R <: Representation[T, F]](
     val representation: R,
     val fitness: Double = Double.NaN
 ) extends Verifiable with FlatMappable[T] with Foldable[T]:

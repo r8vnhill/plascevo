@@ -62,6 +62,78 @@ class EvolutionStateTest extends AbstractPlascevoTest:
                 }
             }
         }
+
+        "can be mapped to another state" in {
+            forAll(
+                evolutionStateAndPopulationGen(
+                    populationGen(
+                        individualGen(simpleRepresentationGen(simpleFeatureGen(Arbitrary.arbInt.arbitrary)))
+                    ),
+                    Gen.oneOf(
+                        FitnessMaxRanker[Int, SimpleFeature[Int], Representation[Int, SimpleFeature[Int]]],
+                        FitnessMinRanker[Int, SimpleFeature[Int], Representation[Int, SimpleFeature[Int]]]
+                    )
+                )
+            ) { case (evolutionState, _) =>
+                val mapped = evolutionState.map(ind => ind.copy(fitness = ind.fitness + 1))
+                mapped.population should contain theSameElementsAs
+                    evolutionState.population.map(ind => ind.copy(fitness = ind.fitness + 1))
+            }
+        }
+
+        "can be folded to the left" in {
+            forAll(
+                evolutionStateAndPopulationGen(
+                    populationGen(
+                        individualGen(simpleRepresentationGen(simpleFeatureGen(Arbitrary.arbInt.arbitrary)))
+                    ),
+                    Gen.oneOf(
+                        FitnessMaxRanker[Int, SimpleFeature[Int], Representation[Int, SimpleFeature[Int]]],
+                        FitnessMinRanker[Int, SimpleFeature[Int], Representation[Int, SimpleFeature[Int]]]
+                    )
+                )
+            ) { case (evolutionState, _) =>
+                val folded = evolutionState.foldLeft(0)(_ + _)
+                val expected = evolutionState.population.map(_.representation.flatten().sum).sum
+                folded should be(expected)
+            }
+        }
+
+        "can be folded to the right" in {
+            forAll(
+                evolutionStateAndPopulationGen(
+                    populationGen(
+                        individualGen(simpleRepresentationGen(simpleFeatureGen(Arbitrary.arbInt.arbitrary)))
+                    ),
+                    Gen.oneOf(
+                        FitnessMaxRanker[Int, SimpleFeature[Int], Representation[Int, SimpleFeature[Int]]],
+                        FitnessMinRanker[Int, SimpleFeature[Int], Representation[Int, SimpleFeature[Int]]]
+                    )
+                )
+            ) { case (evolutionState, _) =>
+                val folded = evolutionState.foldRight(0)(_ + _)
+                val expected = evolutionState.population.map(_.representation.flatten().sum).sum
+                folded should be(expected)
+            }
+        }
+
+        "can be flattened" in {
+            forAll(
+                evolutionStateAndPopulationGen(
+                    populationGen(
+                        individualGen(simpleRepresentationGen(simpleFeatureGen(Arbitrary.arbInt.arbitrary)))
+                    ),
+                    Gen.oneOf(
+                        FitnessMaxRanker[Int, SimpleFeature[Int], Representation[Int, SimpleFeature[Int]]],
+                        FitnessMinRanker[Int, SimpleFeature[Int], Representation[Int, SimpleFeature[Int]]]
+                    )
+                )
+            ) { case (evolutionState, _) =>
+                val flattened = evolutionState.flatten()
+                val expected = evolutionState.population.flatMap(_.representation.flatten())
+                flattened should contain theSameElementsAs expected
+            }
+        }
     }
 
     private def evolutionStateAndPopulationGen[T, F <: Feature[T, F], R <: Representation[T, F]](
