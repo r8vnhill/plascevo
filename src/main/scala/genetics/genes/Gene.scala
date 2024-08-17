@@ -40,3 +40,31 @@ trait Gene[T, G <: Gene[T, G]] extends Feature[T, G]:
      * @return A sequence containing the value of the gene.
      */
     override def flatten(): Seq[T] = Seq(value)
+
+    /** Folds the value of the gene from the right.
+     *
+     * This method applies a binary operation to the value of the gene and an initial value, effectively folding the
+     * value of the gene from the right. Since the gene is atomic, this operation simply applies the function to the
+     * gene's value and the initial value.
+     *
+     * @param initial The initial value to start the folding operation.
+     * @param f       A binary operation that takes the gene's value and the initial value, and returns the new
+     *                accumulated value.
+     * @tparam U The type of the accumulated value and the result.
+     * @return The result of applying the folding operation to the gene's value and the initial value.
+     */
+    override def foldRight[U](initial: U)(f: (T, U) => U): U = f(value, initial)
+
+    /** Folds the value of the gene from the left.
+     *
+     * This method applies a binary operation to an initial value and the value of the gene, effectively folding the
+     * value of the gene from the left. Since the gene is atomic, this operation simply applies the function to the
+     * initial value and the gene's value.
+     *
+     * @param initial The initial value to start the folding operation.
+     * @param f       A binary operation that takes the initial value and the gene's value, and returns the new
+     *                accumulated value.
+     * @tparam U The type of the accumulated value and the result.
+     * @return The result of applying the folding operation to the initial value and the gene's value.
+     */
+    override def foldLeft[U](initial: U)(f: (U, T) => U): U = f(initial, value)
