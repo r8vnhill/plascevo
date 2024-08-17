@@ -1,10 +1,8 @@
 package cl.ravenhill.plascevo
 
-import repr.{Feature, IsValidRepresentation, Representation, SimpleFeature, simpleFeatureGen, simpleRepresentationGen}
+import matchers.beValid
+import repr.*
 
-import cl.ravenhill.individualGen
-import cl.ravenhill.plascevo.matchers.beValid
-import cl.ravenhill.plascevo.{Domain, Individual, ToStringMode, repr}
 import org.scalacheck.{Arbitrary, Gen}
 
 class IndividualTest extends AbstractPlascevoTest:

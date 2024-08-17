@@ -2,7 +2,6 @@ package cl.ravenhill.plascevo
 
 import repr.{Feature, Representation, simpleFeatureGen, simpleRepresentationGen}
 
-import cl.ravenhill.individualGen
 import org.scalacheck.{Arbitrary, Gen}
 
 import scala.collection.mutable.ListBuffer
