@@ -1,6 +1,6 @@
-package cl.ravenhill.plascebo
+package cl.ravenhill.plascevo
 
-import org.scalacheck.*
+import cl.ravenhill.plascevo.repr
 import org.scalatest.matchers.should
 
 /** An abstract base class for testing components within the Plascevo framework.

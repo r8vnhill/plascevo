@@ -1,4 +1,4 @@
-package cl.ravenhill.plascebo
+package cl.ravenhill.plascevo
 
 /** Defines domain-level configuration and utilities for the evolutionary algorithm framework.
  *

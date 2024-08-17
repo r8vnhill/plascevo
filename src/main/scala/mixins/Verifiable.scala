@@ -1,4 +1,4 @@
-package cl.ravenhill.plascebo
+package cl.ravenhill.plascevo
 package mixins
 
 /** A trait representing an entity that can be verified.
@@ -25,6 +25,5 @@ package mixins
  *
  * @return A Boolean value indicating whether the verification was successful. Defaults to `true`.
  */
-trait Verifiable {
+trait Verifiable:
     def verify(): Boolean = true
-}
