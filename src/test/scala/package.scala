@@ -2,7 +2,7 @@ package cl.ravenhill
 
 import cl.ravenhill.plascevo.Individual
 import cl.ravenhill.plascevo.repr.{Feature, Representation}
-import org.scalacheck.{Arbitrary, Gen}
+import org.scalacheck.{Arbitrary, Gen, Shrink}
 
 package object plascevo:
 
@@ -146,6 +146,8 @@ package object plascevo:
         reversed: Boolean = false
     )(using ord: Ordering[T]): Gen[(T, T)] = orderedPairGen(a, a, strict, reversed)
 
+    given noShrink[T]: Shrink[T] = Shrink.shrinkAny
+    
     /** Generates a positive integer within a specified range.
      *
      * The `positiveIntGen` function produces a generator (`Gen`) that creates positive integers between `1` and the 
@@ -154,4 +156,4 @@ package object plascevo:
      * @param max The maximum value for the generated integers, inclusive. Defaults to `Int.MaxValue`.
      * @return A generator that produces positive integers within the range `[1, max]`.
      */
-    def positiveIntGen(max: Int = Int.MaxValue): Gen[Int] = Gen.chooseNum(1, max)
+    def positiveIntGen(max: Int = Int.MaxValue): Gen[Int] = Gen.choose(1, max)

@@ -4,7 +4,41 @@ package evolution
 import ranking.IndividualRanker
 import repr.{Feature, Representation}
 
+import org.scalacheck.Gen
+
 package object states:
+    /** Generates an evolution state for use in evolutionary algorithms.
+     *
+     * The `evolutionStateGen` function creates a generator (`Gen`) that produces an instance of `SimpleState`, 
+     * representing the state of an evolutionary algorithm at a specific generation. The state includes a population of
+     * individuals, a ranker to evaluate the population, and the current generation number.
+     *
+     * @param populationGen A generator for the population of individuals.
+     * @param rankerGen A generator for the individual ranker, which evaluates and ranks the individuals in the
+     *                  population.
+     * @param generationGen A generator for the generation number. Defaults to a generator that produces positive
+     *                      integers.
+     * @tparam T The type of value held by the features in the individuals.
+     * @tparam F The type of the feature, which must extend `Feature[T, F]`.
+     * @tparam R The type of the representation, which must extend `Representation[T, F]`.
+     * @return A generator that produces a `SimpleState[T, F, R]` representing the evolution state at a specific
+     *         generation.
+     */
+    def evolutionStateGen[T, F <: Feature[T, F], R <: Representation[T, F]](
+        populationGen: Gen[Population[T, F, R]],
+        rankerGen: Gen[IndividualRanker[T, F, R]],
+        generationGen: Gen[Int] = positiveIntGen()
+    ): Gen[SimpleState[T, F, R]] = {
+        for {
+            population <- populationGen
+            ranker <- rankerGen
+            generation <- generationGen
+        } yield {
+            new SimpleState[T, F, R](population, ranker, generation)
+        }
+    }
+
+
     /** Represents the state of an evolutionary algorithm at a given generation.
      *
      * The `SimpleState` case class encapsulates the current population of individuals, the ranker used to evaluate and 
