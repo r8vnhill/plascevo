@@ -1,7 +1,7 @@
 package cl.ravenhill.plascevo
 package genetics
 
-import genetics.chromosomes.{Chromosome, ChromosomeFactory}
+import genetics.chromosomes.{Chromosome, ChromosomeBuilder}
 import genetics.genes.Gene
 import repr.RepresentationFactory
 
@@ -17,7 +17,7 @@ import scala.collection.mutable.ListBuffer
  * @tparam T The type of value stored by the genes within the chromosomes.
  * @tparam G The type of gene that the chromosomes hold, which must extend [[Gene]].
  */
-class GenotypeFactory[T, G <: Gene[T, G]] extends RepresentationFactory[T, G, Genotype[T, G]] {
+class GenotypeBuilder[T, G <: Gene[T, G]] extends RepresentationFactory[T, G, Genotype[T, G]] {
 
     /** A list buffer that stores the chromosome factories used to create chromosomes for the genotype.
      *
@@ -25,8 +25,13 @@ class GenotypeFactory[T, G <: Gene[T, G]] extends RepresentationFactory[T, G, Ge
      * responsible for creating a single chromosome within the genotype. The order and number of factories in this list
      * determine the structure of the resulting genotype.
      */
-    var chromosomes: mutable.Seq[ChromosomeFactory[T, G]] = ListBuffer.empty[ChromosomeFactory[T, G]]
+    private val chromosomes = ListBuffer.empty[ChromosomeBuilder[T, G]]
 
+    def addChromosome(chromosomeFactory: ChromosomeBuilder[T, G]): GenotypeBuilder[T, G] = {
+        chromosomes += chromosomeFactory
+        this
+    }
+    
     /** Creates a new instance of `Genotype[T, G]`.
      *
      * This method generates a genotype by invoking the `make` method of each `ChromosomeFactory` in the `chromosomes`
@@ -34,8 +39,8 @@ class GenotypeFactory[T, G <: Gene[T, G]] extends RepresentationFactory[T, G, Ge
      *
      * @return A new instance of `Genotype[T, G]` containing the chromosomes created by the chromosome factories.
      */
-    override def make(): Genotype[T, G] = {
-        val chromosomeSeq = chromosomes.map(_.make()).toSeq
+    override def build(): Genotype[T, G] = {
+        val chromosomeSeq = chromosomes.map(_.build()).toSeq
         Genotype(chromosomeSeq)
     }
 }

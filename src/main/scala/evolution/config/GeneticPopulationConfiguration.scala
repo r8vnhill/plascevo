@@ -3,7 +3,7 @@ package evolution.config
 
 import repr.{Feature, Representation, RepresentationFactory}
 
-import cl.ravenhill.plascevo.genetics.GenotypeFactory
+import cl.ravenhill.plascevo.genetics.GenotypeBuilder
 import cl.ravenhill.plascevo.genetics.genes.Gene
 
 /** A configuration class for defining the parameters of a genetic population in an evolutionary algorithm.
@@ -20,6 +20,6 @@ import cl.ravenhill.plascevo.genetics.genes.Gene
  * @tparam G The type of gene that the genotypes hold, which must extend [[Gene]].
  */
 case class GeneticPopulationConfiguration[T, G <: Gene[T, G]](
-    representation: GenotypeFactory[T, G],
+    representation: GenotypeBuilder[T, G],
     populationSize: Int
 )

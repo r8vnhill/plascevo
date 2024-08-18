@@ -46,3 +46,22 @@ case class BooleanChromosome(genes: Seq[BooleanGene]) extends Chromosome[Boolean
         case _ => s"BooleanChromosome(${genes.mkString(", ")})"
     }
 }
+
+/** Companion object for the `BooleanChromosome` class, providing factory methods for creating chromosome builders.
+ *
+ * The `BooleanChromosome` object serves as a companion to the `BooleanChromosome` class and provides a method for
+ * creating instances of `BooleanChromosomeBuilder`. This allows for a flexible and customizable way to construct
+ * `BooleanChromosome` instances in a genetic algorithm.
+ */
+object BooleanChromosome {
+
+    /** Creates a new `BooleanChromosomeBuilder` instance.
+     *
+     * The `builder` method returns a new instance of `BooleanChromosomeBuilder`, which can be used to configure and
+     * build `BooleanChromosome` instances. This builder pattern provides a fluent interface for specifying the details
+     * of the chromosome, such as its size and gene construction strategy.
+     *
+     * @return A new `BooleanChromosomeBuilder` instance for building `BooleanChromosome` objects.
+     */
+    def builder(): BooleanChromosomeBuilder = new BooleanChromosomeBuilder()
+}

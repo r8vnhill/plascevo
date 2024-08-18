@@ -4,7 +4,7 @@ package evolution.engines
 import evolution.config.{EvolutionConfiguration, GeneticPopulationConfiguration, SelectionConfiguration}
 import evolution.states.{EvolutionState, GeneticEvolutionState}
 import genetics.genes.Gene
-import genetics.{Genotype, GenotypeFactory}
+import genetics.{Genotype, GenotypeBuilder}
 import operators.selection.Selector
 
 /** A trait that represents a gene-based evolutionary algorithm.
@@ -37,7 +37,7 @@ abstract class AbstractGeneBasedEvolutionaryAlgorithm[T, G <: Gene[T, G]](
      * This factory is derived from the population configuration and is responsible for generating the genotypes that
      * make up the individuals in the population.
      */
-    protected val genotypeFactory: GenotypeFactory[T, G] = populationConfiguration.representation
+    protected val genotypeFactory: GenotypeBuilder[T, G] = populationConfiguration.representation
 
     /** The size of the population in the evolutionary algorithm.
      *

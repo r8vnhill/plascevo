@@ -15,7 +15,7 @@ import repr.Representation
  * @tparam T The type of value stored by the genes.
  * @tparam G The type of gene that the chromosome holds, which must extend [[Gene]].
  */
-trait Chromosome[T, G <: Gene[T, G]](genes: Seq[G]) extends Representation[T, G] with Mappable[G]:
+trait Chromosome[T, G <: Gene[T, G]](genes: Seq[G]) extends Representation[T, G] with Mappable[G] {
 
     /** Returns the size of the chromosome.
      *
@@ -73,7 +73,7 @@ trait Chromosome[T, G <: Gene[T, G]](genes: Seq[G]) extends Representation[T, G]
 
     /** Applies a transformation function to each gene in the chromosome.
      *
-     * The `map` method applies the provided transformation function `f` to each gene in the `genes` sequence of the 
+     * The `map` method applies the provided transformation function `f` to each gene in the `genes` sequence of the
      * chromosome. It returns a sequence of results produced by applying the function to each gene.
      *
      * @param f The transformation function to apply to each gene. The function takes a gene of type `G` and returns a
@@ -83,5 +83,6 @@ trait Chromosome[T, G <: Gene[T, G]](genes: Seq[G]) extends Representation[T, G]
      *         the chromosome.
      */
     override def map[U](f: G => U): Seq[U] = genes.map(f)
-    
+
     def duplicateWithGenes(genes: Seq[G]): Chromosome[T, G]
+}

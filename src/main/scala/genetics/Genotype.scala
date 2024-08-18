@@ -1,7 +1,7 @@
 package cl.ravenhill.plascevo
 package genetics
 
-import genetics.chromosomes.Chromosome
+import genetics.chromosomes.{Chromosome, ChromosomeBuilder}
 import genetics.genes.Gene
 import repr.Representation
 
@@ -16,7 +16,7 @@ import repr.Representation
  * @tparam T The type of value stored by the genes within the chromosomes.
  * @tparam G The type of gene that the chromosomes hold, which must extend [[Gene]].
  */
-case class Genotype[T, G <: Gene[T, G]](chromosomes: Seq[Chromosome[T, G]]) extends Representation[T, G]:
+case class Genotype[T, G <: Gene[T, G]](chromosomes: Seq[Chromosome[T, G]]) extends Representation[T, G] {
 
     /** Returns the number of chromosomes in the genotype.
      *
@@ -59,7 +59,7 @@ case class Genotype[T, G <: Gene[T, G]](chromosomes: Seq[Chromosome[T, G]]) exte
      * @param initial The initial value to start the folding operation.
      * @param f       A binary operation that takes the current accumulated value and the next value, and returns the
      *                new accumulated value.
-     * @tparam U      The type of the accumulated value and the result.
+     * @tparam U The type of the accumulated value and the result.
      * @return The result of folding the values of the genotype from the left.
      */
     override def foldLeft[U](initial: U)(f: (U, T) => U): U = flatten().foldLeft(initial)(f)
@@ -72,7 +72,7 @@ case class Genotype[T, G <: Gene[T, G]](chromosomes: Seq[Chromosome[T, G]]) exte
      * @param initial The initial value to start the folding operation.
      * @param f       A binary operation that takes the next value and the current accumulated value, and returns the
      *                new accumulated value.
-     * @tparam U      The type of the accumulated value and the result.
+     * @tparam U The type of the accumulated value and the result.
      * @return The result of folding the values of the genotype from the right.
      */
     override def foldRight[U](initial: U)(f: (T, U) => U): U = flatten().foldRight(initial)(f)
@@ -88,3 +88,12 @@ case class Genotype[T, G <: Gene[T, G]](chromosomes: Seq[Chromosome[T, G]]) exte
     override def toString: String = Domain.toStringMode match
         case ToStringMode.SIMPLE => chromosomes.mkString("[", ", ", "]")
         case _ => s"Genotype(chromosomes=$chromosomes)"
+}
+
+object Genotype {
+    def of[T, G <: Gene[T, G]](chromosomes: ChromosomeBuilder[T, G]*): GenotypeBuilder[T, G] = {
+        val builder = GenotypeBuilder[T, G]()
+        chromosomes.foreach(builder.addChromosome)
+        builder
+    }
+}

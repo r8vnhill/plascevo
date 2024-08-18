@@ -21,5 +21,5 @@ trait RepresentationFactory[T, F <: Feature[T, F], R <: Representation[T, F]] {
      *
      * @return A new instance of the representation.
      */
-    def make(): R
+    def build(): R
 }

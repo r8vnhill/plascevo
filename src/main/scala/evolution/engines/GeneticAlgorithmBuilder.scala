@@ -6,7 +6,7 @@ import evolution.config.*
 import evolution.executors.evaluation.EvaluationExecutorFactory
 import evolution.states.GeneticEvolutionState
 import genetics.genes.Gene
-import genetics.{Genotype, GenotypeFactory}
+import genetics.{Genotype, GenotypeBuilder}
 import limits.Limit
 import listeners.{EvolutionListener, ListenerConfiguration}
 import operators.alteration.Alterer
@@ -53,131 +53,200 @@ type PopulationConfig[T, G <: Gene[T, G]] = GeneticPopulationConfiguration[T, G]
  */
 type SelectionConfig[T, G <: Gene[T, G]] = SelectionConfiguration[T, G, Genotype[T, G]]
 
-/** A factory class for creating instances of a genetic algorithm.
+/** A builder class for constructing instances of a genetic algorithm.
  *
- * The `GeneticAlgorithmFactory` class provides a flexible way to configure and create instances of a genetic algorithm.
- * It allows the user to set various parameters, such as population size, survival rate, and selection strategies.
- * Additionally, the factory manages listeners, limits, alterers, evaluators, and interceptors that define the behavior
- * of the genetic algorithm.
+ * The `GeneticAlgorithmBuilder` class provides a flexible and fluent interface for configuring and creating instances
+ * of a genetic algorithm. It allows for customization of various aspects of the algorithm, such as population size,
+ * survival rate, selection strategies, and more. The builder pattern used in this class enables method chaining, making
+ * it easy to set up a genetic algorithm with specific configurations.
  *
- * **Potential Issue**: The use of complex generic types and method chains in the `make` method can lead to Scala
- * compiler "pickling" errors, which occur when the compiler struggles to serialize or save the type information.
- *
- * **Solution**: To mitigate these issues, type aliases (`PopulationConfig` and `SelectionConfig`) have been introduced
- * to simplify type expressions. Additionally, the complex method chains in the `make` method have been refactored into
- * smaller, more focused methods. This reduces the complexity of the type information the compiler needs to handle and
- * improves maintainability.
- *
- * @param fitnessFunction The function used to evaluate the fitness of a genotype.
- * @param genotypeFactory The factory used to create instances of `Genotype[T, G]`.
- * @tparam T The type of value stored by the gene.
- * @tparam G The type of gene that the genotypes hold, which must extend [[Gene]].
+ * @param fitnessFunction  The function used to evaluate the fitness of a genotype.
+ * @param genotypeFactory  The builder used to create instances of `Genotype[T, G]`.
+ * @tparam T The type of value stored by the genes in the genotype.
+ * @tparam G The type of gene that the genotype holds, which must extend [[Gene]].
  */
-class GeneticAlgorithmFactory[T, G <: Gene[T, G]](
+class GeneticAlgorithmBuilder[T, G <: Gene[T, G]](
     val fitnessFunction: Genotype[T, G] => Double,
-    val genotypeFactory: GenotypeFactory[T, G],
+    val genotypeFactory: GenotypeBuilder[T, G],
 ) {
 
     /** The size of the population in the genetic algorithm. */
-    private var _populationSize: Int = GeneticAlgorithmFactory.defaultPopulationSize
+    private var _populationSize: Int = GeneticAlgorithmBuilder.defaultPopulationSize
 
-    /** Gets the current population size.
-     *
-     * @return The current population size.
-     */
-    def populationSize: Int = _populationSize
-
-    /** Sets the population size.
+    /** Sets the population size for the genetic algorithm.
      *
      * @param size The desired population size. Must be greater than 0.
+     * @return The current instance of the `GeneticAlgorithmBuilder` for method chaining.
      * @throws IllegalArgumentException if `size` is less than or equal to 0.
      */
-    def populationSize_=(size: Int): Unit = {
+    def withPopulationSize(size: Int): GeneticAlgorithmBuilder[T, G] = {
         require(size > 0, "Population size must be greater than 0")
         _populationSize = size
+        this
     }
 
     /** The survival rate in the genetic algorithm. */
-    private var _survivalRate: Double = GeneticAlgorithmFactory.defaultSurvivalRate
+    private var _survivalRate: Double = GeneticAlgorithmBuilder.defaultSurvivalRate
 
-    /** Gets the current survival rate.
-     *
-     * @return The current survival rate.
-     */
-    def survivalRate: Double = _survivalRate
-
-    /** Sets the survival rate.
+    /** Sets the survival rate for the genetic algorithm.
      *
      * @param rate The desired survival rate. Must be between 0.0 and 1.0.
+     * @return The current instance of the `GeneticAlgorithmBuilder` for method chaining.
      * @throws IllegalArgumentException if `rate` is not between 0.0 and 1.0.
      */
-    def survivalRate_=(rate: Double): Unit = {
+    def withSurvivalRate(rate: Double): GeneticAlgorithmBuilder[T, G] = {
         require(rate >= 0.0 && rate <= 1.0, "Survival rate must be between 0.0 and 1.0")
         _survivalRate = rate
+        this
     }
 
     /** The ranker used to evaluate and compare individuals in the genetic algorithm. */
-    var ranker: IndividualRanker[T, G, Genotype[T, G]] = GeneticAlgorithmFactory.defaultRanker
+    private var _ranker: IndividualRanker[T, G, Genotype[T, G]] = GeneticAlgorithmBuilder.defaultRanker
+
+    /** Sets the ranker for the genetic algorithm.
+     *
+     * @param ranker The `IndividualRanker` to be used for evaluating and comparing individuals.
+     * @return The current instance of the `GeneticAlgorithmBuilder` for method chaining.
+     */
+    def withRanker(ranker: IndividualRanker[T, G, Genotype[T, G]]): GeneticAlgorithmBuilder[T, G] = {
+        _ranker = ranker
+        this
+    }
 
     /** The selector used to choose parents from the population for reproduction. */
-    var parentSelector: Selector[T, G, Genotype[T, G]] = GeneticAlgorithmFactory.defaultParentSelector
+    private var _parentSelector: Selector[T, G, Genotype[T, G]] = GeneticAlgorithmBuilder.defaultParentSelector
+
+    /** Sets the parent selector for the genetic algorithm.
+     *
+     * @param selector The `Selector` to be used for choosing parents.
+     * @return The current instance of the `GeneticAlgorithmBuilder` for method chaining.
+     */
+    def withParentSelector(selector: Selector[T, G, Genotype[T, G]]): GeneticAlgorithmBuilder[T, G] = {
+        _parentSelector = selector
+        this
+    }
 
     /** The selector used to choose offspring for inclusion in the next generation. */
-    var offspringSelector: Selector[T, G, Genotype[T, G]] = GeneticAlgorithmFactory.defaultOffspringSelector
+    private var _offspringSelector: Selector[T, G, Genotype[T, G]] = GeneticAlgorithmBuilder.defaultOffspringSelector
+
+    /** Sets the offspring selector for the genetic algorithm.
+     *
+     * @param selector The `Selector` to be used for choosing offspring.
+     * @return The current instance of the `GeneticAlgorithmBuilder` for method chaining.
+     */
+    def withOffspringSelector(selector: Selector[T, G, Genotype[T, G]]): GeneticAlgorithmBuilder[T, G] = {
+        _offspringSelector = selector
+        this
+    }
 
     /** A list of listener factories that produce listeners for the genetic algorithm. */
-    var listeners: ListBuffer[ListenerFactory[T, G]] = ListBuffer(GeneticAlgorithmFactory.defaultListeners *)
+    private val _listeners: ListBuffer[ListenerFactory[T, G]] = ListBuffer(GeneticAlgorithmBuilder.defaultListeners *)
+
+    /** Adds a listener to the genetic algorithm.
+     *
+     * @param listener The `ListenerFactory` to be added to the algorithm.
+     * @return The current instance of the `GeneticAlgorithmBuilder` for method chaining.
+     */
+    def addListener(listener: ListenerFactory[T, G]): GeneticAlgorithmBuilder[T, G] = {
+        _listeners += listener
+        this
+    }
 
     /** A list of limit factories that produce limits for the genetic algorithm. */
-    var limits: ListBuffer[LimitFactory[T, G]] = ListBuffer(GeneticAlgorithmFactory.defaultLimits *)
+    private val _limits: ListBuffer[LimitFactory[T, G]] = ListBuffer(GeneticAlgorithmBuilder.defaultLimits *)
+
+    /** Adds a limit to the genetic algorithm.
+     *
+     * @param limit The `LimitFactory` to be added to the algorithm.
+     * @return The current instance of the `GeneticAlgorithmBuilder` for method chaining.
+     */
+    def addLimit(limit: LimitFactory[T, G]): GeneticAlgorithmBuilder[T, G] = {
+        _limits += limit
+        this
+    }
 
     /** A list of alterers that define the alterations to be applied to the population. */
-    var alterers: ListBuffer[Alterer[T, G, Genotype[T, G]]] = ListBuffer(GeneticAlgorithmFactory.defaultAlterers *)
+    private val _alterers: ListBuffer[Alterer[T, G, Genotype[T, G]]] =
+        ListBuffer(GeneticAlgorithmBuilder.defaultAlterers *)
+
+    /** Adds an alterer to the genetic algorithm.
+     *
+     * @param alterer The `Alterer` to be added to the algorithm.
+     * @return The current instance of the `GeneticAlgorithmBuilder` for method chaining.
+     */
+    def addAlterer(alterer: Alterer[T, G, Genotype[T, G]]): GeneticAlgorithmBuilder[T, G] = {
+        _alterers += alterer
+        this
+    }
 
     /** The evaluator used to evaluate the fitness of individuals in the genetic algorithm. */
-    var evaluator = GeneticAlgorithmFactory.defaultEvaluator[T, G]
+    private var _evaluator = GeneticAlgorithmBuilder.defaultEvaluator[T, G]
+
+    /** Sets the evaluator for the genetic algorithm.
+     *
+     * @param evaluator The `EvaluationExecutorFactory` to be used for evaluating fitness.
+     * @return The current instance of the `GeneticAlgorithmBuilder` for method chaining.
+     */
+    def withEvaluator(
+        evaluator: EvaluationExecutorFactory[T, G, Genotype[T, G], GeneticEvolutionState[T, G]]
+    ): GeneticAlgorithmBuilder[T, G] = {
+        _evaluator = evaluator
+        this
+    }
 
     /** The interceptor used to modify the evolutionary state before and after steps in the genetic algorithm. */
-    var interceptor = GeneticAlgorithmFactory.defaultInterceptor[T, G]
+    private var _interceptor = GeneticAlgorithmBuilder.defaultInterceptor[T, G]
 
-    /** Creates a population configuration based on the current settings.
+    /** Sets the interceptor for the genetic algorithm.
      *
-     * **Notes**: This method was introduced to reduce the complexity of the `make` method, which previously contained
-     * deeply nested method chains that contributed to "pickling" errors in the Scala compiler.
-     *
-     * @return A `PopulationConfig` instance representing the population configuration.
+     * @param interceptor The `EvolutionInterceptor` to be used in the algorithm.
+     * @return The current instance of the `GeneticAlgorithmBuilder` for method chaining.
      */
-    private def makePopulationConfig(): PopulationConfig[T, G] =
-        GeneticPopulationConfiguration(genotypeFactory, populationSize)
-
-    /** Creates a selection configuration based on the current settings.
-     *
-     * **Notes**: This method was introduced to simplify the `make` method, helping to avoid issues with the Scala
-     * compiler by breaking down complex configurations into smaller, more manageable methods.
-     *
-     * @return A `SelectionConfig` instance representing the selection configuration.
-     */
-    def makeSelectionConfig(): SelectionConfig[T, G] =
-        SelectionConfiguration(survivalRate, parentSelector, offspringSelector)
+    def withInterceptor(
+        interceptor: EvolutionInterceptor[T, G, Genotype[T, G], GeneticEvolutionState[T, G]]
+    ): GeneticAlgorithmBuilder[T, G] = {
+        _interceptor = interceptor
+        this
+    }
 
     /** Creates and returns an instance of a genetic algorithm based on the current configuration.
      *
-     * **Notes**: The `make` method was refactored to call smaller, focused methods for each part of the genetic
+     * **Notes**: The `build` method was refactored to call smaller, focused methods for each part of the genetic
      * algorithm's configuration. This reduces the complexity of the method and helps prevent Scala compiler "pickling"
      * errors related to complex type serialization.
      *
      * @return A `GeneticAlgorithm` instance configured with the current settings.
      */
-    def make() = GeneticAlgorithm(
+    def build() = GeneticAlgorithm(
         populationConfiguration = makePopulationConfig(),
         selectionConfiguration = makeSelectionConfig(),
-        alterationConfiguration = AlterationConfiguration(alterers.toSeq),
+        alterationConfiguration = AlterationConfiguration(_alterers.toSeq),
         evolutionConfiguration = makeEvolutionConfig()
     )
+    
+    /** Creates a population configuration based on the current settings.
+     *
+     * **Notes**: This method was introduced to reduce the complexity of the `build` method, which previously contained
+     * deeply nested method chains that contributed to "pickling" errors in the Scala compiler.
+     *
+     * @return A `PopulationConfig` instance representing the population configuration.
+     */
+    private def makePopulationConfig(): PopulationConfig[T, G] =
+        GeneticPopulationConfiguration(genotypeFactory, _populationSize)
+
+    /** Creates a selection configuration based on the current settings.
+     *
+     * **Notes**: This method was introduced to simplify the `build` method, helping to avoid issues with the Scala
+     * compiler by breaking down complex configurations into smaller, more manageable methods.
+     *
+     * @return A `SelectionConfig` instance representing the selection configuration.
+     */
+    private def makeSelectionConfig(): SelectionConfig[T, G] =
+        SelectionConfiguration(_survivalRate, _parentSelector, _offspringSelector)
 
     /** Creates an evolution configuration based on the current settings.
      *
-     * **Notes**: This method was introduced to manage the complexity of the `make` method by encapsulating the logic
+     * **Notes**: This method was introduced to manage the complexity of the `build` method by encapsulating the logic
      * for setting up the evolution configuration in a separate method. This helps to mitigate issues related to the
      * Scala compiler's handling of complex types.
      *
@@ -185,12 +254,12 @@ class GeneticAlgorithmFactory[T, G <: Gene[T, G]](
      */
     private def makeEvolutionConfig(): EvolutionConfiguration[T, G, Genotype[T, G], GeneticEvolutionState[T, G]] =
         EvolutionConfiguration(
-            limits = limits.map(_.apply(ListenerConfiguration(ranker))).toSeq,
-            listeners = listeners.map(_.apply(ListenerConfiguration(ranker))).toSeq,
-            ranker = ranker,
-            evaluator = evaluator.creator(fitnessFunction),
-            interceptor = interceptor,
-            initialState = GeneticEvolutionState.empty[T, G](ranker)
+            limits = _limits.map(_.apply(ListenerConfiguration(_ranker))).toSeq,
+            listeners = _listeners.map(_.apply(ListenerConfiguration(_ranker))).toSeq,
+            ranker = _ranker,
+            evaluator = _evaluator.creator(fitnessFunction),
+            interceptor = _interceptor,
+            initialState = GeneticEvolutionState.empty[T, G](_ranker)
         )
 }
 
@@ -203,7 +272,7 @@ class GeneticAlgorithmFactory[T, G <: Gene[T, G]](
  * The defaults are designed to be flexible and can be overridden by users to customize the behavior of the genetic
  * algorithm.
  */
-object GeneticAlgorithmFactory {
+object GeneticAlgorithmBuilder {
 
     /** The default population size for the genetic algorithm.
      *
