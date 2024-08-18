@@ -58,7 +58,7 @@ trait Evolver[
     def evolve(): S = {
         listeners.foreach(_.onEvolutionStart(currentState))
         limits.foreach(_.listener.onEvolutionStart(currentState))
-        
+
         while (!limits.exists(_.apply(currentState))) {
             listeners.foreach(_.onGenerationStart(currentState))
             limits.foreach(_.listener.onGenerationStart(currentState))
@@ -69,7 +69,7 @@ trait Evolver[
 
         listeners.foreach(_.onEvolutionEnd(currentState))
         limits.foreach(_.listener.onEvolutionEnd(currentState))
-        
+
         currentState
     }
 
