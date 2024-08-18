@@ -83,3 +83,5 @@ trait Chromosome[T, G <: Gene[T, G]](genes: Seq[G]) extends Representation[T, G]
      *         the chromosome.
      */
     override def map[U](f: G => U): Seq[U] = genes.map(f)
+    
+    def duplicateWithGenes(genes: Seq[G]): Chromosome[T, G]
