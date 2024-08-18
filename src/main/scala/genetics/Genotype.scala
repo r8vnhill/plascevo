@@ -77,6 +77,24 @@ case class Genotype[T, G <: Gene[T, G]](chromosomes: Seq[Chromosome[T, G]]) exte
      */
     override def foldRight[U](initial: U)(f: (T, U) => U): U = flatten().foldRight(initial)(f)
 
+    /** Returns a sequence of chromosomes paired with their corresponding indices.
+     *
+     * The `zipWithIndex` method pairs each chromosome in the genotype with its corresponding index in the sequence.
+     * This can be useful for iterating over chromosomes when both the chromosome and its position in the genotype are
+     * needed.
+     *
+     * @return A sequence of tuples, where each tuple contains a `Chromosome[T, G]` and its corresponding index as an
+     *         `Int`.
+     *
+     * <h3>Example:</h3>
+     * @example
+     * {{{
+     * val chromosomes = genotype.zipWithIndex
+     * // Example result: Seq((chromosome1, 0), (chromosome2, 1), (chromosome3, 2))
+     * }}}
+     */
+    def zipWithIndex: Seq[(Chromosome[T, G], Int)] = chromosomes.zipWithIndex
+
     /** Returns a string representation of the genotype.
      *
      * The format of the string is determined by the current [[Domain.toStringMode]]:
@@ -90,7 +108,35 @@ case class Genotype[T, G <: Gene[T, G]](chromosomes: Seq[Chromosome[T, G]]) exte
         case _ => s"Genotype(chromosomes=$chromosomes)"
 }
 
+/** Companion object for the `Genotype` class, providing factory methods for creating genotype builders.
+ *
+ * The `Genotype` object includes methods that facilitate the creation of `GenotypeBuilder` instances by specifying the
+ * chromosomes that make up the genotype. This allows for a flexible and fluent interface when constructing genotypes
+ * for use in genetic algorithms.
+ */
 object Genotype {
+
+    /** Creates a `GenotypeBuilder` initialized with the specified chromosome builders.
+     *
+     * The `of` method constructs a `GenotypeBuilder` and initializes it with the provided `ChromosomeBuilder`
+     * instances. This method allows users to specify the chromosomes that will be part of the genotype, providing a
+     * flexible way to define the structure of the genotype before it is built.
+     *
+     * @param chromosomes A variable number of `ChromosomeBuilder` instances that define the chromosomes of the
+     *                    genotype.
+     * @tparam T The type of value stored by the genes in the chromosomes.
+     * @tparam G The type of gene contained within the chromosomes, which must extend [[Gene]].
+     * @return A `GenotypeBuilder[T, G]` initialized with the specified chromosomes.
+     *
+     * <h3>Example:</h3>
+     * @example
+     * {{{
+     * val chromosome1 = new BooleanChromosomeBuilder().withSize(10)
+     * val chromosome2 = new BooleanChromosomeBuilder().withSize(15)
+     * val genotypeBuilder = Genotype.of(chromosome1, chromosome2)
+     * val genotype = genotypeBuilder.build()
+     * }}}
+     */
     def of[T, G <: Gene[T, G]](chromosomes: ChromosomeBuilder[T, G]*): GenotypeBuilder[T, G] = {
         val builder = GenotypeBuilder[T, G]()
         chromosomes.foreach(builder.addChromosome)

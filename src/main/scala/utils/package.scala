@@ -84,7 +84,7 @@ package object utils {
          */
         def incremental: Seq[Double] = seq.scanLeft(0.0)(_ + _).tail
     }
-    
+
     /** An enumeration representing the sorting state of a collection or data structure.
      *
      * The `Sorting` enum defines two possible states: `Sorted` and `Unsorted`. This can be used to indicate whether a
@@ -99,5 +99,24 @@ package object utils {
 
         /** Indicates that the collection or data structure is not sorted. */
         case Unsorted
+    }
+
+    /** An enumeration representing the exclusivity of selection in a genetic algorithm.
+     *
+     * The `Exclusivity` enum defines two possible states for selection during the evolutionary process: `Exclusive` and
+     * `NonExclusive`. These states determine whether the same individual can be selected multiple times to be parents
+     * of the next generation.
+     */
+    enum Exclusivity {
+
+        /** Indicates that a selection is exclusive, meaning that the same individual cannot be selected more than once
+         * to be a parent of the next generation.
+         */
+        case Exclusive
+
+        /** Indicates that a selection is non-exclusive, allowing the same individual to be selected multiple times to
+         * be a parent of the next generation.
+         */
+        case NonExclusive
     }
 }

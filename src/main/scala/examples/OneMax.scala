@@ -5,9 +5,8 @@ import evolution.engines.GeneticAlgorithmBuilder
 import genetics.Genotype
 import genetics.chromosomes.BooleanChromosome
 import genetics.genes.BooleanGene
+import operators.alteration.mutation.BitFlipMutator
 import operators.selection.{RouletteWheelSelector, TournamentSelector}
-
-import cl.ravenhill.plascevo.operators.alteration.mutation.BitFlipMutator
 
 object OneMax {
     def count(genotype: Genotype[Boolean, BooleanGene]): Double = {
