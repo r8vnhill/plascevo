@@ -22,7 +22,7 @@ trait Evolver[
     T,
     F <: Feature[T, F],
     R <: Representation[T, F],
-    S <: EvolutionState[T, F, R]
+    S <: EvolutionState[T, F, R, S]
 ](
     evolutionConfiguration: EvolutionConfiguration[T, F, R, S]
 ) {

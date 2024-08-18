@@ -15,8 +15,10 @@ import repr.{Feature, Representation}
  * @tparam T The type of value stored by the feature.
  * @tparam F The kind of feature stored in the representation, which must implement [[Feature]].
  * @tparam R The type of representation used by the individual, which must implement [[Representation]].
+ * @tparam S The type of the evolutionary state, which must extend [[EvolutionState]].
  */
-trait EvolutionState[T, F <: Feature[T, F], R <: Representation[T, F]] extends FlatMappable[T] with Foldable[T]:
+trait EvolutionState[T, F <: Feature[T, F], R <: Representation[T, F], S <: EvolutionState[T, F, R, S]]
+    extends FlatMappable[T] with Foldable[T]:
 
     /** The population of individuals in the current state.
      *
@@ -56,8 +58,7 @@ trait EvolutionState[T, F <: Feature[T, F], R <: Representation[T, F]] extends F
      * @param f The function to apply to each individual.
      * @return A new `EvolutionState` with the transformed population.
      */
-    def map(f: Individual[T, F, R] => Individual[T, F, R]): EvolutionState[T, F, R] =
-        withPopulation(population.map(f))
+    def map(f: Individual[T, F, R] => Individual[T, F, R]): S = withPopulation(population.map(f))
 
     /** Folds the features of the population from the right.
      *
@@ -65,8 +66,9 @@ trait EvolutionState[T, F <: Feature[T, F], R <: Representation[T, F]] extends F
      * binary operation.
      *
      * @param initial The initial value to start the folding operation.
-     * @param f       A binary operation that takes the next feature and the current accumulated value, and returns the new accumulated value.
-     * @tparam U      The type of the accumulated value and the result.
+     * @param f       A binary operation that takes the next feature and the current accumulated value, and returns the
+     *                new accumulated value.
+     * @tparam U The type of the accumulated value and the result.
      * @return The result of folding the features of the population from the right.
      */
     override def foldRight[U](initial: U)(f: (T, U) => U): U =
@@ -80,7 +82,7 @@ trait EvolutionState[T, F <: Feature[T, F], R <: Representation[T, F]] extends F
      * @param initial The initial value to start the folding operation.
      * @param f       A binary operation that takes the current accumulated value and the next feature, and returns the
      *                new accumulated value.
-     * @tparam U      The type of the accumulated value and the result.
+     * @tparam U The type of the accumulated value and the result.
      * @return The result of folding the features of the population from the left.
      */
     override def foldLeft[U](initial: U)(f: (U, T) => U): U =
@@ -102,4 +104,4 @@ trait EvolutionState[T, F <: Feature[T, F], R <: Representation[T, F]] extends F
      * @param newPopulation The new population to be used in the state.
      * @return A new `EvolutionState` with the updated population.
      */
-    def withPopulation(newPopulation: Population[T, F, R]): EvolutionState[T, F, R]
+    def withPopulation(newPopulation: Population[T, F, R]): S

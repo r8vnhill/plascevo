@@ -136,11 +136,15 @@ class EvolutionStateTest extends AbstractPlascevoTest:
         }
     }
 
-    private def evolutionStateAndPopulationGen[T, F <: Feature[T, F], R <: Representation[T, F]](
+    private def evolutionStateAndPopulationGen[
+        T,
+        F <: Feature[T, F],
+        R <: Representation[T, F]
+    ](
         populationGen: Gen[Population[T, F, R]],
         rankerGen: Gen[IndividualRanker[T, F, R]],
         generationGen: Gen[Int] = positiveIntGen()
-    ): Gen[(EvolutionState[T, F, R], Population[T, F, R])] =
+    ): Gen[(SimpleState[T, F, R], Population[T, F, R])] =
         for
             population <- populationGen
             ranker <- rankerGen

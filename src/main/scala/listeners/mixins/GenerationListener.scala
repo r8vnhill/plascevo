@@ -15,7 +15,7 @@ import repr.{Feature, Representation}
  * @tparam R The type of representation used by the individual, which must implement [[Representation]].
  * @tparam S The type of the evolutionary state, which must extend [[EvolutionState]].
  */
-trait GenerationListener[T, F <: Feature[T, F], R <: Representation[T, F], S <: EvolutionState[T, F, R]]:
+trait GenerationListener[T, F <: Feature[T, F], R <: Representation[T, F], S <: EvolutionState[T, F, R, S]]:
 
     /** Called at the start of a generation.
      *

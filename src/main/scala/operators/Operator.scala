@@ -27,7 +27,7 @@ trait Operator[T, F <: Feature[T, F], R <: Representation[T, F]] {
      * @param buildState A function that takes a sequence of individuals and returns a new evolutionary state.
      * @tparam S The type of the evolutionary state, which must extend [[EvolutionState]].
      */
-    def apply[S <: EvolutionState[T, F, R]](
+    def apply[S <: EvolutionState[T, F, R, S]](
         state: S,
         outputSize: Int,
         buildState: Seq[Individual[T, F, R]] => S

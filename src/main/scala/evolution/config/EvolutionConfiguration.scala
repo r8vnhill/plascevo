@@ -20,7 +20,7 @@ import repr.{Feature, Representation}
  * @tparam R The type of representation used by the individual, which must implement [[Representation]].
  * @tparam S The type of the evolutionary state, which must extend [[EvolutionState]].
  */
-case class EvolutionConfiguration[T, F <: Feature[T, F], R <: Representation[T, F], S <: EvolutionState[T, F, R]](
+case class EvolutionConfiguration[T, F <: Feature[T, F], R <: Representation[T, F], S <: EvolutionState[T, F, R, S]](
     limits: Seq[Limit[T, F, R, S, ?]],
     listeners: Seq[EvolutionListener[T, F, R, S]],
     initialState: S

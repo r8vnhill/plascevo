@@ -30,7 +30,7 @@ trait Selector[T, F <: Feature[T, F], R <: Representation[T, F]] extends Operato
      * @tparam S The type of the evolutionary state, which must extend [[EvolutionState]].
      * @throws IllegalArgumentException if the population is empty or if `outputSize` is non-positive.
      */
-    override def apply[S <: EvolutionState[T, F, R]](
+    override def apply[S <: EvolutionState[T, F, R, S]](
         state: S,
         outputSize: Int,
         buildState: Seq[Individual[T, F, R]] => S

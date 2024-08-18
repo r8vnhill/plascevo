@@ -1,8 +1,8 @@
 package cl.ravenhill.plascevo
 package genetics.chromosomes
 
-import evolution.executors.{ConstructorExecutor, SequentialConstructor}
 import genetics.genes.Gene
+import cl.ravenhill.plascevo.evolution.executors.construction.{ConstructorExecutor, SequentialConstructor}
 
 /** A trait that represents a factory for creating chromosomes in a genetic algorithm.
  *

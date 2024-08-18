@@ -1,5 +1,5 @@
 package cl.ravenhill.plascevo
-package evolution.executors
+package evolution.executors.construction
 
 /** A trait that represents an executor for constructing sequences of elements.
  *

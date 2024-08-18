@@ -5,7 +5,6 @@ import genetics.genes.Gene
 import operators.selection.TournamentSelector.defaultTournamentSize
 import ranking.IndividualRanker
 import repr.Representation
-import utils.maxWithOption
 
 import java.util.Objects
 

@@ -1,10 +1,13 @@
 package cl.ravenhill.plascevo
 package evolution.engines
 
+import evolution.states.GeneticEvolutionState
+import genetics.genes.Gene
 import genetics.{Genotype, GenotypeFactory}
-
-import cl.ravenhill.plascevo.genetics.genes.Gene
-import cl.ravenhill.plascevo.operators.selection.{Selector, TournamentSelector}
+import limits.Limit
+import listeners.EvolutionListener
+import operators.alteration.Alterer
+import operators.selection.{Selector, TournamentSelector}
 
 class GeneticAlgorithmFactory[T, G <: Gene[T, G]](
     val fitnessFunction: Genotype[T, G] => Double,
@@ -22,7 +25,7 @@ class GeneticAlgorithmFactory[T, G <: Gene[T, G]](
     private var _survivalRate: Double = GeneticAlgorithmFactory.defaultSurvivalRate
 
     def survivalRate: Double = _survivalRate
-    
+
     def survivalRate_=(rate: Double): Unit = {
         require(rate >= 0.0 && rate <= 1.0, "Survival rate must be between 0.0 and 1.0")
         _survivalRate = rate
@@ -30,8 +33,34 @@ class GeneticAlgorithmFactory[T, G <: Gene[T, G]](
 }
 
 object GeneticAlgorithmFactory {
+    
     val defaultPopulationSize: Int = 100
+    
     val defaultSurvivalRate: Double = 0.5
+
     def defaultParentSelector[T, G <: Gene[T, G]]: Selector[T, G, Genotype[T, G]] = TournamentSelector()
+
     def defaultOffspringSelector[T, G <: Gene[T, G]]: Selector[T, G, Genotype[T, G]] = TournamentSelector()
+
+    def defaultAlterers[T, G <: Gene[T, G]]: Seq[Alterer[T, G, Genotype[T, G]]] = Seq()
+
+    def defaultLimits[
+        T, 
+        G <: Gene[T, G]
+    ]: Seq[
+        Limit[
+            T, 
+            G, 
+            Genotype[T, G], 
+            GeneticEvolutionState[T, G], 
+            EvolutionListener[T, G, Genotype[T, G], GeneticEvolutionState[T, G]]
+        ]
+    ] = Seq()
+    
+    def defaultListeners[
+        T, 
+        G <: Gene[T, G]
+    ]: Seq[EvolutionListener[T, G, Genotype[T, G], GeneticEvolutionState[T, G]]] = Seq()
+    
+    
 }

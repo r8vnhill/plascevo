@@ -22,11 +22,11 @@ case class GeneticEvolutionState[T, G <: Gene[T, G]](
     override val generation: Int,
     override val ranker: IndividualRanker[T, G, Genotype[T, G]],
     override val population: Population[T, G, Genotype[T, G]]
-) extends EvolutionState[T, G, Genotype[T, G]] {
+) extends EvolutionState[T, G, Genotype[T, G], GeneticEvolutionState[T, G]] {
 
     require(generation >= 0, "Generation number must be non-negative.")
 
     override def withPopulation(
         newPopulation: Population[T, G, Genotype[T, G]]
-    ): EvolutionState[T, G, Genotype[T, G]] = copy(population = newPopulation)
+    ): GeneticEvolutionState[T, G] = copy(population = newPopulation)
 }

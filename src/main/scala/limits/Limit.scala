@@ -24,7 +24,7 @@ class Limit[
     T, 
     F <: Feature[T, F], 
     R <: Representation[T, F], 
-    S <: EvolutionState[T, F, R], 
+    S <: EvolutionState[T, F, R, S], 
     L <: EvolutionListener[T, F, R, S]
 ](
     val listener: L,
@@ -61,7 +61,7 @@ def limit[
     T, 
     F <: Feature[T, F], 
     R <: Representation[T, F], 
-    S <: EvolutionState[T, F, R], 
+    S <: EvolutionState[T, F, R, S], 
     L <: EvolutionListener[T, F, R, S]
 ](
     builder: ListenerConfiguration[T, F, R] => L,

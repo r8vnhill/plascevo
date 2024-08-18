@@ -56,7 +56,7 @@ package object states:
         population: Population[T, F, R],
         ranker: IndividualRanker[T, F, R],
         generation: Int
-    ) extends EvolutionState[T, F, R]:
+    ) extends EvolutionState[T, F, R, SimpleState[T, F, R]]:
 
         /** Creates a new `SimpleState` instance with an updated population.
          *
