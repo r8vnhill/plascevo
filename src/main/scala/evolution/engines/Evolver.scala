@@ -24,7 +24,7 @@ trait Evolver[
     R <: Representation[T, F],
     S <: EvolutionState[T, F, R]
 ](
-    private val evolutionConfiguration: EvolutionConfiguration[T, F, R, S]
+    evolutionConfiguration: EvolutionConfiguration[T, F, R, S]
 ) {
 
     /** The current state of the evolutionary process.

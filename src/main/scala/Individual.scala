@@ -67,7 +67,7 @@ case class Individual[T, F <: Feature[T, F], R <: Representation[T, F]](
      * @return `true` if the fitness is not `NaN`, `false` otherwise.
      */
     def isEvaluated: Boolean = !fitness.isNaN
-
+    
     /** Returns a string representation of the individual.
      *
      * The format of the string is determined by the current [[Domain.toStringMode]]:

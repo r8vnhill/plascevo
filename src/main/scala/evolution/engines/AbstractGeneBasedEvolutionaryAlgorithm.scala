@@ -1,8 +1,8 @@
 package cl.ravenhill.plascevo
 package evolution.engines
 
-import evolution.config.{GeneticPopulationConfiguration, SelectionConfiguration}
-import evolution.states.EvolutionState
+import evolution.config.{EvolutionConfiguration, GeneticPopulationConfiguration, SelectionConfiguration}
+import evolution.states.{EvolutionState, GeneticEvolutionState}
 import genetics.genes.Gene
 import genetics.{Genotype, GenotypeFactory}
 import operators.selection.Selector
@@ -21,15 +21,16 @@ import operators.selection.Selector
  * @tparam T The type of value stored by the genes within the genotypes.
  * @tparam G The type of gene that the genotypes hold, which must extend [[Gene]].
  */
-trait GeneBasedEvolutionaryAlgorithm[T, G <: Gene[T, G]](
+abstract class AbstractGeneBasedEvolutionaryAlgorithm[T, G <: Gene[T, G]](
     populationConfiguration: GeneticPopulationConfiguration[T, G],
-    selectionConfiguration: SelectionConfiguration[T, G, Genotype[T, G]]
+    selectionConfiguration: SelectionConfiguration[T, G, Genotype[T, G]],
+    evolutionConfiguration: EvolutionConfiguration[T, G, Genotype[T, G], GeneticEvolutionState[T, G]]
 ) extends Evolver[
     T,
     G,
     Genotype[T, G],
-    EvolutionState[T, G, Genotype[T, G]]
-] {
+    GeneticEvolutionState[T, G]
+](evolutionConfiguration) {
 
     /** The factory used to create genotypes within the evolutionary algorithm.
      *
