@@ -15,7 +15,7 @@ import repr.{Feature, Representation}
  * @tparam R The type of representation used by the individual, which must implement [[Representation]].
  */
 case class EvolutionRecord[T, F <: Feature[T, F], R <: Representation[T, F]](
-    generations: Seq[GenerationRecord[T, F, R]]
+    generations: Seq[GenerationRecord[T, F, R]] = Seq.empty[GenerationRecord[T, F, R]]
 ):
 
     /** A record of the initialization phase of the evolutionary process.

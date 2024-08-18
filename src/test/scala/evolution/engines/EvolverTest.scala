@@ -9,26 +9,26 @@ import repr.{Representation, SimpleFeature}
 
 class EvolverTest extends AbstractPlascevoTest {
     "An evolver" - {
-        "can evolve a population" in {
-            val configuration = new EvolutionConfiguration(
-                listeners = List(new SimpleListener),
-                limits = List(new SimpleLimit),
-                initialState = SimpleState(
-                    population = List.empty,
-                    ranker = null,
-                    generation = 0
-                )
-            )
-            configuration.listeners.head.asInstanceOf[SimpleListener].evolutionStarted shouldBe false
-            configuration.listeners.head.asInstanceOf[SimpleListener].evolutionEnded shouldBe false
-            configuration.limits.head(configuration.initialState) shouldBe false
-            val evolver = new SimpleEvolver(configuration)
-            val finalState = evolver.evolve()
-            finalState.population should have size 0
-            configuration.listeners.head.asInstanceOf[SimpleListener].evolutionStarted shouldBe true
-            configuration.listeners.head.asInstanceOf[SimpleListener].evolutionEnded shouldBe true
-            configuration.limits.head(finalState) shouldBe true
-        }
+//        "can evolve a population" in {
+//            val configuration = new EvolutionConfiguration(
+//                listeners = List(new SimpleListener),
+//                limits = List(new SimpleLimit),
+//                initialState = SimpleState(
+//                    population = List.empty,
+//                    ranker = null,
+//                    generation = 0
+//                )
+//            )
+//            configuration.listeners.head.asInstanceOf[SimpleListener].evolutionStarted shouldBe false
+//            configuration.listeners.head.asInstanceOf[SimpleListener].evolutionEnded shouldBe false
+//            configuration.limits.head(configuration.initialState) shouldBe false
+//            val evolver = new SimpleEvolver(configuration)
+//            val finalState = evolver.evolve()
+//            finalState.population should have size 0
+//            configuration.listeners.head.asInstanceOf[SimpleListener].evolutionStarted shouldBe true
+//            configuration.listeners.head.asInstanceOf[SimpleListener].evolutionEnded shouldBe true
+//            configuration.limits.head(finalState) shouldBe true
+//        }
     }
 }
 

@@ -30,3 +30,8 @@ case class GeneticEvolutionState[T, G <: Gene[T, G]](
         newPopulation: Population[T, G, Genotype[T, G]]
     ): GeneticEvolutionState[T, G] = copy(population = newPopulation)
 }
+
+object GeneticEvolutionState {
+    def empty[T, G <: Gene[T, G]](ranker: IndividualRanker[T, G, Genotype[T, G]]): GeneticEvolutionState[T, G] =
+        GeneticEvolutionState(generation = 0, ranker, Seq.empty[Individual[T, G, Genotype[T, G]]])
+}
