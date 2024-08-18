@@ -4,10 +4,17 @@ package evolution.engines
 import evolution.states.EvolutionState
 import genetics.Genotype
 import genetics.genes.Gene
+import listeners.EvolutionListener
 
 trait GeneBasedEvolutionaryAlgorithm[T, G <: Gene[T, G]]
-    extends Evolver[T, G, Genotype[T, G], EvolutionState[T, G, Genotype[T, G]]]:
+    extends Evolver[
+        T,
+        G,
+        Genotype[T, G],
+        EvolutionState[T, G, Genotype[T, G]]
+    ] {
 
     val populationSize: Int
 
     val survivalRate: Double
+}

@@ -18,10 +18,17 @@ import repr.{Feature, Representation}
  * @tparam F The kind of feature stored in the representation, which must implement [[Feature]].
  * @tparam R The type of representation used by the individual, which must implement [[Representation]].
  * @tparam S The type of the evolutionary state, which must extend [[EvolutionState]].
+ * @tparam L The type of the evolutionary listener, which must extend [[EvolutionListener]].
  */
-class Limit[T, F <: Feature[T, F], R <: Representation[T, F], S <: EvolutionState[T, F, R]](
-    val listener: EvolutionListener[T, F, R, S],
-    val predicate: (EvolutionListener[T, F, R, S], S) => Boolean
+class Limit[
+    T, 
+    F <: Feature[T, F], 
+    R <: Representation[T, F], 
+    S <: EvolutionState[T, F, R], 
+    L <: EvolutionListener[T, F, R, S]
+](
+    val listener: L,
+    val predicate: (L, S) => Boolean
 ) {
 
     /** Applies the limiting condition to the current state.
@@ -50,9 +57,15 @@ class Limit[T, F <: Feature[T, F], R <: Representation[T, F], S <: EvolutionStat
  * @tparam S The type of the evolutionary state, which must extend [[EvolutionState]].
  * @return A function that takes a `ListenerConfiguration` and returns a `Limit` object.
  */
-def limit[T, F <: Feature[T, F], R <: Representation[T, F], S <: EvolutionState[T, F, R]](
-    builder: ListenerConfiguration[T, F, R] => EvolutionListener[T, F, R, S],
+def limit[
+    T, 
+    F <: Feature[T, F], 
+    R <: Representation[T, F], 
+    S <: EvolutionState[T, F, R], 
+    L <: EvolutionListener[T, F, R, S]
+](
+    builder: ListenerConfiguration[T, F, R] => L,
     predicate: (EvolutionListener[T, F, R, S], S) => Boolean
-): ListenerConfiguration[T, F, R] => Limit[T, F, R, S] = {
+): ListenerConfiguration[T, F, R] => Limit[T, F, R, S, L] = {
     listenerConfiguration => new Limit(builder(listenerConfiguration), predicate)
 }

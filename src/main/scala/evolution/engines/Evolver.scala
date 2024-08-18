@@ -1,10 +1,10 @@
 package cl.ravenhill.plascevo
 package evolution.engines
 
+import evolution.config.EvolutionConfiguration
+import evolution.states.EvolutionState
+import listeners.EvolutionListener
 import repr.{Feature, Representation}
-
-import cl.ravenhill.plascevo.evolution.config.EvolutionConfiguration
-import cl.ravenhill.plascevo.evolution.states.EvolutionState
 
 /** A trait that defines the core behavior of an evolutionary algorithm.
  *
@@ -18,16 +18,21 @@ import cl.ravenhill.plascevo.evolution.states.EvolutionState
  * @tparam R The type of representation used by the individual, which must implement [[Representation]].
  * @tparam S The type of the evolutionary state, which must extend [[EvolutionState]].
  */
-trait Evolver[T, F <: Feature[T, F], R <: Representation[T, F], S <: EvolutionState[T, F, R]](
+trait Evolver[
+    T,
+    F <: Feature[T, F],
+    R <: Representation[T, F],
+    S <: EvolutionState[T, F, R]
+](
     private val evolutionConfiguration: EvolutionConfiguration[T, F, R, S]
-):
+) {
 
     /** The current state of the evolutionary process.
      *
      * This variable holds the current state, which is updated as the process evolves through generations. It is
      * protected, allowing subclasses to access and modify the state as needed.
      */
-    protected var currentState: S
+    protected var currentState: S = evolutionConfiguration.initialState
 
     /** The listeners for the evolutionary process.
      *
@@ -48,21 +53,25 @@ trait Evolver[T, F <: Feature[T, F], R <: Representation[T, F], S <: EvolutionSt
      * as well as at the start and end of each generation. The process continues to iterate through generations until
      * one of the limits is reached.
      *
-     * @param state The initial state of the evolutionary process.
      * @return The final state after the evolutionary process has completed.
      */
-    def evolve(state: S): S =
+    def evolve(): S = {
         listeners.foreach(_.onEvolutionStart(currentState))
-
+        limits.foreach(_.listener.onEvolutionStart(currentState))
+        
         while (!limits.exists(_.apply(currentState))) {
             listeners.foreach(_.onGenerationStart(currentState))
+            limits.foreach(_.listener.onGenerationStart(currentState))
             currentState = iterateGeneration(currentState)
             listeners.foreach(_.onGenerationEnd(currentState))
+            limits.foreach(_.listener.onGenerationEnd(currentState))
         }
 
         listeners.foreach(_.onEvolutionEnd(currentState))
-
-        state
+        limits.foreach(_.listener.onEvolutionEnd(currentState))
+        
+        currentState
+    }
 
     /** Iterates through a single generation of the evolutionary process.
      *
@@ -73,3 +82,4 @@ trait Evolver[T, F <: Feature[T, F], R <: Representation[T, F], S <: EvolutionSt
      * @return The updated state after one generation has been processed.
      */
     protected def iterateGeneration(state: S): S
+}
