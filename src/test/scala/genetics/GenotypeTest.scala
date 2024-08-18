@@ -86,8 +86,8 @@ class GenotypeTest extends AbstractPlascevoTest {
  *         `geneGen`.
  */
 private def genotypeGen[T, G <: Gene[T, G]](
-    geneGen: Gen[G],
-): Gen[Genotype[T, G]] =
+    geneGen: Gen[SimpleGene],
+): Gen[Genotype[Int, SimpleGene]] =
     Gen.listOf(chromosomeGen(geneGen)).map(chromosomes => Genotype(chromosomes))
 
 /** Generates a genotype and its flattened chromosomes for testing purposes.

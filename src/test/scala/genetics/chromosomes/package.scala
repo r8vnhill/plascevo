@@ -26,10 +26,10 @@ package object chromosomes {
      *         `maxSize`.
      */
     def chromosomeGen[T, G <: Gene[T, G]](
-        geneGen: Gen[G],
+        geneGen: Gen[SimpleGene],
         minSize: Int = 0,
         maxSize: Int = 10
-    ): Gen[Chromosome[T, G]] = chromosomeAndSizeGen(geneGen, minSize, maxSize).map(_._1)
+    ): Gen[SimpleChromosome] = chromosomeAndSizeGen(geneGen, minSize, maxSize).map(_._1)
 
 
     /** Generates a chromosome and its size for an evolutionary algorithm.
@@ -46,15 +46,15 @@ package object chromosomes {
      * @return A generator that produces a tuple containing a `Chromosome[T, G]` and its size.
      */
     def chromosomeAndSizeGen[T, G <: Gene[T, G]](
-        geneGen: Gen[G],
+        geneGen: Gen[SimpleGene],
         minSize: Int = 0,
         maxSize: Int = 10
-    ): Gen[(Chromosome[T, G], Int)] =
+    ): Gen[(SimpleChromosome, Int)] =
         Gen.chooseNum(minSize, maxSize).flatMap { size =>
-            val genes = ListBuffer.empty[G]
+            val genes = ListBuffer.empty[SimpleGene]
             for _ <- 0 until size do
                 genes += geneGen.sample.get
-            (new Chromosome[T, G](genes.toSeq) {}, size)
+            (SimpleChromosome(genes.toSeq), size)
         }
 
     /** Generates a chromosome with at least one invalid gene for testing purposes.
@@ -83,5 +83,6 @@ package object chromosomes {
         }
     
     /** Represents a simple chromosome for testing purposes. */
-    case class SimpleChromosome(genes: Seq[SimpleGene]) extends Chromosome[Int, SimpleGene](genes)
+    case class SimpleChromosome(genes: Seq[SimpleGene]) extends Chromosome[Int, SimpleGene](genes):
+        override def duplicateWithGenes(genes: Seq[SimpleGene]): Chromosome[Int, SimpleGene] = SimpleChromosome(genes)
 }

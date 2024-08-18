@@ -27,21 +27,21 @@ sealed trait BooleanGene extends Gene[Boolean, BooleanGene] {
      * @param value The boolean value for the new gene.
      * @return A `BooleanGene` instance with the specified value.
      */
-    override def duplicateWithValue(value: Boolean): BooleanGene = if value then True else False
+    override def duplicateWithValue(value: Boolean): BooleanGene = if value then TrueGene else FalseGene
+}
 
-    /** An object representing a `BooleanGene` with a value of `true`.
-     *
-     * The `True` object is a singleton instance of `BooleanGene` that always holds the value `true`.
-     */
-    case object True extends BooleanGene {
-        override val value: Boolean = true
-    }
+/** An object representing a `BooleanGene` with a value of `true`.
+ *
+ * The `TrueGene` object is a singleton instance of `BooleanGene` that always holds the value `true`.
+ */
+case object TrueGene extends BooleanGene {
+    override val value: Boolean = true
+}
 
-    /** An object representing a `BooleanGene` with a value of `false`.
-     *
-     * The `False` object is a singleton instance of `BooleanGene` that always holds the value `false`.
-     */
-    case object False extends BooleanGene {
-        override val value: Boolean = false
-    }
+/** An object representing a `BooleanGene` with a value of `false`.
+ *
+ * The `False` object is a singleton instance of `BooleanGene` that always holds the value `false`.
+ */
+case object FalseGene extends BooleanGene {
+    override val value: Boolean = false
 }
