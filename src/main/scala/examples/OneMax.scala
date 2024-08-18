@@ -6,6 +6,8 @@ import genetics.Genotype
 import genetics.chromosomes.BooleanChromosome
 import genetics.genes.BooleanGene
 
+import cl.ravenhill.plascevo.operators.selection.{RouletteWheelSelector, TournamentSelector}
+
 object OneMax {
     def count(genotype: Genotype[Boolean, BooleanGene]): Double = {
         genotype.flatten().count(_ == true)
@@ -21,7 +23,8 @@ object OneMax {
             )
         )
             .withPopulationSize(100)
-//            .withParentSelector()
+            .withParentSelector(RouletteWheelSelector())
+            .withSurvivorSelector(TournamentSelector())
             .build()
     }
 }

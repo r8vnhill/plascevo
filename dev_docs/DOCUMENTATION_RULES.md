@@ -1,5 +1,3 @@
-Here’s the improved version of your documentation rules:
-
 # Documentation Guidelines
 
 ### 1. Markdown Formatting for Code Snippets

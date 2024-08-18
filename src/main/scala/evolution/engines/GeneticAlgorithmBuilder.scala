@@ -125,17 +125,17 @@ class GeneticAlgorithmBuilder[T, G <: Gene[T, G]](
         _parentSelector = selector
         this
     }
+    
+    /** The selector used to choose survivors from the population for the next generation. */
+    private var _survivorSelector: Selector[T, G, Genotype[T, G]] = GeneticAlgorithmBuilder.defaultSurvivorSelector
 
-    /** The selector used to choose offspring for inclusion in the next generation. */
-    private var _offspringSelector: Selector[T, G, Genotype[T, G]] = GeneticAlgorithmBuilder.defaultOffspringSelector
-
-    /** Sets the offspring selector for the genetic algorithm.
+    /** Sets the survivor selector for the genetic algorithm.
      *
-     * @param selector The `Selector` to be used for choosing offspring.
+     * @param selector The `Selector` to be used for choosing survivors.
      * @return The current instance of the `GeneticAlgorithmBuilder` for method chaining.
      */
-    def withOffspringSelector(selector: Selector[T, G, Genotype[T, G]]): GeneticAlgorithmBuilder[T, G] = {
-        _offspringSelector = selector
+    def withSurvivorSelector(selector: Selector[T, G, Genotype[T, G]]): GeneticAlgorithmBuilder[T, G] = {
+        _survivorSelector = selector
         this
     }
 
@@ -242,7 +242,7 @@ class GeneticAlgorithmBuilder[T, G <: Gene[T, G]](
      * @return A `SelectionConfig` instance representing the selection configuration.
      */
     private def makeSelectionConfig(): SelectionConfig[T, G] =
-        SelectionConfiguration(_survivalRate, _parentSelector, _offspringSelector)
+        SelectionConfiguration(_survivalRate, _parentSelector, _survivorSelector)
 
     /** Creates an evolution configuration based on the current settings.
      *
@@ -320,7 +320,7 @@ object GeneticAlgorithmBuilder {
      * @tparam G The type of gene that the genotypes hold, which must extend [[Gene]].
      * @return A `Selector` instance for selecting offspring.
      */
-    def defaultOffspringSelector[T, G <: Gene[T, G]]: Selector[T, G, Genotype[T, G]] = TournamentSelector()
+    def defaultSurvivorSelector[T, G <: Gene[T, G]]: Selector[T, G, Genotype[T, G]] = TournamentSelector()
 
     /** Provides a default sequence of alterers for the genetic algorithm.
      *
