@@ -11,12 +11,14 @@ import repr.Representation
  * functionality for verifying the integrity of the chromosome, flattening the genes into a sequence of values, and
  * determining the size of the chromosome.
  *
- * @param genes The sequence of genes that make up the chromosome.
  * @tparam T The type of value stored by the genes.
  * @tparam G The type of gene that the chromosome holds, which must extend [[Gene]].
  */
-trait Chromosome[T, G <: Gene[T, G]](genes: Seq[G]) extends Representation[T, G] with Mappable[G] {
+trait Chromosome[T, G <: Gene[T, G]] extends Representation[T, G] with Mappable[G] {
 
+    /** The sequence of genes that make up the chromosome. */
+    val genes: Seq[G]
+    
     /** Returns the size of the chromosome.
      *
      * The size is defined as the number of genes within the chromosome.

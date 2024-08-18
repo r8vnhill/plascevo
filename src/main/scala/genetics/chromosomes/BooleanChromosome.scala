@@ -15,7 +15,7 @@ private val chunkSize = 4
  *
  * @param genes The sequence of `BooleanGene` instances that make up the chromosome.
  */
-case class BooleanChromosome(genes: Seq[BooleanGene]) extends Chromosome[Boolean, BooleanGene](genes) {
+case class BooleanChromosome(override val genes: Seq[BooleanGene]) extends Chromosome[Boolean, BooleanGene] {
 
     /** Duplicates the chromosome with a new set of boolean genes.
      *

@@ -1,6 +1,7 @@
 package cl.ravenhill.plascevo
 package operators.alteration.mutation
 
+import genetics.chromosomes.Chromosome
 import genetics.genes.Gene
 
 /** A trait representing a mutator for genes in a genetic algorithm.
@@ -19,6 +20,34 @@ trait GeneMutator[T, G <: Gene[T, G]] extends Mutator[T, G] {
      * Implementers must ensure that this value is between 0.0 and 1.0.
      */
     val geneRate: Double
+
+    /** Mutates a chromosome by potentially mutating each gene based on the `geneRate`.
+     *
+     * The `mutateChromosome` method overrides the `Mutator` trait's method to provide specific logic for mutating the
+     * genes within a chromosome. Each gene in the chromosome is evaluated, and based on the `geneRate`, it may be
+     * mutated using the `mutateGene` method. If a gene is not mutated, it remains unchanged.
+     *
+     * @param chromosome The chromosome to be mutated.
+     * @return A new `Chromosome[T, G]` instance with potentially mutated genes.
+     *
+     *         <h3>Example:</h3>
+     * @example
+     * {{{
+     * val mutator = new CustomGeneMutator[Double, SimpleGene](geneRate = 0.1)
+     * val mutatedChromosome = mutator.mutateChromosome(chromosome)
+     * }}}
+     */
+    override def mutateChromosome(
+        chromosome: Chromosome[T, G]
+    ): Chromosome[T, G] = {
+        chromosome.duplicateWithGenes(chromosome.genes.map { gene =>
+            if (Domain.random.nextDouble() < geneRate) {
+                mutateGene(gene)
+            } else {
+                gene
+            }
+        })
+    }
 
     /** Mutates an individual gene.
      *

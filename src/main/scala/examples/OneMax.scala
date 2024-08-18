@@ -7,6 +7,8 @@ import genetics.chromosomes.BooleanChromosome
 import genetics.genes.BooleanGene
 import operators.selection.{RouletteWheelSelector, TournamentSelector}
 
+import cl.ravenhill.plascevo.operators.alteration.mutation.BitFlipMutator
+
 object OneMax {
     def count(genotype: Genotype[Boolean, BooleanGene]): Double = {
         genotype.flatten().count(_ == true)
@@ -24,6 +26,7 @@ object OneMax {
             .withPopulationSize(100)
             .withParentSelector(RouletteWheelSelector())
             .withSurvivorSelector(TournamentSelector())
+            .addAlterer(BitFlipMutator())
             .build()
     }
 }
