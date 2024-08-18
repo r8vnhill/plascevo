@@ -3,11 +3,10 @@ package operators.alteration.crossover
 
 import evolution.states.EvolutionState
 import genetics.Genotype
+import genetics.chromosomes.Chromosome
 import genetics.genes.Gene
 import operators.alteration.Alterer
-import utils.{Exclusivity, nIndices, pIndices, subsets}
-
-import cl.ravenhill.plascevo.genetics.chromosomes.Chromosome
+import utils.{Exclusivity, pIndices, subsets}
 
 import scala.collection.mutable.ListBuffer
 import scala.util.Random
@@ -56,12 +55,12 @@ trait Crossover[T, G <: Gene[T, G]] extends Alterer[T, G, Genotype[T, G]] {
      * generates offspring genotypes. The number of offspring generated is determined by the `numOffspring` parameter,
      * and the method ensures that the output population size matches the specified `outputSize`.
      *
-     * @param state The current evolutionary state, containing the population to be altered.
+     * @param state      The current evolutionary state, containing the population to be altered.
      * @param outputSize The desired size of the output population after the crossover operation.
      * @param buildState A function to build the new evolutionary state from the recombined population.
      * @return A new evolutionary state with the recombined population.
      *
-     * <h3>Example:</h3>
+     *         <h3>Example:</h3>
      * @example
      * {{{
      * val crossover = new SimpleCrossover[Double, SimpleGene](
@@ -79,6 +78,7 @@ trait Crossover[T, G <: Gene[T, G]] extends Alterer[T, G, Genotype[T, G]] {
         buildState: Seq[Individual[T, G, Genotype[T, G]]] => S
     ): S = {
         given random: Random = Domain.random
+
         // Select a subset of individuals to recombine using the provided probability and other parameters
         val parents = subsets(state.population, numParents, exclusivity)
         // Recombine the selected individuals to produce offspring
@@ -100,7 +100,7 @@ trait Crossover[T, G <: Gene[T, G]] extends Alterer[T, G, Genotype[T, G]] {
      * matches `numParents` and that all genotypes have the same number of chromosomes.
      *
      * @param parentGenotypes The sequence of parent genotypes to be recombined.
-     * @param random An implicit `Random` instance used to determine random selections during the crossover process.
+     * @param random          An implicit `Random` instance used to determine random selections during the crossover process.
      * @return A sequence of offspring genotypes produced from the crossover operation.
      * @throws IllegalArgumentException if the number of parent genotypes does not match `numParents` or if the genotypes
      *                                  do not have the same number of chromosomes.
@@ -149,7 +149,7 @@ trait Crossover[T, G <: Gene[T, G]] extends Alterer[T, G, Genotype[T, G]] {
      * to combine genetic material from the parent chromosomes.
      *
      * @param chromosomes The sequence of chromosomes to be recombined.
-     * @param random An implicit `Random` instance used to determine random selections during the crossover process.
+     * @param random      An implicit `Random` instance used to determine random selections during the crossover process.
      * @return A sequence of offspring chromosomes produced from the crossover operation.
      */
     def crossoverChromosomes(chromosomes: Seq[Chromosome[T, G]])(using random: Random): Seq[Chromosome[T, G]]

@@ -86,5 +86,38 @@ trait Chromosome[T, G <: Gene[T, G]] extends Representation[T, G] with Mappable[
      */
     override def map[U](f: G => U): Seq[U] = genes.map(f)
 
+    /** Creates a new chromosome with the specified sequence of genes.
+     *
+     * The `duplicateWithGenes` method creates a new instance of a chromosome using the provided sequence of genes. This
+     * method is useful for creating modified versions of an existing chromosome while preserving its other attributes.
+     *
+     * @param genes The sequence of genes to be included in the new chromosome.
+     * @return A new `Chromosome[T, G]` instance containing the specified genes.
+     *
+     *         <h3>Example:</h3>
+     * @example
+     * {{{
+     * val newGenes = Seq(gene1, gene2, gene3)
+     * val newChromosome = chromosome.duplicateWithGenes(newGenes)
+     * }}}
+     */
     def duplicateWithGenes(genes: Seq[G]): Chromosome[T, G]
+
+    /** Retrieves the gene at the specified index in the chromosome.
+     *
+     * The `apply` method provides access to the gene at a given index within the chromosome. This allows for easy
+     * retrieval of specific genes by their position in the sequence.
+     *
+     * @param index The index of the gene to retrieve.
+     * @return The gene at the specified index in the chromosome.
+     * @throws IndexOutOfBoundsException if the index is out of range (i.e., `index < 0` or `index >= genes.size`).
+     *
+     *                                   <h3>Example:</h3>
+     * @example
+     * {{{
+     * val gene = chromosome(1)
+     * // Example result: gene2 (the gene at index 1)
+     * }}}
+     */
+    def apply(index: Int): G = genes(index)
 }
