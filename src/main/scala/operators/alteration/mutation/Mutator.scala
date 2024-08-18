@@ -13,17 +13,24 @@ import utils.===
  * The `Mutator` trait extends the `Alterer` trait and provides functionality to mutate individuals and chromosomes
  * within a genetic algorithm. The mutation process is controlled by the `individualRate` and `chromosomeRate`,
  * which determine the probability of mutating an individual or a chromosome, respectively.
- *
- * @param individualRate The probability of mutating an individual within the population. Must be between 0.0 and 1.0.
- * @param chromosomeRate The probability of mutating a chromosome within an individual. Must be between 0.0 and 1.0.
+ * 
  * @tparam T The type of value stored by the gene.
  * @tparam G The type of gene contained within the genotype, which must extend [[Gene]].
  */
-trait Mutator[T, G <: Gene[T, G]](
-    individualRate: Double,
-    chromosomeRate: Double
-) extends Alterer[T, G, Genotype[T, G]] {
+trait Mutator[T, G <: Gene[T, G]] extends Alterer[T, G, Genotype[T, G]] {
 
+    /**
+     * The probability of mutating an individual within the population. Implementers must ensure that this value is
+     * between 0.0 and 1.0.
+     */
+    val individualRate: Double
+    
+    /**
+     * The probability of mutating a chromosome within an individual. Implementers must ensure that this value is
+     * between 0.0 and 1.0.
+     */
+    val chromosomeRate: Double
+    
     /** Applies mutation to the population during the evolutionary process.
      *
      * The `apply` method is responsible for mutating individuals in the population based on the specified
@@ -53,11 +60,7 @@ trait Mutator[T, G <: Gene[T, G]](
             state
         } else {
             state.map(
-                if (Domain.random.nextDouble() > individualRate) {
-                    identity
-                } else {
-                    mutateIndividual(_)
-                }
+                if (Domain.random.nextDouble() > individualRate) then identity else mutateIndividual
             )
         }
     }
@@ -74,11 +77,7 @@ trait Mutator[T, G <: Gene[T, G]](
         Individual(
             Genotype(
                 individual.representation.chromosomes.map(
-                    if (Domain.random.nextDouble() > chromosomeRate) {
-                        identity
-                    } else {
-                        mutateChromosome(_)
-                    }
+                    if (Domain.random.nextDouble() > chromosomeRate) then identity else mutateChromosome
                 )
             )
         )
