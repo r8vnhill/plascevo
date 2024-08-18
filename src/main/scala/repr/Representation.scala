@@ -12,7 +12,7 @@ import mixins.{FlatMappable, Foldable, Verifiable}
  * @tparam T The type of value stored by the feature.
  * @tparam F The kind of feature stored in the representation, which must implement [[Feature]].
  */
-trait Representation[T, F <: Feature[T, F]] extends Verifiable with FlatMappable[T] with Foldable[T]:
+trait Representation[T, F <: Feature[T, F]] extends Verifiable with FlatMappable[T] with Foldable[T] {
 
     /** The size of the representation.
      *
@@ -25,3 +25,4 @@ trait Representation[T, F <: Feature[T, F]] extends Verifiable with FlatMappable
      * @return `true` if the representation is empty, `false` otherwise.
      */
     def isEmpty: Boolean = size == 0
+}

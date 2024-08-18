@@ -18,9 +18,9 @@ import java.util.Objects
  * @tparam R The type of representation used by the individual, which must implement [[Representation]].
  */
 case class Individual[T, F <: Feature[T, F], R <: Representation[T, F]](
-    val representation: R,
-    val fitness: Double = Double.NaN
-) extends Verifiable with FlatMappable[T] with Foldable[T]:
+    representation: R,
+    fitness: Double = Double.NaN
+) extends Verifiable with FlatMappable[T] with Foldable[T] {
 
     /** The size of the individual, representing the number of features in its representation.
      *
@@ -41,7 +41,7 @@ case class Individual[T, F <: Feature[T, F], R <: Representation[T, F]](
      * @param initial The initial value to start the folding operation.
      * @param f       A binary operation that takes the current accumulated value and the next feature, and returns the
      *                new accumulated value.
-     * @tparam U      The type of the accumulated value and the result.
+     * @tparam U The type of the accumulated value and the result.
      * @return The result of folding the features from the left.
      */
     override def foldLeft[U](initial: U)(f: (U, T) => U): U = representation.foldLeft(initial)(f)
@@ -51,7 +51,7 @@ case class Individual[T, F <: Feature[T, F], R <: Representation[T, F]](
      * @param initial The initial value to start the folding operation.
      * @param f       A binary operation that takes the next feature and the current accumulated value, and returns the
      *                new accumulated value.
-     * @tparam U      The type of the accumulated value and the result.
+     * @tparam U The type of the accumulated value and the result.
      * @return The result of folding the features from the right.
      */
     override def foldRight[U](initial: U)(f: (T, U) => U): U = representation.foldRight(initial)(f)
@@ -67,7 +67,7 @@ case class Individual[T, F <: Feature[T, F], R <: Representation[T, F]](
      * @return `true` if the fitness is not `NaN`, `false` otherwise.
      */
     def isEvaluated: Boolean = !fitness.isNaN
-    
+
     /** Returns a string representation of the individual.
      *
      * The format of the string is determined by the current [[Domain.toStringMode]]:
@@ -98,3 +98,4 @@ case class Individual[T, F <: Feature[T, F], R <: Representation[T, F]](
      * @return The hash code value.
      */
     override def hashCode(): Int = Objects.hash(classOf[Individual[?, ?, ?]], representation)
+}
