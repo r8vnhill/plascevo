@@ -24,7 +24,10 @@ case class GeneticAlgorithm[
 ) {
     override protected def iterateGeneration(
         state: GeneticEvolutionState[T, G]
-    ): GeneticEvolutionState[T, G] = ???
+    ): GeneticEvolutionState[T, G] = {
+        val interceptedStart = interceptor.before(state)
+        ???
+    }
 }
 
 object GeneticAlgorithm {

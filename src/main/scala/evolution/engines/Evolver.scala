@@ -15,7 +15,7 @@ trait Evolver[
     S <: EvolutionState[T, F, R, S],
     L <: EvolutionListener[T, F, R, S]
 ](evolutionConfiguration: EvolutionConfiguration[T, F, R, S, L]) {
-    protected val listeners: Seq[L] = evolutionConfiguration.listeners
+    val listeners: Seq[L] = evolutionConfiguration.listeners
 
     protected val limits: Seq[Limit[T, F, R, S, L]] = evolutionConfiguration.limits
 

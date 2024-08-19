@@ -10,6 +10,8 @@ import operators.alteration.crossover.UniformCrossover
 import operators.alteration.mutation.BitFlipMutator
 import operators.selection.{RouletteWheelSelector, TournamentSelector}
 
+import cl.ravenhill.plascevo.listeners.summary.EvolutionSummary
+
 import scala.util.Random
 
 object OneMax {
@@ -36,7 +38,9 @@ object OneMax {
             .addAlterer(UniformCrossover(chromosomeRate = 0.6))
             .addLimit(MaxGenerations(100))
             .addLimit(TargetFitness(50))
+            .addListener(c => EvolutionSummary(c))
             .build()
-        println(engine.toString)
+        engine.evolve()
+        engine.listeners.foreach(_.display)
     }
 }

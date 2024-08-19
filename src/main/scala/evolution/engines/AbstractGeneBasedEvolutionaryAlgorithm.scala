@@ -1,6 +1,7 @@
 package cl.ravenhill.plascevo
 package evolution.engines
 
+import evolution.EvolutionInterceptor
 import evolution.config.*
 import evolution.states.GeneticEvolutionState
 import genetics.genes.Gene
@@ -33,4 +34,7 @@ abstract class AbstractGeneBasedEvolutionaryAlgorithm[
      * include in the next generation, ensuring the continuation of the evolutionary process.
      */
     val offspringSelector: Selector[T, G, Genotype[T, G]] = selectionConfiguration.offspringSelector
+
+    val interceptor: EvolutionInterceptor[T, G, Genotype[T, G], GeneticEvolutionState[T, G]] =
+        evolutionConfiguration.interceptor
 }
