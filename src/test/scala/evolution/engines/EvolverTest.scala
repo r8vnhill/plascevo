@@ -44,7 +44,7 @@ private class SimpleEvolver(
     SimpleFeature[Int],
     Representation[Int, SimpleFeature[Int]],
     SimpleState[Int, SimpleFeature[Int], Representation[Int, SimpleFeature[Int]]]
-](configuration) {
+]() {
     override protected def iterateGeneration(
         state: SimpleState[Int, SimpleFeature[Int], Representation[Int, SimpleFeature[Int]]]
     ): SimpleState[Int, SimpleFeature[Int], Representation[Int, SimpleFeature[Int]]] = state

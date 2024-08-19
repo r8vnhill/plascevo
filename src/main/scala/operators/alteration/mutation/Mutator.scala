@@ -8,12 +8,14 @@ import genetics.genes.Gene
 import operators.alteration.Alterer
 import utils.===
 
+import scala.util.Random
+
 /** A trait representing a mutator in a genetic algorithm, responsible for mutating individuals and chromosomes.
  *
  * The `Mutator` trait extends the `Alterer` trait and provides functionality to mutate individuals and chromosomes
  * within a genetic algorithm. The mutation process is controlled by the `individualRate` and `chromosomeRate`,
  * which determine the probability of mutating an individual or a chromosome, respectively.
- * 
+ *
  * @tparam T The type of value stored by the gene.
  * @tparam G The type of gene contained within the genotype, which must extend [[Gene]].
  */
@@ -24,13 +26,13 @@ trait Mutator[T, G <: Gene[T, G]] extends Alterer[T, G, Genotype[T, G]] {
      * between 0.0 and 1.0.
      */
     val individualRate: Double
-    
+
     /**
      * The probability of mutating a chromosome within an individual. Implementers must ensure that this value is
      * between 0.0 and 1.0.
      */
     val chromosomeRate: Double
-    
+
     /** Applies mutation to the population during the evolutionary process.
      *
      * The `apply` method is responsible for mutating individuals in the population based on the specified
@@ -54,13 +56,13 @@ trait Mutator[T, G <: Gene[T, G]] extends Alterer[T, G, Genotype[T, G]] {
         state: S,
         outputSize: Int,
         buildState: Seq[Individual[T, G, Genotype[T, G]]] => S
-    ): S = {
+    )(using random: Random): S = {
         require(outputSize == state.population.size, "Output size must match the population size.")
         if (individualRate === 0) {
             state
         } else {
             state.map(
-                if (Domain.random.nextDouble() > individualRate) then identity else mutateIndividual
+                if (random.nextDouble() > individualRate) then identity else mutateIndividual
             )
         }
     }
@@ -73,11 +75,12 @@ trait Mutator[T, G <: Gene[T, G]] extends Alterer[T, G, Genotype[T, G]] {
      * @param individual The individual to be mutated.
      * @return A new `Individual` instance with potentially mutated chromosomes.
      */
-    def mutateIndividual(individual: Individual[T, G, Genotype[T, G]]): Individual[T, G, Genotype[T, G]] =
+    def mutateIndividual(individual: Individual[T, G, Genotype[T, G]])
+        (using random: Random): Individual[T, G, Genotype[T, G]] =
         Individual(
             Genotype(
                 individual.representation.chromosomes.map(
-                    if (Domain.random.nextDouble() > chromosomeRate) then identity else mutateChromosome
+                    if (random.nextDouble() > chromosomeRate) then identity else mutateChromosome
                 )
             )
         )

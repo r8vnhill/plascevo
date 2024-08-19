@@ -2,11 +2,10 @@ package cl.ravenhill.plascevo
 package operators.selection
 
 import genetics.genes.Gene
-import operators.selection.TournamentSelector.defaultTournamentSize
 import ranking.IndividualRanker
 import repr.Representation
 
-import java.util.Objects
+import scala.util.Random
 
 /** A selector that implements tournament selection in a genetic or evolutionary algorithm.
  *
@@ -39,13 +38,13 @@ case class TournamentSelector[T, G <: Gene[T, G], R <: Representation[T, G]](
         population: Population[T, G, R],
         count: Int,
         ranker: IndividualRanker[T, G, R]
-    ): Seq[Individual[T, G, R]] = {
+    )(using random: Random): Seq[Individual[T, G, R]] = {
         (0 until count).map { _ =>
             // Initialize variables for the tournament selection
             var maxIndividual: Option[Individual[T, G, R]] = None
 
             // Iterate through the individuals in the tournament
-            val selectedIndividuals = Iterator.continually(population(Domain.random.nextInt(population.size)))
+            val selectedIndividuals = Iterator.continually(population(random.nextInt(population.size)))
                 .take(tournamentSize)
 
             selectedIndividuals.foreach { individual =>
@@ -63,35 +62,6 @@ case class TournamentSelector[T, G <: Gene[T, G], R <: Representation[T, G]](
 
             maxIndividual.get
         }
-    }
-
-    /** Returns a string representation of the `TournamentSelector`.
-     *
-     * This method provides a string that includes the tournament size, making it easier to understand the configuration
-     * of the selector.
-     *
-     * @return A string representation of the `TournamentSelector`.
-     */
-    override def toString: String = s"TournamentSelector(tournamentSize = $tournamentSize)"
-
-    /** Returns the hash code of the `TournamentSelector`.
-     *
-     * The hash code is based on the tournament size and is used for comparison and hashing purposes.
-     *
-     * @return The hash code of the `TournamentSelector`.
-     */
-    override def hashCode(): Int = Objects.hash(classOf[TournamentSelector[T, G, R]], tournamentSize)
-
-    /** Compares the `TournamentSelector` with another object for equality.
-     *
-     * Two `TournamentSelector` instances are considered equal if they have the same tournament size.
-     *
-     * @param obj The object to compare with.
-     * @return `true` if the other object is a `TournamentSelector` with the same tournament size, `false` otherwise.
-     */
-    override def equals(obj: Any): Boolean = obj match {
-        case that: TournamentSelector[_, _, _] => tournamentSize == that.tournamentSize
-        case _ => false
     }
 }
 

@@ -6,6 +6,8 @@ import operators.Operator
 import ranking.IndividualRanker
 import repr.{Feature, Representation}
 
+import scala.util.Random
+
 /** A trait that represents a selection operator in a genetic or evolutionary algorithm.
  *
  * The `Selector` trait extends the `Operator` trait and defines the behavior for selecting a subset of individuals from
@@ -34,7 +36,7 @@ trait Selector[T, F <: Feature[T, F], R <: Representation[T, F]] extends Operato
         state: S,
         outputSize: Int,
         buildState: Seq[Individual[T, F, R]] => S
-    ): S = {
+    )(using random: Random): S = {
         require(!state.isEmpty, "Cannot select individuals from an empty population.")
         require(outputSize > 0, "Cannot select a non-positive number of individuals.")
 
@@ -59,5 +61,5 @@ trait Selector[T, F <: Feature[T, F], R <: Representation[T, F]] extends Operato
         population: Population[T, F, R],
         outputSize: Int,
         ranker: IndividualRanker[T, F, R]
-    ): Population[T, F, R]
+    )(using random: Random): Population[T, F, R]
 }

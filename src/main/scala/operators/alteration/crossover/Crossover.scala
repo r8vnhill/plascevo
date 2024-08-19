@@ -76,8 +76,7 @@ trait Crossover[T, G <: Gene[T, G]] extends Alterer[T, G, Genotype[T, G]] {
         state: S,
         outputSize: Int,
         buildState: Seq[Individual[T, G, Genotype[T, G]]] => S
-    ): S = {
-        given random: Random = Domain.random
+    )(using random: Random): S = {
 
         // Select a subset of individuals to recombine using the provided probability and other parameters
         val parents = subsets(state.population, numParents, exclusivity)

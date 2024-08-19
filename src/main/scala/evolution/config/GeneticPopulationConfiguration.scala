@@ -21,5 +21,5 @@ import cl.ravenhill.plascevo.genetics.genes.Gene
  */
 case class GeneticPopulationConfiguration[T, G <: Gene[T, G]](
     representation: GenotypeBuilder[T, G],
-    populationSize: Int
+    populationSize: PopulationSize
 )

@@ -4,6 +4,8 @@ package operators
 import evolution.states.EvolutionState
 import repr.{Feature, Representation}
 
+import scala.util.Random
+
 /** A trait that represents an operator in a genetic or evolutionary algorithm.
  *
  * The `Operator` trait defines the behavior of an operator that modifies the population of individuals within an
@@ -31,5 +33,5 @@ trait Operator[T, F <: Feature[T, F], R <: Representation[T, F]] {
         state: S,
         outputSize: Int,
         buildState: Seq[Individual[T, F, R]] => S
-    ): S
+    )(using random: Random): S
 }

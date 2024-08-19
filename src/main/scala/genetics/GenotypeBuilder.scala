@@ -43,4 +43,6 @@ class GenotypeBuilder[T, G <: Gene[T, G]] extends RepresentationFactory[T, G, Ge
         val chromosomeSeq = chromosomes.map(_.build()).toSeq
         Genotype(chromosomeSeq)
     }
+
+    override def toString: String = s"GenotypeBuilder(chromosomes = $chromosomes)"
 }

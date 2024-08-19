@@ -6,6 +6,8 @@ import repr.{Feature, Representation}
 import utils.Sorting.Unsorted
 import utils.{===, Sorting, incremental, sub}
 
+import scala.util.Random
+
 /** A selector class implementing the roulette wheel selection mechanism for evolutionary algorithms.
  *
  * The `RouletteWheelSelector` class extends the `Selector` trait and implements the roulette wheel selection algorithm,
@@ -18,7 +20,7 @@ import utils.{===, Sorting, incremental, sub}
  * @tparam F The type of feature contained within the representation, which must extend [[Feature]].
  * @tparam R The type of representation used by the individual, which must extend [[Representation]].
  */
-class RouletteWheelSelector[T, F <: Feature[T, F], R <: Representation[T, F]](val sorted: Sorting = Unsorted)
+case class RouletteWheelSelector[T, F <: Feature[T, F], R <: Representation[T, F]](sorted: Sorting = Unsorted)
     extends Selector[T, F, R] {
 
     /** Calculates the selection probabilities for each individual in the population based on their fitness.
@@ -32,7 +34,7 @@ class RouletteWheelSelector[T, F <: Feature[T, F], R <: Representation[T, F]](va
      * @param ranker The `IndividualRanker` used to evaluate and compare individuals.
      * @return A sequence of probabilities corresponding to each individual in the population.
      */
-    def probabilities(population: Population[T, F, R], ranker: IndividualRanker[T, F, R]): Seq[Double] = {
+    def calculateProbabilities(population: Population[T, F, R], ranker: IndividualRanker[T, F, R]): Seq[Double] = {
         val fitnessValues = ranker.fitnessTransform(population.fitness)
         val adjustedFitness = (fitnessValues sub scala.math.min(fitnessValues.min, 0.0)).toBuffer
         val totalFitness = adjustedFitness.sum
@@ -60,15 +62,15 @@ class RouletteWheelSelector[T, F <: Feature[T, F], R <: Representation[T, F]](va
     override def select(
         population: Population[T, F, R], outputSize: Int,
         ranker: IndividualRanker[T, F, R]
-    ): Population[T, F, R] = {
+    )(using random: Random): Population[T, F, R] = {
         val pop = sorted match {
             case Unsorted => population
             case _ => ranker.sort(population)
         }
-        val probs = probabilities(pop, ranker).incremental
+        val probabilities = calculateProbabilities(pop, ranker).incremental
         (0 until outputSize).map { _ =>
-            val r = Domain.random.nextDouble()
-            val index = probs.indexWhere(_ > r)
+            val r = random.nextDouble()
+            val index = probabilities.indexWhere(_ > r)
             pop(index)
         }
     }

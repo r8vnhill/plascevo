@@ -1,14 +1,17 @@
 package cl.ravenhill.plascevo
 package examples
 
-import evolution.engines.GeneticAlgorithmBuilder
+import evolution.config.{PopulationSize, SurvivalRate}
+import evolution.engines.GeneticAlgorithm
 import genetics.Genotype
 import genetics.chromosomes.BooleanChromosome
 import genetics.genes.BooleanGene
-import operators.alteration.mutation.BitFlipMutator
-import operators.selection.{RouletteWheelSelector, TournamentSelector}
 
+import cl.ravenhill.plascevo.limits.MaxGenerations
 import cl.ravenhill.plascevo.operators.alteration.crossover.UniformCrossover
+import cl.ravenhill.plascevo.operators.alteration.mutation.BitFlipMutator
+import cl.ravenhill.plascevo.operators.selection.{RouletteWheelSelector, TournamentSelector}
+import cl.ravenhill.plascevo.ranking.{FitnessMaxRanker, IndividualRanker}
 
 import scala.util.Random
 
@@ -17,9 +20,12 @@ object OneMax {
         genotype.flatten().count(_ == true)
     }
 
-    def main(args: Array[String]): Unit = {
-        given random: Random = new Random()
-        val engine = GeneticAlgorithmBuilder(
+    def main(args: Array[String]): Unit = { 
+        given PopulationSize = PopulationSize(100)
+        given SurvivalRate = SurvivalRate(0.7)
+        given Random = Random()
+        
+        val engine = GeneticAlgorithm.of(
             count,
             Genotype.of(
                 BooleanChromosome.builder()
@@ -27,11 +33,12 @@ object OneMax {
                     .withTrueRate(0.15)
             )
         )
-            .withPopulationSize(100)
             .withParentSelector(RouletteWheelSelector())
             .withSurvivorSelector(TournamentSelector())
             .addAlterer(BitFlipMutator())
-            .addAlterer(UniformCrossover(chromosomeRate = 0.6))
-            .build()
+            .addAlterer(UniformCrossover())
+            .addLimit(MaxGenerations(100))
+            .build
+        println(engine.toString)
     }
 }
