@@ -19,7 +19,7 @@ import scala.collection.mutable.ListBuffer
  */
 case class EvolutionRecord[T, F <: Feature[T, F], R <: Representation[T, F]](
     generations: ListBuffer[GenerationRecord[T, F, R]] = ListBuffer.empty[GenerationRecord[T, F, R]]
-):
+) extends TimedRecord {
 
     /** A record of the initialization phase of the evolutionary process.
      *
@@ -36,4 +36,4 @@ case class EvolutionRecord[T, F <: Feature[T, F], R <: Representation[T, F]](
      * duration of the initialization phase.
      */
     class InitializationRecord extends TimedRecord
-
+}

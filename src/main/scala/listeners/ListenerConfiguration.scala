@@ -1,11 +1,10 @@
 package cl.ravenhill.plascevo
 package listeners
 
+import listeners.records.{EvolutionRecord, GenerationRecord}
+import ranking.{FitnessMaxRanker, IndividualRanker}
 import repr.{Feature, Representation}
-
-import cl.ravenhill.plascevo.listeners.records.{EvolutionRecord, GenerationRecord}
-import cl.ravenhill.plascevo.ranking.{FitnessMaxRanker, IndividualRanker}
-import cl.ravenhill.plascevo.utils.Box
+import utils.{Box, average, maxOfOption, minOfOption}
 
 import scala.concurrent.duration.Duration
 

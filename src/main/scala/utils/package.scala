@@ -41,6 +41,48 @@ package object utils {
         def toInt: Int = if b then 1 else 0
     }
 
+    extension (iterable: Iterable[Long]) {
+        def average: Double = {
+            var sum = 0.0
+            var count = 0
+            for (value <- iterable) {
+                sum += value
+                count += 1
+                checkCountOverflow(count)
+            }
+            if (count == 0) then Double.NaN else sum / count
+        }
+    }
+
+    extension[T] (iterable: Iterable[T]) {
+        def maxOfOption[R](selector: T => R)(using ord: Ordering[R]): Option[R] = {
+            val iterator = iterable.iterator
+            if (!iterator.hasNext) return None
+            var maxValue = selector(iterator.next())
+            while (iterator.hasNext) {
+                val value = selector(iterator.next())
+                if (ord.gt(value, maxValue)) maxValue = value
+            }
+            Some(maxValue)
+        }
+        
+        def minOfOption[R](selector: T => R)(using ord: Ordering[R]): Option[R] = {
+            val iterator = iterable.iterator
+            if (!iterator.hasNext) return None
+            var minValue = selector(iterator.next())
+            while (iterator.hasNext) {
+                val value = selector(iterator.next())
+                if (ord.lt(value, minValue)) minValue = value
+            }
+            Some(minValue)
+        }
+    }
+
+    private def checkCountOverflow(count: Int): Int = {
+        if (count < 0) throw ArithmeticException("Count overflow detected")
+        count
+    }
+
     extension (seq: Seq[Double]) {
 
         /** Subtracts a specified value from each element in the sequence.
