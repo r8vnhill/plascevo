@@ -4,7 +4,7 @@ package limits
 import repr.{Feature, Representation}
 
 import cl.ravenhill.plascevo.evolution.states.EvolutionState
-import cl.ravenhill.plascevo.listeners.EvolutionListener
+import cl.ravenhill.plascevo.listeners.{EvolutionListener, ListenerConfiguration}
 import cl.ravenhill.plascevo.utils.===
 
 class TargetFitness[T, F <: Feature[T, F], R <: Representation[T, F], S <: EvolutionState[T, F, R, S]](
@@ -16,5 +16,6 @@ class TargetFitness[T, F <: Feature[T, F], R <: Representation[T, F], S <: Evolu
     def this(targetFitness: Double)(using equalityThreshold: Double) = this(_ === targetFitness)
 }
 
-private class TargetFitnessListener[T, F <: Feature[T, F], R <: Representation[T, F], S <: EvolutionState[T, F, R, S]]
-    extends EvolutionListener[T, F, R, S]
+private class TargetFitnessListener[T, F <: Feature[T, F], R <: Representation[T, F], S <: EvolutionState[T, F, R, S]](
+    configuration: ListenerConfiguration[T, F, R] = ListenerConfiguration[T, F, R]()
+) extends EvolutionListener[T, F, R, S](configuration)

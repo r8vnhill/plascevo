@@ -2,7 +2,7 @@ package cl.ravenhill.plascevo
 package limits
 
 import evolution.states.EvolutionState
-import listeners.EvolutionListener
+import listeners.{EvolutionListener, ListenerConfiguration}
 import repr.{Feature, Representation}
 
 case class MaxGenerations[T, F <: Feature[T, F], R <: Representation[T, F], S <: EvolutionState[T, F, R, S]](
@@ -12,5 +12,6 @@ case class MaxGenerations[T, F <: Feature[T, F], R <: Representation[T, F], S <:
     (_, state) => state.generation >= maxGenerations
 )
 
-private class MaxGenerationsListener[T, F <: Feature[T, F], R <: Representation[T, F], S <: EvolutionState[T, F, R, S]]
-    extends EvolutionListener[T, F, R, S]
+private class MaxGenerationsListener[T, F <: Feature[T, F], R <: Representation[T, F], S <: EvolutionState[T, F, R, S]](
+    configuration: ListenerConfiguration[T, F, R] = ListenerConfiguration[T, F, R]()
+) extends EvolutionListener[T, F, R, S](configuration)

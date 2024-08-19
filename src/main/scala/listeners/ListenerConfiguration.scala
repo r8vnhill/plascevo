@@ -9,7 +9,7 @@ import utils.{Box, average, maxOfOption, minOfOption}
 import scala.concurrent.duration.Duration
 
 case class ListenerConfiguration[T, F <: Feature[T, F], R <: Representation[T, F]](
-    ranker: IndividualRanker[T, F, R] = FitnessMaxRanker(),
+    ranker: IndividualRanker[T, F, R] = FitnessMaxRanker[T, F, R](),
     evolution: EvolutionRecord[T, F, R] = EvolutionRecord[T, F, R](),
     precision: Duration => Long = _.toMillis
 ) {
