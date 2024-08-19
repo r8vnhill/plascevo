@@ -12,7 +12,8 @@ class EvolutionSummary[T, F <: Feature[T, F], R <: Representation[T, F], S <: Ev
   with GenerationSummary[T, F, R, S](configuration)
   with InitializationSummary[T, F, R, S](configuration)
   with EvaluationSummary[T, F, R, S](configuration)
-  with ParentSelectionSummary[T, F, R, S](configuration) {
+  with ParentSelectionSummary[T, F, R, S](configuration)
+  with SurvivorSelectionSummary[T, F, R, S](configuration) {
     
     private val evolution = configuration.evolution
 

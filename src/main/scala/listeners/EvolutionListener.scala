@@ -2,7 +2,7 @@ package cl.ravenhill.plascevo
 package listeners
 
 import evolution.states.EvolutionState
-import listeners.mixins.{EvaluationListener, GenerationListener, InitializationListener, ParentSelectionListener}
+import listeners.mixins.{EvaluationListener, GenerationListener, InitializationListener, ParentSelectionListener, SurvivorSelectionListener}
 import listeners.records.{EvolutionRecord, IndividualRecord}
 import ranking.IndividualRanker
 import repr.{Feature, Representation}
@@ -12,12 +12,13 @@ trait EvolutionListener[T, F <: Feature[T, F], R <: Representation[T, F], S <: E
 ) extends GenerationListener[T, F, R, S]
   with InitializationListener[T, F, R, S]
   with EvaluationListener[T, F, R, S]
-  with ParentSelectionListener[T, F, R, S] {
+  with ParentSelectionListener[T, F, R, S]
+  with SurvivorSelectionListener[T, F, R, S] {
 
     def fittest: IndividualRecord[T, F, R] = fittestWith(configuration.ranker, configuration.evolution)
-    
+
     def display = println(toString)
-    
+
     def onEvolutionStart(state: S): Unit = ()
 
     def onEvolutionEnd(state: S): Unit = ()
