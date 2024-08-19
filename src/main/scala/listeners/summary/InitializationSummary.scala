@@ -9,7 +9,7 @@ import repr.{Feature, Representation}
 import scala.concurrent.duration.Deadline
 
 trait InitializationSummary[T, F <: Feature[T, F], R <: Representation[T, F], S <: EvolutionState[T, F, R, S]](
-    override val configuration: ListenerConfiguration[T, F, R]
+    configuration: ListenerConfiguration[T, F, R]
 ) extends InitializationListener[T, F, R, S] {
     private val evolution = configuration.evolution
 
