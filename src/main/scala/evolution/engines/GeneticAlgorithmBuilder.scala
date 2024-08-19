@@ -24,20 +24,20 @@ import scala.collection.mutable.ListBuffer
 private type ListenerFactory[T, G <: Gene[T, G]] =
     ListenerConfiguration[T, G, Genotype[T, G]] => EvolutionListener[T, G, Genotype[T, G], GeneticEvolutionState[T, G]]
 
-/** A type alias representing a limit on the evolution process in a genetic algorithm.
+/** A type alias for a factory function that creates a `Limit` based on a listener configuration.
  *
- * The `EvolutionLimit` type alias defines a limit on the evolution process in a genetic algorithm. This limit is
- * applied to control various aspects of the evolutionary process, such as the number of generations, the fitness
- * threshold, or other criteria that determine when the evolutionary algorithm should terminate or take specific
- * actions.
+ * The `LimitFactory` type defines a function that takes a `ListenerConfiguration` and returns a `Limit`. This factory
+ * pattern allows for the creation of limits that can be customized based on the specific configuration provided.
  */
-private type EvolutionLimit[T, G <: Gene[T, G]] = Limit[
-    T,
-    G,
-    Genotype[T, G],
-    GeneticEvolutionState[T, G],
-    EvolutionListener[T, G, Genotype[T, G], GeneticEvolutionState[T, G]]
-]
+private type LimitFactory[T, G <: Gene[T, G]] =
+    ListenerConfiguration[T, G, Genotype[T, G]] =>
+        Limit[
+            T,
+            G,
+            Genotype[T, G],
+            GeneticEvolutionState[T, G],
+            EvolutionListener[T, G, Genotype[T, G], GeneticEvolutionState[T, G]]
+        ]
 
 /** Type alias for the genetic population configuration.
  *
@@ -68,20 +68,37 @@ type SelectionConfig[T, G <: Gene[T, G]] = SelectionConfiguration[T, G, Genotype
 class GeneticAlgorithmBuilder[T, G <: Gene[T, G]](
     val fitnessFunction: Genotype[T, G] => Double,
     val genotypeFactory: GenotypeBuilder[T, G],
-)(
-    using private val populationSize: PopulationSize = GeneticAlgorithmBuilder.defaultPopulationSize,
-    private val survivalRate: SurvivalRate = GeneticAlgorithmBuilder.defaultSurvivalRate,
 ) {
 
-    /** Creates and returns an instance of a genetic algorithm based on the current configuration.
+    /** The size of the population in the genetic algorithm. */
+    private var _populationSize: Int = GeneticAlgorithmBuilder.defaultPopulationSize
+
+    /** Sets the population size for the genetic algorithm.
      *
-     * **Notes**: The `build` method was refactored to call smaller, focused methods for each part of the genetic
-     * algorithm's configuration. This reduces the complexity of the method and helps prevent Scala compiler "pickling"
-     * errors related to complex type serialization.
-     *
-     * @return A `GeneticAlgorithm` instance configured with the current settings.
+     * @param size The desired population size. Must be greater than 0.
+     * @return The current instance of the `GeneticAlgorithmBuilder` for method chaining.
+     * @throws IllegalArgumentException if `size` is less than or equal to 0.
      */
-    def build = GeneticAlgorithm(fitnessFunction, genotypeFactory, _ranker, _parentSelector, _survivorSelector)
+    def withPopulationSize(size: Int): GeneticAlgorithmBuilder[T, G] = {
+        require(size > 0, "Population size must be greater than 0")
+        _populationSize = size
+        this
+    }
+
+    /** The survival rate in the genetic algorithm. */
+    private var _survivalRate: Double = GeneticAlgorithmBuilder.defaultSurvivalRate
+
+    /** Sets the survival rate for the genetic algorithm.
+     *
+     * @param rate The desired survival rate. Must be between 0.0 and 1.0.
+     * @return The current instance of the `GeneticAlgorithmBuilder` for method chaining.
+     * @throws IllegalArgumentException if `rate` is not between 0.0 and 1.0.
+     */
+    def withSurvivalRate(rate: Double): GeneticAlgorithmBuilder[T, G] = {
+        require(rate >= 0.0 && rate <= 1.0, "Survival rate must be between 0.0 and 1.0")
+        _survivalRate = rate
+        this
+    }
 
     /** The ranker used to evaluate and compare individuals in the genetic algorithm. */
     private var _ranker: IndividualRanker[T, G, Genotype[T, G]] = GeneticAlgorithmBuilder.defaultRanker
@@ -135,9 +152,25 @@ class GeneticAlgorithmBuilder[T, G <: Gene[T, G]](
         this
     }
 
-    private val _limits: ListBuffer[EvolutionLimit[T, G]] = ListBuffer(GeneticAlgorithmBuilder.defaultLimits *)
+    private val _limits: ListBuffer[
+        Limit[
+            T,
+            G,
+            Genotype[T, G],
+            GeneticEvolutionState[T, G],
+            EvolutionListener[T, G, Genotype[T, G], GeneticEvolutionState[T, G]]
+        ]
+    ] = ListBuffer(GeneticAlgorithmBuilder.defaultLimits *)
 
-    def addLimit(limit: EvolutionLimit[T, G]): GeneticAlgorithmBuilder[T, G] = {
+    def addLimit(
+        limit: Limit[
+            T,
+            G,
+            Genotype[T, G],
+            GeneticEvolutionState[T, G],
+            EvolutionListener[T, G, Genotype[T, G], GeneticEvolutionState[T, G]]
+        ]
+    ): GeneticAlgorithmBuilder[T, G] = {
         _limits += limit
         this
     }
@@ -186,6 +219,21 @@ class GeneticAlgorithmBuilder[T, G <: Gene[T, G]](
         this
     }
 
+    /** Creates and returns an instance of a genetic algorithm based on the current configuration.
+     *
+     * **Notes**: The `build` method was refactored to call smaller, focused methods for each part of the genetic
+     * algorithm's configuration. This reduces the complexity of the method and helps prevent Scala compiler "pickling"
+     * errors related to complex type serialization.
+     *
+     * @return A `GeneticAlgorithm` instance configured with the current settings.
+     */
+    def build() = GeneticAlgorithm(
+        populationConfiguration = makePopulationConfig(),
+        selectionConfiguration = makeSelectionConfig(),
+        alterationConfiguration = AlterationConfiguration(_alterers.toSeq),
+        evolutionConfiguration = makeEvolutionConfig()
+    )
+
     /** Creates a population configuration based on the current settings.
      *
      * **Notes**: This method was introduced to reduce the complexity of the `build` method, which previously contained
@@ -194,7 +242,7 @@ class GeneticAlgorithmBuilder[T, G <: Gene[T, G]](
      * @return A `PopulationConfig` instance representing the population configuration.
      */
     private def makePopulationConfig(): PopulationConfig[T, G] =
-        GeneticPopulationConfiguration(genotypeFactory, populationSize)
+        GeneticPopulationConfiguration(genotypeFactory, _populationSize)
 
     /** Creates a selection configuration based on the current settings.
      *
@@ -204,7 +252,7 @@ class GeneticAlgorithmBuilder[T, G <: Gene[T, G]](
      * @return A `SelectionConfig` instance representing the selection configuration.
      */
     private def makeSelectionConfig(): SelectionConfig[T, G] =
-        SelectionConfiguration(survivalRate, _parentSelector, _survivorSelector)
+        SelectionConfiguration(_survivalRate, _parentSelector, _survivorSelector)
 
     /** Creates an evolution configuration based on the current settings.
      *
@@ -240,14 +288,14 @@ object GeneticAlgorithmBuilder {
      *
      * This value represents the number of individuals in the population and is set to 100 by default.
      */
-    val defaultPopulationSize: PopulationSize = PopulationSize(100)
+    val defaultPopulationSize: Int = 100
 
     /** The default survival rate for the genetic algorithm.
      *
      * This value represents the proportion of the population that survives to the next generation and is set to 0.5
      * (50%) by default.
      */
-    val defaultSurvivalRate: SurvivalRate = SurvivalRate(0.5)
+    val defaultSurvivalRate: Double = 0.5
 
     /** Provides a default ranker for individuals in a genetic algorithm.
      *
@@ -295,18 +343,25 @@ object GeneticAlgorithmBuilder {
      */
     def defaultAlterers[T, G <: Gene[T, G]]: Seq[Alterer[T, G, Genotype[T, G]]] = Seq()
 
-    /**
-     * Provides a default sequence of limits for the genetic algorithm.
+    /** Provides a default sequence of limit factories for the genetic algorithm.
      *
-     * The `defaultLimits` function returns a sequence of `EvolutionLimit` instances that are used to enforce limits on
-     * the evolutionary process. By default, this sequence is empty, meaning no limits are predefined. Users can
-     * override this to include specific limits that control the evolution process, such as maximum generations or
-     * fitness thresholds.
+     * The `defaultLimits` function returns a sequence of `LimitFactory` instances that are used to create `Limit`
+     * objects for the genetic algorithm. By default, this sequence is empty, meaning no limits are predefined. Users
+     * can override this to include specific limits that define stopping conditions for the evolutionary process.
      *
      * @tparam T The type of value stored by the gene.
      * @tparam G The type of gene that the genotypes hold, which must extend [[Gene]].
+     * @return A sequence of `LimitFactory` instances for creating `Limit` objects.
      */
-    def defaultLimits[T, G <: Gene[T, G]]: Seq[EvolutionLimit[T, G]] = Seq()
+    def defaultLimits[T, G <: Gene[T, G]]: Seq[
+        Limit[
+            T, 
+            G, 
+            Genotype[T, G], 
+            GeneticEvolutionState[T, G], 
+            EvolutionListener[T, G, Genotype[T, G], GeneticEvolutionState[T, G]]
+        ]
+    ] = Seq()
 
     /** Provides a default sequence of listener factories for the genetic algorithm.
      *

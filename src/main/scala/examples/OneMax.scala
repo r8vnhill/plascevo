@@ -1,17 +1,14 @@
 package cl.ravenhill.plascevo
 package examples
 
-import evolution.config.{PopulationSize, SurvivalRate}
 import evolution.engines.GeneticAlgorithm
 import genetics.Genotype
 import genetics.chromosomes.BooleanChromosome
 import genetics.genes.BooleanGene
-
-import cl.ravenhill.plascevo.limits.MaxGenerations
-import cl.ravenhill.plascevo.operators.alteration.crossover.UniformCrossover
-import cl.ravenhill.plascevo.operators.alteration.mutation.BitFlipMutator
-import cl.ravenhill.plascevo.operators.selection.{RouletteWheelSelector, TournamentSelector}
-import cl.ravenhill.plascevo.ranking.{FitnessMaxRanker, IndividualRanker}
+import limits.MaxGenerations
+import operators.alteration.crossover.UniformCrossover
+import operators.alteration.mutation.BitFlipMutator
+import operators.selection.{RouletteWheelSelector, TournamentSelector}
 
 import scala.util.Random
 
@@ -20,25 +17,24 @@ object OneMax {
         genotype.flatten().count(_ == true)
     }
 
-    def main(args: Array[String]): Unit = { 
-        given PopulationSize = PopulationSize(100)
-        given SurvivalRate = SurvivalRate(0.7)
-        given Random = Random()
-        
+    def main(args: Array[String]): Unit = {
+        given random: Random = new Random()
+
         val engine = GeneticAlgorithm.of(
-            count,
-            Genotype.of(
-                BooleanChromosome.builder()
-                    .withSize(50)
-                    .withTrueRate(0.15)
+                count,
+                Genotype.of(
+                    BooleanChromosome.builder()
+                        .withSize(50)
+                        .withTrueRate(0.15)
+                )
             )
-        )
+            .withPopulationSize(100)
             .withParentSelector(RouletteWheelSelector())
             .withSurvivorSelector(TournamentSelector())
             .addAlterer(BitFlipMutator())
-            .addAlterer(UniformCrossover())
+            .addAlterer(UniformCrossover(chromosomeRate = 0.6))
             .addLimit(MaxGenerations(100))
-            .build
+            .build()
         println(engine.toString)
     }
 }
