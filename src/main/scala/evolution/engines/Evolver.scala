@@ -5,9 +5,8 @@ import evolution.config.EvolutionConfiguration
 import evolution.states.EvolutionState
 import limits.Limit
 import listeners.EvolutionListener
+import ranking.IndividualRanker
 import repr.{Feature, Representation}
-
-import cl.ravenhill.plascevo.ranking.IndividualRanker
 
 trait Evolver[
     T,
@@ -15,17 +14,15 @@ trait Evolver[
     R <: Representation[T, F],
     S <: EvolutionState[T, F, R, S],
     L <: EvolutionListener[T, F, R, S]
-](
-    using initialState: S,
-    private val listeners: Seq[EvolutionListener[T, F, R, S]] = Seq.empty[EvolutionListener[T, F, R, S]],
-    private val limits: Seq[Limit[T, F, R, S, L]] = Seq.empty[Limit[T, F, R, S, L]]
-) {
-    protected val ranker: IndividualRanker[T, F, R]
+](evolutionConfiguration: EvolutionConfiguration[T, F, R, S, L]) {
+    protected val listeners: Seq[L] = evolutionConfiguration.listeners
 
-    private var currentState = initialState
+    protected val limits: Seq[Limit[T, F, R, S, L]] = evolutionConfiguration.limits
+
+    private var currentState: S = evolutionConfiguration.initialState
 
     protected val allListeners: Seq[EvolutionListener[T, F, R, S]] = listeners ++ limits.map(_.listener)
-    
+
     /** Evolves the current state through generations until a stopping condition is met.
      *
      * This method manages the entire evolutionary process. It notifies listeners at the start and end of the evolution,

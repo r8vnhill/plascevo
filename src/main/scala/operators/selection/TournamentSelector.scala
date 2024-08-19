@@ -38,7 +38,7 @@ case class TournamentSelector[T, G <: Gene[T, G], R <: Representation[T, G]](
         population: Population[T, G, R],
         count: Int,
         ranker: IndividualRanker[T, G, R]
-    )(using random: Random): Seq[Individual[T, G, R]] = {
+    )(using random: Random, equalityThreshold: Double): Seq[Individual[T, G, R]] = {
         (0 until count).map { _ =>
             // Initialize variables for the tournament selection
             var maxIndividual: Option[Individual[T, G, R]] = None

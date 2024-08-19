@@ -33,5 +33,5 @@ trait Operator[T, F <: Feature[T, F], R <: Representation[T, F]] {
         state: S,
         outputSize: Int,
         buildState: Seq[Individual[T, F, R]] => S
-    )(using random: Random): S
+    )(using random: Random, equalityThreshold: Double): S
 }

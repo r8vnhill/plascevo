@@ -56,7 +56,7 @@ trait Mutator[T, G <: Gene[T, G]] extends Alterer[T, G, Genotype[T, G]] {
         state: S,
         outputSize: Int,
         buildState: Seq[Individual[T, G, Genotype[T, G]]] => S
-    )(using random: Random): S = {
+    )(using random: Random, equalityThreshold: Double): S = {
         require(outputSize == state.population.size, "Output size must match the population size.")
         if (individualRate === 0) {
             state

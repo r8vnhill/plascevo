@@ -31,10 +31,11 @@ case class RouletteWheelSelector[T, F <: Feature[T, F], R <: Representation[T, F
      * 1, or assigns equal probability if the total fitness is not valid.
      *
      * @param population The population of individuals from which to select.
-     * @param ranker The `IndividualRanker` used to evaluate and compare individuals.
+     * @param ranker     The `IndividualRanker` used to evaluate and compare individuals.
      * @return A sequence of probabilities corresponding to each individual in the population.
      */
-    def calculateProbabilities(population: Population[T, F, R], ranker: IndividualRanker[T, F, R]): Seq[Double] = {
+    def calculateProbabilities(population: Population[T, F, R], ranker: IndividualRanker[T, F, R])
+        (using equalityThreshold: Double): Seq[Double] = {
         val fitnessValues = ranker.fitnessTransform(population.fitness)
         val adjustedFitness = (fitnessValues sub scala.math.min(fitnessValues.min, 0.0)).toBuffer
         val totalFitness = adjustedFitness.sum
@@ -56,13 +57,13 @@ case class RouletteWheelSelector[T, F <: Feature[T, F], R <: Representation[T, F
      *
      * @param population The population of individuals from which to select.
      * @param outputSize The number of individuals to select.
-     * @param ranker The `IndividualRanker` used to evaluate and compare individuals.
+     * @param ranker     The `IndividualRanker` used to evaluate and compare individuals.
      * @return A `Population[T, F, R]` containing the selected individuals.
      */
     override def select(
         population: Population[T, F, R], outputSize: Int,
         ranker: IndividualRanker[T, F, R]
-    )(using random: Random): Population[T, F, R] = {
+    )(using random: Random, equalityThreshold: Double): Population[T, F, R] = {
         val pop = sorted match {
             case Unsorted => population
             case _ => ranker.sort(population)

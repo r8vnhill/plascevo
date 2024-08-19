@@ -19,9 +19,9 @@ import repr.{Feature, Representation}
  * @tparam R The type of representation used by the individual, which must extend [[Representation]].
  */
 case class SelectionConfiguration[T, F <: Feature[T, F], R <: Representation[T, F]](
-    survivalRate: SurvivalRate,
+    survivalRate: Double,
     parentSelector: Selector[T, F, R],
     offspringSelector: Selector[T, F, R]
 ) {
-    require(survivalRate.rate >= 0.0 && survivalRate.rate <= 1.0, "Survival rate must be between 0.0 and 1.0.")
+    require(survivalRate >= 0.0 && survivalRate <= 1.0, "Survival rate must be between 0.0 and 1.0.")
 }

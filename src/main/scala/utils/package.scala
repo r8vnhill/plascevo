@@ -4,29 +4,10 @@ package object utils {
 
     extension (n: Double) {
 
-        /** Compares the current `Double` with another `Double` for equality within a specified threshold.
-         *
-         * The `===` method checks if the absolute difference between the current `Double` and the specified `other`
-         * value is less than the `Domain.equalityThreshold`. If the difference is smaller than the threshold, the two
-         * numbers are considered equal.
-         *
-         * @param other The `Double` value to compare with the current `Double`.
-         * @return `true` if the difference between `n` and `other` is less than `Domain.equalityThreshold`, otherwise
-         *         `false`.
-         */
-        infix def ===(other: Double): Boolean = Math.abs(n - other) < Domain.equalityThreshold
+        infix def ===(other: Double)(using equalityThreshold: Double): Boolean = Math.abs(n - other) < equalityThreshold
 
-        /** Compares the current `Double` with another `Double` for inequality within a specified threshold.
-         *
-         * The `!==` method checks if the absolute difference between the current `Double` and the specified `other`
-         * value is greater than or equal to the `Domain.equalityThreshold`. If the difference is equal to or greater
-         * than the threshold, the two numbers are considered not equal.
-         *
-         * @param other The `Double` value to compare with the current `Double`.
-         * @return `true` if the difference between `n` and `other` is greater than or equal to
-         *         `Domain.equalityThreshold`, otherwise `false`.
-         */
-        infix def !==(other: Double): Boolean = Math.abs(n - other) >= Domain.equalityThreshold
+        infix def !==(other: Double)
+            (using equalityThreshold: Double): Boolean = Math.abs(n - other) >= equalityThreshold
     }
 
     extension (n: Int) {

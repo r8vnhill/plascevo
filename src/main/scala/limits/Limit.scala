@@ -28,7 +28,7 @@ class Limit[
     L <: EvolutionListener[T, F, R, S]
 ](
     val listener: L,
-    val predicate: (L, S) => Boolean
+    private val predicate: (L, S) => Boolean
 ) {
 
     /** Applies the limiting condition to the current state.

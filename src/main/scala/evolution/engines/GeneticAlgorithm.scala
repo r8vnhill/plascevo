@@ -3,17 +3,23 @@ package evolution.engines
 
 import evolution.config.*
 import evolution.states.GeneticEvolutionState
-import genetics.{Genotype, GenotypeBuilder}
 import genetics.genes.Gene
+import genetics.{Genotype, GenotypeBuilder}
+import listeners.EvolutionListener
 
-case class GeneticAlgorithm[T, G <: Gene[T, G]](
+case class GeneticAlgorithm[
+    T, 
+    G <: Gene[T, G], 
+    L <: EvolutionListener[T, G, Genotype[T, G], GeneticEvolutionState[T, G]]
+](
     populationConfiguration: GeneticPopulationConfiguration[T, G],
     selectionConfiguration: SelectionConfiguration[T, G, Genotype[T, G]],
     alterationConfiguration: AlterationConfiguration[T, G, Genotype[T, G]],
-    evolutionConfiguration: EvolutionConfiguration[T, G, Genotype[T, G], GeneticEvolutionState[T, G]]
+    evolutionConfiguration: EvolutionConfiguration[T, G, Genotype[T, G], GeneticEvolutionState[T, G], L]
 ) extends AbstractGeneBasedEvolutionaryAlgorithm(
     populationConfiguration,
     selectionConfiguration,
+    alterationConfiguration,
     evolutionConfiguration
 ) {
     override protected def iterateGeneration(

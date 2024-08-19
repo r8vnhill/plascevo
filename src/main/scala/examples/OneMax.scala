@@ -5,7 +5,7 @@ import evolution.engines.GeneticAlgorithm
 import genetics.Genotype
 import genetics.chromosomes.BooleanChromosome
 import genetics.genes.BooleanGene
-import limits.MaxGenerations
+import limits.{MaxGenerations, TargetFitness}
 import operators.alteration.crossover.UniformCrossover
 import operators.alteration.mutation.BitFlipMutator
 import operators.selection.{RouletteWheelSelector, TournamentSelector}
@@ -18,7 +18,8 @@ object OneMax {
     }
 
     def main(args: Array[String]): Unit = {
-        given random: Random = new Random()
+        given Random = new Random()
+        given equalityThreshold: Double = 0.0001
 
         val engine = GeneticAlgorithm.of(
                 count,
@@ -34,6 +35,7 @@ object OneMax {
             .addAlterer(BitFlipMutator())
             .addAlterer(UniformCrossover(chromosomeRate = 0.6))
             .addLimit(MaxGenerations(100))
+            .addLimit(TargetFitness(50))
             .build()
         println(engine.toString)
     }

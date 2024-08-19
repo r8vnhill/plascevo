@@ -262,15 +262,19 @@ class GeneticAlgorithmBuilder[T, G <: Gene[T, G]](
      *
      * @return An `EvolutionConfiguration` instance representing the evolution configuration.
      */
-    private def makeEvolutionConfig(): EvolutionConfiguration[T, G, Genotype[T, G], GeneticEvolutionState[T, G]] =
-        EvolutionConfiguration(
-            limits = _limits.toSeq,
-            listeners = _listeners.map(_.apply(ListenerConfiguration(_ranker))).toSeq,
-            ranker = _ranker,
-            evaluator = _evaluator.creator(fitnessFunction),
-            interceptor = _interceptor,
-            initialState = GeneticEvolutionState.empty[T, G](_ranker)
-        )
+    private def makeEvolutionConfig(): EvolutionConfiguration[
+        T,
+        G, Genotype[T, G],
+        GeneticEvolutionState[T, G],
+        EvolutionListener[T, G, Genotype[T, G], GeneticEvolutionState[T, G]]
+    ] = EvolutionConfiguration(
+        limits = _limits.toSeq,
+        listeners = _listeners.map(_.apply(ListenerConfiguration(_ranker))).toSeq,
+        ranker = _ranker,
+        evaluator = _evaluator.creator(fitnessFunction),
+        interceptor = _interceptor,
+        initialState = GeneticEvolutionState.empty[T, G](_ranker)
+    )
 }
 
 /** A factory object that provides default configurations and components for creating genetic algorithms.
@@ -355,10 +359,10 @@ object GeneticAlgorithmBuilder {
      */
     def defaultLimits[T, G <: Gene[T, G]]: Seq[
         Limit[
-            T, 
-            G, 
-            Genotype[T, G], 
-            GeneticEvolutionState[T, G], 
+            T,
+            G,
+            Genotype[T, G],
+            GeneticEvolutionState[T, G],
             EvolutionListener[T, G, Genotype[T, G], GeneticEvolutionState[T, G]]
         ]
     ] = Seq()
