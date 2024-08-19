@@ -1,8 +1,6 @@
 package cl.ravenhill.plascevo
 package utils
 
-import mixins.{Foldable, Mappable}
-
 sealed trait Box[T] {
     def value: Option[T]
 
@@ -42,7 +40,7 @@ object MutableBox {
 }
 
 object Box {
-    def immutable[U](value: U): ImmutableBox[U] = ImmutableBox(Some(value))
+    def immutable[U](value: Option[U]): ImmutableBox[U] = ImmutableBox(value)
 
-    def mutable[U](value: U): MutableBox[U] = MutableBox(Some(value))
+    def mutable[U](value: Option[U]): MutableBox[U] = MutableBox(value)
 }

@@ -3,6 +3,9 @@ package listeners.records
 
 import repr.{Feature, Representation}
 
+import scala.collection.mutable
+import scala.collection.mutable.ListBuffer
+
 /** A case class that represents the complete record of an evolutionary process.
  *
  * The `EvolutionRecord` class tracks the entire sequence of generations involved in an evolutionary algorithm.
@@ -15,7 +18,7 @@ import repr.{Feature, Representation}
  * @tparam R The type of representation used by the individual, which must implement [[Representation]].
  */
 case class EvolutionRecord[T, F <: Feature[T, F], R <: Representation[T, F]](
-    generations: Seq[GenerationRecord[T, F, R]] = Seq.empty[GenerationRecord[T, F, R]]
+    generations: ListBuffer[GenerationRecord[T, F, R]] = ListBuffer.empty[GenerationRecord[T, F, R]]
 ):
 
     /** A record of the initialization phase of the evolutionary process.

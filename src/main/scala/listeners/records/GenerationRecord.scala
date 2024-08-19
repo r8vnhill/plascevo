@@ -19,6 +19,12 @@ case class GenerationRecord[T, F <: Feature[T, F], R <: Representation[T, F]](
 ) extends TimedRecord {
     require(generation >= 0, "Generation must be non-negative")
 
+    val alteration: AlterationRecord = AlterationRecord()
+    val evaluation: EvaluationRecord = EvaluationRecord()
+    val parentSelection: SelectionRecord = SelectionRecord()
+    val survivorSelection: SelectionRecord = SelectionRecord()
+    val population: PopulationRecord = PopulationRecord(Seq.empty, Seq.empty)
+
     /** A private variable that tracks the steady state of the generation.
      *
      * The steady state represents the number of generations in which no significant changes occurred. It is initialized
@@ -72,7 +78,7 @@ case class GenerationRecord[T, F <: Feature[T, F], R <: Representation[T, F]](
      * @param offspring The sequence of offspring individuals in the generation.
      */
     case class PopulationRecord(
-        parents: Seq[IndividualRecord[T, F, R]],
-        offspring: Seq[IndividualRecord[T, F, R]]
+        var parents: Seq[IndividualRecord[T, F, R]] = Seq.empty,
+        var offspring: Seq[IndividualRecord[T, F, R]] = Seq.empty
     ) extends TimedRecord
 }
