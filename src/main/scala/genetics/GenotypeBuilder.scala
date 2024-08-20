@@ -3,7 +3,7 @@ package genetics
 
 import genetics.chromosomes.{Chromosome, ChromosomeBuilder}
 import genetics.genes.Gene
-import repr.RepresentationFactory
+import repr.RepresentationBuilder
 
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
@@ -18,7 +18,7 @@ import scala.util.Random
  * @tparam T The type of value stored by the genes within the chromosomes.
  * @tparam G The type of gene that the chromosomes hold, which must extend [[Gene]].
  */
-class GenotypeBuilder[T, G <: Gene[T, G]] extends RepresentationFactory[T, G, Genotype[T, G]] {
+class GenotypeBuilder[T, G <: Gene[T, G]] extends RepresentationBuilder[T, G, Genotype[T, G]] {
 
     /** A list buffer that stores the chromosome factories used to create chromosomes for the genotype.
      *

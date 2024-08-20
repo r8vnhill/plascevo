@@ -3,7 +3,7 @@ package evolution.config
 
 import genetics.GenotypeBuilder
 import genetics.genes.Gene
-import repr.{Feature, Representation, RepresentationFactory}
+import repr.{Feature, Representation, RepresentationBuilder}
 
 case class GeneticPopulationConfiguration[T, G <: Gene[T, G]](
     genotypeBuilder: GenotypeBuilder[T, G],
