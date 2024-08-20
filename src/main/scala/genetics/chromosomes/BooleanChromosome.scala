@@ -25,7 +25,7 @@ case class BooleanChromosome(override val genes: Seq[BooleanGene]) extends Chrom
      * @param genes The sequence of `BooleanGene` instances to be used in the new chromosome.
      * @return A new `BooleanChromosome` instance with the specified genes.
      */
-    override def duplicateWithGenes(genes: Seq[BooleanGene]): BooleanChromosome = new BooleanChromosome(genes)
+    override def duplicateWithGenes(genes: Seq[BooleanGene]): BooleanChromosome = BooleanChromosome(genes)
 
     /** Converts the chromosome to a string representation based on the current `toStringMode` in the `Domain`.
      *

@@ -34,7 +34,7 @@ class ChromosomeTest extends AbstractPlascevoTest:
         "can be flattened" in {
             forAll(chromosomeGen(simpleGeneGen())) { chromosome =>
                 val flattened = chromosome.flatten()
-                flattened should be(chromosome.map(_.value))
+                flattened should be(chromosome.genes.flatMap(_.flatten()))
             }
         }
 
@@ -55,7 +55,7 @@ class ChromosomeTest extends AbstractPlascevoTest:
         "can  be folded to the left" in {
             forAll(chromosomeGen(simpleGeneGen())) { chromosome =>
                 val folded = chromosome.foldLeft(0)(_ + _)
-                val expected = chromosome.map(_.value).sum
+                val expected = chromosome.genes.map(_.value).sum
                 folded should be(expected)
             }
         }
@@ -63,7 +63,7 @@ class ChromosomeTest extends AbstractPlascevoTest:
         "can be folded to the right" in {
             forAll(chromosomeGen(simpleGeneGen())) { chromosome =>
                 val folded = chromosome.foldRight(0)(_ + _)
-                val expected = chromosome.map(_.value).sum
+                val expected = chromosome.genes.map(_.value).sum
                 folded should be(expected)
             }
         }

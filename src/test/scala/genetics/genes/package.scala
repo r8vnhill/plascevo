@@ -40,6 +40,7 @@ package object genes:
         override def verify(): Boolean =
             if !isValid then false
             else super.verify()
+            
 
     /** Generates a `SimpleGene` with a specified validity.
      *

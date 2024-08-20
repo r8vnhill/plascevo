@@ -4,26 +4,29 @@ package operators.alteration
 import operators.Operator
 import repr.{Feature, Representation}
 
-/** A trait that represents an alterer in an evolutionary algorithm.
+/** Represents an alterer in an evolutionary algorithm.
  *
- * The `Alterer` trait extends the `Operator` trait and defines the behavior for modifying the population of individuals
- * within an evolutionary process. Alterers can perform various tasks such as mutation, crossover, or other genetic
- * transformations that alter the individuals' representations.
+ * An `Alterer` is a specialized operator used in evolutionary algorithms to modify or "alter" individuals within a
+ * population. This process typically involves operations such as mutation or crossover, which introduce variations
+ * in the population to explore the search space more effectively. The `Alterer` trait extends the [[Operator]] trait
+ * and provides the foundation for implementing these variation mechanisms.
  *
- * @tparam T The type of value stored by the feature.
- * @tparam F The type of feature contained within the representation, which must extend [[Feature]].
+ * @tparam T The type of value stored by the features within the individual.
+ * @tparam F The type of feature contained in the representation, which must extend [[Feature]].
  * @tparam R The type of representation used by the individual, which must extend [[Representation]].
+ *
+ * @example
+ * {{{
+ * // Example implementation of a mutation alterer that flips bits in a binary string
+ * class BitFlipMutator extends Alterer[Boolean, SimpleGene, SimpleRepresentation] {
+ *   override def apply[S <: EvolutionState[Boolean, SimpleGene, SimpleRepresentation, S]](
+ *     state: S,
+ *     outputSize: Int,
+ *     buildState: Seq[Individual[Boolean, SimpleGene, SimpleRepresentation]] => S
+ *   )(using random: Random, equalityThreshold: Double): S = {
+ *     // Mutation logic here
+ *   }
+ * }
+ * }}}
  */
-trait Alterer[T, F <: Feature[T, F], R <: Representation[T, F]] extends Operator[T, F, R] {
-
-    /** Combines this alterer with another alterer to create a sequence of alterers.
-     *
-     * This infix method allows two alterers to be combined into a sequence, which can then be applied sequentially
-     * during the evolutionary process. The resulting sequence of alterers can be used to perform multiple alterations
-     * on the population in a defined order.
-     *
-     * @param other The other alterer to be combined with this alterer.
-     * @return A sequence of alterers combining this alterer and the other alterer.
-     */
-    infix def +(other: Alterer[T, F, R]): Seq[Alterer[T, F, R]] = Seq(this, other)
-}
+trait Alterer[T, F <: Feature[T, F], R <: Representation[T, F]] extends Operator[T, F, R]

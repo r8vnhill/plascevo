@@ -4,6 +4,8 @@ import cl.ravenhill.plascevo.Individual
 import cl.ravenhill.plascevo.repr.{Feature, Representation}
 import org.scalacheck.{Arbitrary, Gen, Shrink}
 
+import scala.util.Random
+
 package object plascevo:
 
     extension [T](iterable: Iterable[T])
@@ -78,8 +80,8 @@ package object plascevo:
      * useful for testing scenarios where a diverse population of individuals is required.
      *
      * @param individualGen A generator for creating particular `Individual` instances.
-     * @param minSize The minimum size of the population to generate. Defaults to `0`.
-     * @param maxSize The maximum size of the population to generate. Defaults to `100`.
+     * @param minSize       The minimum size of the population to generate. Defaults to `0`.
+     * @param maxSize       The maximum size of the population to generate. Defaults to `100`.
      * @tparam T The type of value held by the features.
      * @tparam F The type of the feature, which must extend `Feature[T, F]`.
      * @tparam R The type of the representation, which must extend `Representation[T, F]`.
@@ -147,7 +149,7 @@ package object plascevo:
     )(using ord: Ordering[T]): Gen[(T, T)] = orderedPairGen(a, a, strict, reversed)
 
     given noShrink[T]: Shrink[T] = Shrink.shrinkAny
-    
+
     /** Generates a positive integer within a specified range.
      *
      * The `positiveIntGen` function produces a generator (`Gen`) that creates positive integers between `1` and the 
@@ -157,3 +159,40 @@ package object plascevo:
      * @return A generator that produces positive integers within the range `[1, max]`.
      */
     def positiveIntGen(max: Int = Int.MaxValue): Gen[Int] = Gen.choose(1, max)
+
+    /** Generates a random probability value between 0.0 and 1.0.
+     *
+     * The `probabilityGen` function returns a generator (`Gen[Double]`) that produces random `Double` values in the 
+     * range [0.0, 1.0]. The generated values are guaranteed to be finite and non-NaN, ensuring they represent valid 
+     * probabilities. This generator is particularly useful in scenarios where a random probability or chance value 
+     * is needed, such as in stochastic algorithms or simulations.
+     *
+     * @return A generator that produces valid probability values between 0.0 and 1.0.
+     */
+    def probabilityGen: Gen[Double] = Gen.chooseNum(0.0, 1.0).filter(_.isFinite).filterNot(_.isNaN)
+
+    /** Generates a random invalid probability value outside the range [0.0, 1.0].
+     *
+     * The `invalidProbabilityGen` function returns a generator (`Gen[Double]`) that produces random `Double` values 
+     * that are considered invalid as probabilities. Specifically, the generated values are either less than 0.0 
+     * or greater than 1.0, thereby falling outside the valid probability range. This generator is useful in testing 
+     * scenarios where invalid probability values need to be handled, such as in input validation or error handling.
+     *
+     * @return A generator that produces invalid probability values, which are either less than 0.0 or greater than 1.0.
+     */
+    def invalidProbabilityGen: Gen[Double] = Gen.chooseNum(Double.MinValue, Double.MaxValue)
+        .filter(d => d < 0.0 || d > 1.0)
+
+    /** Generates a `Random` instance seeded with a specified or randomly generated seed.
+     *
+     * The `randomGen` function returns a generator (`Gen[Random]`) that produces instances of `Random`, each initialized 
+     * with a specific seed value. This allows for controlled randomness in tests or simulations, where reproducibility 
+     * is desired. By default, the seed is randomly generated using a `Gen[Long]` generator, which produces values across 
+     * the entire range of valid `Long` values.
+     *
+     * @param seed A generator that produces the seed value for the `Random` instance. Defaults to a generator that 
+     *             produces random `Long` values within the range of `Long.MinValue` to `Long.MaxValue`.
+     * @return A generator that produces a `Random` instance seeded with the generated or provided seed value.
+     */
+    def randomGen(seed: Gen[Long] = Gen.chooseNum(Long.MinValue, Long.MaxValue)): Gen[Random] =
+        seed.map(new Random(_))
