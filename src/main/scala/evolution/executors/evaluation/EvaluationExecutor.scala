@@ -27,7 +27,7 @@ trait EvaluationExecutor[T, F <: Feature[T, F], R <: Representation[T, F], S <: 
      * @param force The force evaluation strategy, determining which individuals should be evaluated.
      * @return The updated evolutionary state after the evaluation process has been applied.
      */
-    def apply(state: S, force: ForceEvaluation): S
+    def apply(state: S, force: ForceEvaluation = ForceEvaluation.New): S
 }
 
 /** Companion object for the `EvaluationExecutor` trait, providing utility methods for evaluation.

@@ -6,11 +6,10 @@ import genetics.Genotype
 import genetics.chromosomes.BooleanChromosome
 import genetics.genes.BooleanGene
 import limits.{MaxGenerations, TargetFitness}
+import listeners.summary.EvolutionSummary
 import operators.alteration.crossover.UniformCrossover
 import operators.alteration.mutation.BitFlipMutator
 import operators.selection.{RouletteWheelSelector, TournamentSelector}
-
-import cl.ravenhill.plascevo.listeners.summary.EvolutionSummary
 
 import scala.util.Random
 
@@ -21,8 +20,11 @@ object OneMax {
 
     def main(args: Array[String]): Unit = {
         given Random = new Random()
-        given equalityThreshold: Double = 0.0001
 
+        given equalityThreshold: Double = 1e-6
+
+        Domain.toStringMode = ToStringMode.SIMPLE
+        
         val engine = GeneticAlgorithm.of(
                 count,
                 Genotype.of(
@@ -38,7 +40,7 @@ object OneMax {
             .addAlterer(UniformCrossover(chromosomeRate = 0.6))
             .addLimit(MaxGenerations(100))
             .addLimit(TargetFitness(50))
-            .addListener(c => EvolutionSummary(c))
+            .addListener(EvolutionSummary(_))
             .build()
         engine.evolve()
         engine.listeners.foreach(_.display)

@@ -15,7 +15,7 @@ class EvolutionSummary[T, F <: Feature[T, F], R <: Representation[T, F], S <: Ev
   with ParentSelectionSummary[T, F, R, S](configuration)
   with SurvivorSelectionSummary[T, F, R, S](configuration)
   with AlterationSummary[T, F, R, S](configuration) {
-    
+
     private val evolution = configuration.evolution
 
     override def toString: String = {

@@ -14,6 +14,7 @@ import operators.selection.{Selector, TournamentSelector}
 import ranking.{FitnessMaxRanker, IndividualRanker}
 
 import scala.collection.mutable.ListBuffer
+import scala.util.Random
 
 /** A type alias for a factory function that creates an `EvolutionListener` based on a listener configuration.
  *
@@ -227,7 +228,9 @@ class GeneticAlgorithmBuilder[T, G <: Gene[T, G]](
      *
      * @return A `GeneticAlgorithm` instance configured with the current settings.
      */
-    def build() = GeneticAlgorithm(
+    def build()(
+        using random: Random, equalityThreshold: Double
+    ): GeneticAlgorithm[T, G, EvolutionListener[T, G, Genotype[T, G], GeneticEvolutionState[T, G]]] = GeneticAlgorithm(
         populationConfiguration = makePopulationConfig(),
         selectionConfiguration = makeSelectionConfig(),
         alterationConfiguration = AlterationConfiguration(_alterers.toSeq),
