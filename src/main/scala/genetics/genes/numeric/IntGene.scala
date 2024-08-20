@@ -33,6 +33,7 @@ case class IntGene(
         true
     }
 ) extends NumericGene[Int, IntGene] {
+    
     require(range._1 < range._2, "The lower bound of the range must be less than the upper bound.")
 
     /** Creates a new `IntGene` with the specified value.

@@ -1,6 +1,8 @@
 package cl.ravenhill.plascevo
 package genetics.genes.numeric
 
+import matchers.beValid
+
 import org.scalacheck.{Arbitrary, Gen}
 
 import scala.util.Random
@@ -17,19 +19,19 @@ class NumericGeneTest extends AbstractPlascevoTest {
             forAll(numericGeneGen()(positivePredicate)) { gene =>
                 val mutatedGene = gene.mutate()
                 mutatedGene.value should be > 0
-                mutatedGene.predicate(mutatedGene.value) shouldEqual true
+                mutatedGene should beValid
             }
 
             forAll(numericGeneGen()(evenPredicate)) { gene =>
                 val mutatedGene = gene.mutate()
                 mutatedGene.value % 2 shouldEqual 0
-                mutatedGene.predicate(mutatedGene.value) shouldEqual true
+                mutatedGene should beValid
             }
-            
+
             forAll(numericGeneGen()(lessThanHundredPredicate)) { gene =>
                 val mutatedGene = gene.mutate()
                 mutatedGene.value should be < 100
-                mutatedGene.predicate(mutatedGene.value) shouldEqual true
+                mutatedGene should beValid
             }
         }
     }
@@ -67,7 +69,7 @@ class SimpleNumericGene(override val value: Int)(override val predicate: Int => 
     extends NumericGene[Int, SimpleNumericGene] {
 
     private var increased: Int = 0
-    
+
     /**
      * Creates a duplicate of this gene with a new value.
      *
