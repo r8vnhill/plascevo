@@ -1,6 +1,5 @@
 package cl.ravenhill.plascevo
 
-import cl.ravenhill.plascevo.repr
 import org.scalatest.matchers.should
 
 /** An abstract base class for testing components within the Plascevo framework.
@@ -12,6 +11,6 @@ import org.scalatest.matchers.should
  */
 abstract class AbstractPlascevoTest
     extends org.scalatest.freespec.AnyFreeSpec
-        with should.Matchers
-        with org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
-        with org.scalatest.BeforeAndAfterEach
+    with should.Matchers
+    with org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
+    with org.scalatest.BeforeAndAfterEach
