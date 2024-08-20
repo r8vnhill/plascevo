@@ -3,6 +3,8 @@ package genetics.chromosomes
 
 import genetics.genes.{BooleanGene, FalseGene, TrueGene}
 
+import scala.util.Random
+
 /** A builder class for constructing `BooleanChromosome` instances in a genetic algorithm.
  *
  * The `BooleanChromosomeBuilder` class extends the `ChromosomeBuilder` trait and provides additional configuration
@@ -43,11 +45,11 @@ class BooleanChromosomeBuilder extends ChromosomeBuilder[Boolean, BooleanGene] {
      * @return A new `BooleanChromosome` instance with the configured boolean genes.
      * @throws NoSuchElementException if the size of the chromosome has not been set.
      */
-    override def build(): Chromosome[Boolean, BooleanGene] = {
+    override def build()(using random: Random): Chromosome[Boolean, BooleanGene] = {
         BooleanChromosome(
             _executor(
                 _size.get,
-                _ => if (Domain.random.nextDouble() < _trueRate) then TrueGene else FalseGene
+                _ => if (random.nextDouble() < _trueRate) then TrueGene else FalseGene
             )
         )
     }

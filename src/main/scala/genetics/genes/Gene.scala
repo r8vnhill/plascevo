@@ -30,7 +30,7 @@ trait Gene[T, G <: Gene[T, G]] extends Feature[T, G]:
      *
      * @return A new instance of the gene with the mutated value.
      */
-    def mutate(): G = duplicateWithValue(generator(value, Domain.random))
+    def mutate()(using random: Random): G = duplicateWithValue(generator(value, random))
 
     /** Flattens the gene into a sequence containing its value.
      *

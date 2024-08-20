@@ -4,6 +4,8 @@ package operators.alteration.mutation
 import genetics.chromosomes.Chromosome
 import genetics.genes.Gene
 
+import scala.util.Random
+
 /** A trait representing a mutator for genes in a genetic algorithm.
  *
  * The `GeneMutator` trait extends the `Mutator` trait and focuses specifically on mutating individual genes within a
@@ -39,9 +41,9 @@ trait GeneMutator[T, G <: Gene[T, G]] extends Mutator[T, G] {
      */
     override def mutateChromosome(
         chromosome: Chromosome[T, G]
-    ): Chromosome[T, G] = {
+    )(using random: Random): Chromosome[T, G] = {
         chromosome.duplicateWithGenes(chromosome.genes.map { gene =>
-            if (Domain.random.nextDouble() < geneRate) {
+            if (random.nextDouble() < geneRate) {
                 mutateGene(gene)
             } else {
                 gene

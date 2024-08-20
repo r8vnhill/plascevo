@@ -1,12 +1,16 @@
 package cl.ravenhill.plascevo
 package genetics.genes
 
+import scala.util.Random
+
 class GeneTest extends AbstractPlascevoTest {
+    given Random = Random()
+    
     "A Gene" - {
         "can be mutated" in {
             forAll(simpleGeneGen()) { gene =>
                 val mutatedGene = gene.mutate()
-                mutatedGene.value should be(gene.value + 1)
+                mutatedGene.value.should(be(gene.value + 1))
             }
         }
 

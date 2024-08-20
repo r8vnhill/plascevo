@@ -93,5 +93,5 @@ trait Mutator[T, G <: Gene[T, G]] extends Alterer[T, G, Genotype[T, G]] {
      * @param chromosome The chromosome to be mutated.
      * @return A new `Chromosome[T, G]` instance representing the mutated chromosome.
      */
-    def mutateChromosome(chromosome: Chromosome[T, G]): Chromosome[T, G]
+    def mutateChromosome(chromosome: Chromosome[T, G])(using random: Random): Chromosome[T, G]
 }

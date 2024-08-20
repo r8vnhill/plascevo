@@ -7,6 +7,7 @@ import repr.RepresentationFactory
 
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
+import scala.util.Random
 
 /** A factory class for creating genotypes in a genetic algorithm.
  *
@@ -39,7 +40,7 @@ class GenotypeBuilder[T, G <: Gene[T, G]] extends RepresentationFactory[T, G, Ge
      *
      * @return A new instance of `Genotype[T, G]` containing the chromosomes created by the chromosome factories.
      */
-    override def build(): Genotype[T, G] = {
+    override def build()(using random: Random): Genotype[T, G] = {
         val chromosomeSeq = chromosomes.map(_.build()).toSeq
         Genotype(chromosomeSeq)
     }

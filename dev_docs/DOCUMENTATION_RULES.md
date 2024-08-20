@@ -41,24 +41,16 @@ When providing usage examples in docstring comments, follow this syntax:
  * <h2>Usage:</h2>
  * 
  * Usage details and scenarios.
- *
- * <h3>Example 1: Description</h3>
  * 
+ * @tags
  * @example
  * {{{
  * // example 1 code
  * }}}
- * 
- * <h3>Example 2: Description</h3>
- * 
  * @example
  * {{{
  * // example 2 code
  * }}}
- * @tags
  */
 def foo(params) = elements.forEach(action)
 ````
-
-### Important Note:
-**Place examples before the `@tags`.** Examples of `@tags` include `@param`, `@return`, `@throws`, etc.

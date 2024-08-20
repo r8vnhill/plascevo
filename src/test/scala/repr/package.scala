@@ -64,10 +64,12 @@ package object repr:
     } yield {
         validity match {
             case IsValidRepresentation.VALID => new AbstractBaseRepresentation[T, F](features) {
-                // No additional methods needed; inherits from BaseRepresentation.
+                override def toString: String = s"SimpleRepresentation($features)"
             }
             case IsValidRepresentation.INVALID => new AbstractBaseRepresentation[T, F](features) {
                 override def verify(): Boolean = false
+                
+                override def toString: String = s"InvalidRepresentation($features)"
             }
         }
     }

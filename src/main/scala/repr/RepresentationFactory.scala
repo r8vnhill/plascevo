@@ -1,6 +1,8 @@
 package cl.ravenhill.plascevo
 package repr
 
+import scala.util.Random
+
 /** A trait that represents a factory for creating representations in an evolutionary algorithm.
  *
  * The `RepresentationFactory` trait defines a factory interface for creating instances of a specific type of
@@ -21,5 +23,5 @@ trait RepresentationFactory[T, F <: Feature[T, F], R <: Representation[T, F]] {
      *
      * @return A new instance of the representation.
      */
-    def build(): R
+    def build()(using random: Random): R
 }

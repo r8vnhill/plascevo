@@ -2,7 +2,10 @@ package cl.ravenhill.plascevo
 package genetics.chromosomes
 
 import genetics.genes.Gene
+
 import cl.ravenhill.plascevo.evolution.executors.construction.{ConstructorExecutor, SequentialConstructor}
+
+import scala.util.Random
 
 /** A trait for building `Chromosome` instances in a genetic algorithm.
  *
@@ -62,5 +65,5 @@ trait ChromosomeBuilder[T, G <: Gene[T, G]] {
      *
      * @return A new `Chromosome[T, G]` instance.
      */
-    def build(): Chromosome[T, G]
+    def build()(using random: Random): Chromosome[T, G]
 }
