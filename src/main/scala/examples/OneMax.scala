@@ -11,6 +11,8 @@ import operators.alteration.crossover.UniformCrossover
 import operators.alteration.mutation.BitFlipMutator
 import operators.selection.{RouletteWheelSelector, TournamentSelector}
 
+import cl.ravenhill.plascevo.listeners.plotter.EvolutionPlotter
+
 import scala.util.Random
 
 /** An example of a genetic algorithm implementation for solving the One Max problem.
@@ -53,7 +55,7 @@ object OneMax {
      * - **Survivor Selector:** Tournament Selection.
      * - **Alterers:** Includes a Bit Flip Mutator and Uniform Crossover with a 60% chromosome rate.
      * - **Limits:** The algorithm runs for a maximum of 100 generations or until a fitness score of 50 is achieved.
-     * - **Listeners:** Includes an `EvolutionSummary` listener to display the results of the evolution process.
+     * - **Listeners:** Includes an `EvolutionSummary` 
      */
     def main(args: Array[String]): Unit = {
         // Set up the random number generator utilized by the genetic algorithm
@@ -81,6 +83,7 @@ object OneMax {
             .addLimit(MaxGenerations(100))
             .addLimit(TargetFitness(50))
             .addListener(EvolutionSummary(_))
+            .addListener(EvolutionPlotter(_))
             .build()
 
         engine.evolve()
