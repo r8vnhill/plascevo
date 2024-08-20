@@ -5,66 +5,81 @@ import repr.Feature
 
 import scala.util.Random
 
-/** A trait that represents a gene within a genetic algorithm.
+/** A trait representing a gene in an evolutionary algorithm.
  *
- * The `Gene` trait extends the `Feature` trait, encapsulating the behavior and characteristics of a gene, including
- * mutation and value generation. Genes are a fundamental part of the representation of individuals in genetic
- * algorithms.
+ * The `Gene` trait extends the [[Feature]] trait and provides additional functionality specific to genes in
+ * evolutionary algorithms. A gene typically represents a single unit of information in the genetic representation
+ * of an individual. This trait includes methods for generating new values, mutating the gene, and basic operations
+ * like flattening and folding its value.
  *
  * @tparam T The type of value stored by the gene.
  * @tparam G The type of the gene itself, which must extend `Gene`.
+ *
+ * @example
+ * {{{
+ * case class IntGene(value: Int) extends Gene[Int, IntGene] {
+ *   override def generator(using random: Random): Int = random.nextInt(100)
+ *   override def duplicateWithValue(value: Int): IntGene = copy(value = value)
+ * }
+ *
+ * given Random = new Random()
+ * val gene = IntGene(42)
+ * val mutatedGene = gene.mutate() // Generates a new IntGene with a randomly generated value
+ * }}}
  */
-trait Gene[T, G <: Gene[T, G]] extends Feature[T, G]:
+trait Gene[T, G <: Gene[T, G]] extends Feature[T, G] {
 
-    /** The generator function used to produce new values for the gene.
+    /** Generates a new value for the gene using a random number generator.
      *
-     * This function takes the current value of the gene and a `Random` instance, and returns a new value. It is used
-     * primarily during mutation to generate the gene's new value.
+     * The `generator` method is used to produce a new value for the gene, typically during the mutation process.
+     * The method operates within the context of an implicit random number generator, allowing for stochastic
+     * generation of values.
+     *
+     * @param random An implicit random number generator.
+     * @return A new value of type `T` generated randomly.
      */
-    val generator: (T, Random) => T
+    def generator(using random: Random): T
 
-    /** Mutates the gene by generating a new value.
+    /** Mutates the gene by generating a new value and returning a new instance with this value.
      *
-     * This method applies the generator function to the current value of the gene, using a random number generator from
-     * the `Domain`. It then creates a duplicate of the gene with this new value.
+     * The `mutate` method applies the `generator` method to produce a new value and then creates a new instance of the
+     * gene with this value. The mutation process is stochastic, relying on the provided random number generator.
      *
-     * @return A new instance of the gene with the mutated value.
+     * @param random An implicit random number generator.
+     * @return A new instance of the gene with a mutated value.
      */
-    def mutate()(using random: Random): G = duplicateWithValue(generator(value, random))
+    def mutate()(using random: Random): G = duplicateWithValue(generator(using random))
 
     /** Flattens the gene into a sequence containing its value.
      *
-     * This method returns a sequence containing only the current value of the gene, as genes are typically atomic
-     * units within the representation.
+     * The `flatten` method returns a sequence containing the gene's value. Since a gene typically represents a single
+     * unit of information, the resulting sequence will contain exactly one element.
      *
-     * @return A sequence containing the value of the gene.
+     * @return A sequence containing the gene's value.
      */
-    override def flatten(): Seq[T] = Seq(value)
+    final override def flatten(): Seq[T] = Seq(value)
 
-    /** Folds the value of the gene from the right.
+    /** Folds the gene's value from the right, combining it with an initial value.
      *
-     * This method applies a binary operation to the value of the gene and an initial value, effectively folding the
-     * value of the gene from the right. Since the gene is atomic, this operation simply applies the function to the
-     * gene's value and the initial value.
+     * The `foldRight` method processes the gene's value and combines it with the initial value using the provided
+     * binary operation `f`. Since the gene contains a single value, this operation is straightforward.
      *
-     * @param initial The initial value to start the folding operation.
-     * @param f       A binary operation that takes the gene's value and the initial value, and returns the new
-     *                accumulated value.
-     * @tparam U The type of the accumulated value and the result.
-     * @return The result of applying the folding operation to the gene's value and the initial value.
+     * @param initial The initial value to combine with the gene's value.
+     * @param f       A binary operation that combines the gene's value with the accumulated result.
+     * @tparam U The type of the accumulated value and the final result.
+     * @return The result of combining the gene's value with the initial value using `f`.
      */
-    override def foldRight[U](initial: U)(f: (T, U) => U): U = f(value, initial)
+    final override def foldRight[U](initial: U)(f: (T, U) => U): U = f(value, initial)
 
-    /** Folds the value of the gene from the left.
+    /** Folds the gene's value from the left, combining it with an initial value.
      *
-     * This method applies a binary operation to an initial value and the value of the gene, effectively folding the
-     * value of the gene from the left. Since the gene is atomic, this operation simply applies the function to the
-     * initial value and the gene's value.
+     * The `foldLeft` method processes the gene's value and combines it with the initial value using the provided
+     * binary operation `f`. Since the gene contains a single value, this operation is straightforward.
      *
-     * @param initial The initial value to start the folding operation.
-     * @param f       A binary operation that takes the initial value and the gene's value, and returns the new
-     *                accumulated value.
-     * @tparam U The type of the accumulated value and the result.
-     * @return The result of applying the folding operation to the initial value and the gene's value.
+     * @param initial The initial value to combine with the gene's value.
+     * @param f       A binary operation that combines the accumulated value with the gene's value.
+     * @tparam U The type of the accumulated value and the final result.
+     * @return The result of combining the gene's value with the initial value using `f`.
      */
-    override def foldLeft[U](initial: U)(f: (U, T) => U): U = f(initial, value)
+    final override def foldLeft[U](initial: U)(f: (U, T) => U): U = f(initial, value)
+}

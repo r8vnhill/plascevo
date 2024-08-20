@@ -46,5 +46,5 @@ trait FlatMappable[+T] {
      * @tparam U The type of elements in the resulting sequence.
      * @return A sequence of elements obtained by applying the function `f` to each element in the flattened structure.
      */
-    def flatMap[U](f: T => Seq[U]): Seq[U] = flatten().flatMap(f)
+    final def flatMap[U](f: T => Seq[U]): Seq[U] = flatten().flatMap(f)
 }

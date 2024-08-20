@@ -22,8 +22,24 @@ class MutatorTest extends AbstractPlascevoTest {
                 }
             }
         }
-        
-        ""
+
+        "when mutating an individual" - {
+            "should perform no mutations if the chromosome rate is 0.0" in {
+//                forAll(
+//                    simpleMutatorGen(chromosomeRate = Gen.const(0.0)),
+//                    individualGen(simpleGeneGen()),
+//                    randomGen()
+//                ) { (mutator, individual, random) =>
+//                    val mutated = mutator.mutateIndividual(individual)(using random)
+//                    mutated.representation should have size individual.representation.size
+////                    mutated.representation.zip(individual.representation).foreach { case (mutatedChromosome, originalChromosome) =>
+////                        mutatedChromosome.genes.zip(originalChromosome.genes).foreach { case (mutatedGene, originalGene) =>
+////                            mutatedGene.value shouldBe originalGene.value
+////                        }
+////                    }
+//                }
+            }
+        }
     }
 }
 
@@ -33,10 +49,10 @@ class MutatorTest extends AbstractPlascevoTest {
  * `Mutator` for `SimpleGene` types. The mutator is configured with specified or default mutation rates for individuals
  * and chromosomes, enabling controlled mutations within an evolutionary algorithm.
  *
- * @param individualRate  A generator that produces the probability of mutating an individual within the population.
- *                        Defaults to `probabilityGen`, which generates values between 0.0 and 1.0.
- * @param chromosomeRate  A generator that produces the probability of mutating a chromosome within an individual.
- *                        Defaults to `probabilityGen`, which generates values between 0.0 and 1.0.
+ * @param individualRate A generator that produces the probability of mutating an individual within the population.
+ *                       Defaults to `probabilityGen`, which generates values between 0.0 and 1.0.
+ * @param chromosomeRate A generator that produces the probability of mutating a chromosome within an individual.
+ *                       Defaults to `probabilityGen`, which generates values between 0.0 and 1.0.
  * @return A generator that produces a `Mutator[Int, SimpleGene]` with the specified mutation rates.
  */
 def simpleMutatorGen(

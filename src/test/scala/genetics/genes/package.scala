@@ -21,7 +21,7 @@ package object genes:
          *
          * This function generates a new integer value for the gene by incrementing the current value by 1.
          */
-        override val generator: (Int, Random) => Int = (v, _) => v + 1
+        override def generator(using random: Random): Int = value + 1
 
         /** Creates a duplicate of this gene with a new value.
          *

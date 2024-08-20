@@ -17,7 +17,7 @@ sealed trait BooleanGene extends Gene[Boolean, BooleanGene] {
      * This function takes the current value and a `Random` instance as input, but it only uses the `Random` instance
      * to generate a new boolean value, ignoring the current value.
      */
-    override val generator: (Boolean, Random) => Boolean = (_, random) => random.nextBoolean()
+    override def generator(using random: Random): Boolean = random.nextBoolean()
 
     /** Duplicates the gene with a specified boolean value.
      *
