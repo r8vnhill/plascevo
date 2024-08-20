@@ -7,34 +7,22 @@ import scala.util.Random
 
 /** Generates a sequence of unique random indices within a specified range.
  *
- * The `nIndices` method returns a sequence of unique random integers within the range defined by the `start`
- * (inclusive) and `end` (exclusive) parameters. The number of indices generated is specified by the `size` parameter.
- * The resulting indices are returned in sorted order.
+ * The `nIndices` method produces a sequence of `size` unique indices within the range `[start, end)`. The indices are
+ * selected randomly and are guaranteed to be unique within the resulting sequence. This method is useful in scenarios
+ * where you need to sample a specific number of distinct elements from a collection by their indices.
  *
- * @param size   The number of indices to generate. Must be greater than or equal to 0 and less than or equal to the
- *               size of the range (`end - start`).
- * @param end    The end of the range (exclusive) within which indices are generated. Must be greater than the `start`
- *               index.
- * @param start  The start of the range (inclusive) within which indices are generated. Defaults to 0. Must be greater
- *               than or equal to 0.
- * @param random An implicit `Random` instance used for generating random indices.
- * @return A sorted sequence of unique random indices within the specified range.
- * @throws IllegalArgumentException if the input parameters do not meet the validation criteria.
- *
- *                                  <h3>Example 1: Generating Random Indices</h3>
+ * @param size  The number of indices to generate.
+ * @param end   The exclusive upper bound of the range from which to generate indices.
+ * @param start The inclusive lower bound of the range from which to generate indices. Defaults to `0`.
+ * @param random An implicit `Random` instance used for generating random numbers.
+ * @return A sorted sequence of unique indices within the range `[start, end)`.
+ * @throws IllegalArgumentException If `size` is negative, greater than the size of the range, or if `start` is not less
+ *                                  than `end`.
  * @example
  * {{{
- * given random: Random = new Random()
- * val randomIndices = nIndices(size = 3, end = 10)
- * // Example result: Seq(1, 4, 7)
- * }}}
- *
- * <h3>Example 2: Generating Random Indices with a Custom Start</h3>
- * @example
- * {{{
- * given random: Random = new Random()
- * val randomIndices = nIndices(size = 5, end = 20, start = 10)
- * // Example result: Seq(10, 12, 15, 17, 19)
+ * given Random = new Random()
+ * val indices = nIndices(3, 10)
+ * // indices: Seq[Int] = Seq(2, 5, 7)  // Example output
  * }}}
  */
 def nIndices(size: Int, end: Int, start: Int = 0)(using random: Random): Seq[Int] = {
@@ -50,35 +38,25 @@ def nIndices(size: Int, end: Int, start: Int = 0)(using random: Random): Seq[Int
     }.sorted
 }
 
-/** Generates a sequence of indices based on a specified probability.
+/** Generates a sequence of indices within a specified range, selected based on a given probability.
  *
- * The `pIndices` method returns a sequence of indices within the specified range `[start, end)`, where each index is
- * included in the result based on the provided `pickProbability`. The method filters the indices by generating a random
- * number for each and comparing it against the `pickProbability`. If the random number is less than the
- * `pickProbability`, the index is included in the result.
+ * The `pIndices` method produces a sequence of indices from the range `[start, end)`, where each index is included in
+ * the result with a probability specified by `pickProbability`. This method is useful in scenarios where you need to
+ * randomly sample indices from a range with a certain likelihood.
  *
- * @param pickProbability The probability of picking each index. Must be in the range `[0.0, 1.0]`.
- * @param end The end of the range (exclusive) within which indices are considered. Must be greater than or equal to 0.
- * @param start The start of the range (inclusive) within which indices are considered. Defaults to 0. Must be greater
- *              than or equal to 0.
- * @param random An implicit `Random` instance used to determine whether each index is picked.
- * @return A sequence of indices selected based on the specified probability.
- * @throws IllegalArgumentException if the input parameters do not meet the validation criteria.
- *
- * <h3>Example 1: Generating Indices with 50% Probability</h3>
+ * @param pickProbability The probability with which each index is selected. Must be within the range `[0.0, 1.0]`.
+ * @param end             The exclusive upper bound of the range from which to generate indices.
+ * @param start           The inclusive lower bound of the range from which to generate indices. Defaults to `0`.
+ * @param random          An implicit `Random` instance used for generating random numbers.
+ * @return A sequence of indices from the specified range `[start, end)` where each index is selected with the given
+ *         probability.
+ * @throws IllegalArgumentException If `pickProbability` is not within the range `[0.0, 1.0]`, or if `start` is not
+ *                                  less than or equal to `end - 1`.
  * @example
  * {{{
- * given random: Random = new Random()
- * val indices = pIndices(pickProbability = 0.5, end = 10)
- * // Example result: Seq(1, 3, 7, 8)
- * }}}
- *
- * <h3>Example 2: Generating Indices with 30% Probability and Custom Start</h3>
- * @example
- * {{{
- * given random: Random = new Random()
- * val indices = pIndices(pickProbability = 0.3, end = 20, start = 10)
- * // Example result: Seq(10, 14, 17)
+ * given Random = new Random()
+ * val indices = pIndices(0.3, 10)
+ * // indices: Seq[Int] = Seq(1, 3, 7)  // Example output where some indices are selected
  * }}}
  */
 def pIndices(pickProbability: Double, end: Int, start: Int = 0)(using random: Random): Seq[Int] = {
@@ -93,38 +71,51 @@ def pIndices(pickProbability: Double, end: Int, start: Int = 0)(using random: Ra
     (start until end).filter { _ => random.nextDouble() < pickProbability }
 }
 
-/** Generates a sequence of subsets from a given sequence of elements.
+/** Generates a sequence of randomly selected subsets from a given sequence of elements.
  *
- * The `subsets` method creates a specified number of subsets from the input sequence of elements. The method can
- * generate either exclusive or non-exclusive subsets, depending on the value of the `exclusive` parameter. Exclusive
- * subsets ensure that elements are not repeated across subsets, while non-exclusive subsets allow the same element to
- * appear in multiple subsets. The method also supports an optional limit on the number of subsets generated.
+ * The `subsets` method returns a sequence of subsets, each containing a random selection of elements from the input
+ * sequence. The selection process can be either exclusive or non-exclusive, based on the `exclusive` parameter.
  *
- * @param elements The input sequence of elements from which subsets will be generated.
- * @param size The desired size of each subset. Must be greater than 0.
- * @param exclusive The exclusivity rule to apply when generating subsets: `Exclusive` or `NonExclusive`.
- * @param limit An optional limit on the number of subsets to generate. Defaults to `Int.MaxValue`.
- * @param random An implicit `Random` instance used for random selection.
+ * - If `exclusive` is `Exclusivity.Exclusive`, each element can only be used once across all subsets. The size of the
+ *   input sequence must be a multiple of the subset size.
+ * - If `exclusive` is `Exclusivity.NonExclusive`, elements can be used in multiple subsets.
+ *
+ * The `size` parameter specifies the number of elements in each subset. It must be at least 1 and at most the size of
+ * the input sequence. The `limit` parameter sets the maximum number of subsets to generate. If not provided, the 
+ * default value is `Int.MaxValue`.
+ *
+ * Each element in the input sequence is guaranteed to be included in at least one subset if `exclusivity` is set to
+ * `Exclusivity.Exclusive`.
+ *
+ * @param elements  The input sequence of elements from which to generate subsets.
+ * @param size      The number of elements in each subset.
+ * @param exclusive Specifies whether the selection should be exclusive (no repeated elements) or non-exclusive
+ *                  (repeated elements allowed).
+ * @param limit     The maximum number of subsets to generate. Defaults to `Int.MaxValue`.
+ * @param random    An implicit `Random` instance used for shuffling and selecting elements.
  * @tparam T The type of elements in the sequence.
- * @return A sequence of subsets, each represented as a `Seq[T]`.
- * @throws IllegalArgumentException if the input parameters do not meet the validation criteria.
- *
- * <h3>Example 1: Generating Exclusive Subsets</h3>
+ * @return A sequence of randomly generated subsets.
+ * @throws IllegalArgumentException If the input parameters are invalid, such as an invalid subset size or 
+ *                                  exclusivity settings.
  * @example
  * {{{
  * given random: Random = new Random()
- * val elements = Seq(1, 2, 3, 4, 5)
- * val subsets = subsets(elements, size = 2, exclusive = Exclusivity.Exclusive)
- * // Example result: Seq(Seq(1, 2), Seq(3, 4))
- * }}}
  *
- * <h3>Example 2: Generating Non-Exclusive Subsets</h3>
- * @example
- * {{{
- * given random: Random = new Random()
- * val elements = Seq(1, 2, 3, 4, 5)
- * val subsets = subsets(elements, size = 3, exclusive = Exclusivity.NonExclusive, limit = 3)
- * // Example result: Seq(Seq(1, 2, 3), Seq(1, 4, 5), Seq(2, 3, 4))
+ * // Generate three exclusive subsets of size two from a sequence of integers:
+ * val elements = Seq(1, 2, 3, 4, 5, 6)
+ * val subsets = subsets(elements, size = 2, exclusive = Exclusivity.Exclusive, limit = 3)
+ * // subsets: Seq(Seq(2, 6), Seq(4, 3), Seq(5, 1))
+ *
+ * // Generate four non-exclusive subsets of size three from a sequence of strings:
+ * val elements = Seq("cat", "dog", "fish", "bird", "hamster")
+ * val subsets = subsets(elements, size = 3, exclusive = Exclusivity.NonExclusive, limit = 4)
+ * // subsets: Seq(Seq("hamster", "fish", "dog"), Seq("bird", "fish", "hamster"),
+ * //              Seq("cat", "dog", "fish"), Seq("hamster", "cat", "dog"))
+ *
+ * // Generate two exclusive subsets of size four from a sequence of characters:
+ * val elements = Seq('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l')
+ * val subsets = subsets(elements, size = 4, exclusive = Exclusivity.Exclusive, limit = 2)
+ * // subsets: Seq(Seq('h', 'j', 'l', 'f'), Seq('b', 'g', 'a', 'e'))
  * }}}
  */
 def subsets[T](elements: Seq[T], size: Int, exclusive: Exclusivity, limit: Int = Int.MaxValue)
@@ -151,30 +142,24 @@ def subsets[T](elements: Seq[T], size: Int, exclusive: Exclusivity, limit: Int =
     subsets.map(_.toSeq).toSeq
 }
 
-/** Creates a non-exclusive subset of elements from a list.
+/** Creates a non-exclusive subset of elements from a sequence.
  *
- * The `createNonExclusiveSubset` method generates a subset of a specified size from the given list of elements. The
- * selection process is non-exclusive, meaning that the same element can appear multiple times in the subset. The first
- * element of the subset is always the first unused element from the list, while the remaining elements are chosen
- * randomly from the list. Once an element is selected, it is removed from the list of remaining elements.
+ * The `createNonExclusiveSubset` method generates a subset of the specified `size` from the provided `elements`
+ * sequence. This method allows for the possibility of selecting the same element multiple times across different
+ * subsets (non-exclusive selection). The first element of the subset is always taken from the `remainingElements`,
+ * ensuring that each element is used at least once. The subsequent elements are chosen randomly from the entire
+ * `elements` sequence.
  *
- * @param elements          The original list of elements from which the subset is to be created.
- * @param remainingElements A mutable list buffer of remaining elements that have not yet been used in the subset.
- *                          This list is updated as elements are selected.
- * @param size              The desired size of the subset.
- * @param random            An implicit `Random` instance used for random selection.
- * @tparam T The type of elements in the list.
- * @return A `List[T]` representing the non-exclusive subset of elements.
+ * The `remainingElements` sequence is modified during this process by removing elements that are used in the subset.
  *
- *         <h3>Example:</h3>
- * @example
- * {{{
- * given random: Random = new Random()
- * val elements = List(1, 2, 3, 4, 5)
- * val remainingElements = ListBuffer(1, 2, 3, 4, 5)
- * val subset = createNonExclusiveSubset(elements, remainingElements, size = 3)
- * // Example result: List(1, 4, 2)
- * }}}
+ * @param elements          The original sequence of elements from which to select the subset.
+ * @param remainingElements A mutable `ListBuffer` of elements that have not yet been used in the current subset.
+ * @param size              The number of elements to include in the subset.
+ * @param random            An implicit `Random` instance used for selecting random elements.
+ * @tparam T The type of elements in the sequence.
+ * @return A `ListBuffer` containing the selected subset of elements.
+ * @throws NoSuchElementException If the `remainingElements` or `elements` sequence does not have enough elements
+ *                                to create a subset of the specified size.
  */
 private def createNonExclusiveSubset[T](
     elements: Seq[T],
