@@ -3,34 +3,51 @@ package repr
 
 import mixins.{FlatMappable, Foldable, Verifiable}
 
-/** Represents a feature in an evolutionary algorithm.
+/** Represents an atomic feature in an evolutionary algorithm.
  *
- * A feature is an atomic component in an evolutionary algorithm. For instance, a gene is a feature in a genetic
- * algorithm, and a chromosome is a vector of such features. The `Feature` trait provides a common structure for these
- * components, with methods for duplicating features with new values.
+ * In the context of evolutionary algorithms, a feature is the smallest unit that contributes to the structure of a
+ * solution. For example, in a genetic algorithm, a gene would be considered a feature, while a chromosome could be
+ * viewed as a collection of such features. The `Feature` trait provides a unified interface for these components,
+ * ensuring they can be duplicated with new values, verified, and manipulated through various operations.
  *
- * <h2>Usage:</h2>
- * This trait is intended to be implemented by classes representing individual elements in evolutionary algorithms, such
- * as genes or other units.
+ * This trait is typically implemented by classes that represent individual elements within evolutionary algorithms,
+ * such as genes, decision variables, or other fundamental units that compose a solution.
  *
- * <h3>Example 1: Implementing Feature</h3>
+ * @tparam T The type of the value contained within the feature.
+ * @tparam F The specific type of the feature itself, which must extend [[Feature]].
  *
  * @example
  * {{{
  * class MyGene(val value: Int) extends Feature[Int, MyGene] {
  *   override def duplicateWithValue(value: Int): MyGene = new MyGene(value)
+ *
+ *   override def verify(): Boolean = value >= 0  // Example verification logic
+ *
+ *   override def flatten(): Seq[Int] = Seq(value)  // Flattening returns a sequence with the single value
+ *
+ *   override def foldLeft[U](initial: U)(f: (U, Int) => U): U = f(initial, value)
+ *
+ *   override def foldRight[U](initial: U)(f: (Int, U) => U): U = f(value, initial)
  * }
  * }}}
- * @tparam T The type of the value held by the feature.
- * @tparam F The type of the feature itself, which must extend [[Feature]].
  */
-trait Feature[T, F <: Feature[T, F]] extends Verifiable with FlatMappable[T] with Foldable[T]:
-    /** The value held by the feature. */
+trait Feature[T, F <: Feature[T, F]] extends Verifiable with FlatMappable[T] with Foldable[T] {
+
+    /** The value contained within the feature.
+     *
+     * This value represents the core data or decision variable that the feature contributes to the evolutionary
+     * process.
+     */
     def value: T
 
-    /** Creates a duplicate of the feature with the specified value.
+    /** Creates a duplicate of this feature with a new specified value.
      *
-     * @param value The value for the new feature.
-     * @return A new feature with the specified value.
+     * This method allows for the creation of a new instance of the feature, retaining the same characteristics but with
+     * a different value. This is particularly useful in operations such as mutation, where a feature needs to be
+     * altered while preserving the structure of the solution.
+     *
+     * @param value The new value for the duplicated feature.
+     * @return A new feature instance with the specified value.
      */
     def duplicateWithValue(value: T): F
+}
