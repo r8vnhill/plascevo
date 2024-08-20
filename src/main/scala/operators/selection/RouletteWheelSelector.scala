@@ -4,7 +4,8 @@ package operators.selection
 import ranking.IndividualRanker
 import repr.{Feature, Representation}
 import utils.Sorting.Unsorted
-import utils.{===, Sorting, incremental, sub}
+import utils.{Sorting, incremental, sub}
+import utils.Numeric.=~
 
 import scala.util.Random
 
@@ -39,7 +40,7 @@ case class RouletteWheelSelector[T, F <: Feature[T, F], R <: Representation[T, F
         val fitnessValues = ranker.fitnessTransform(population.fitness)
         val adjustedFitness = (fitnessValues sub scala.math.min(fitnessValues.min, 0.0)).toBuffer
         val totalFitness = adjustedFitness.sum
-        if (totalFitness.isNaN || totalFitness.isInfinity || totalFitness === 0.0) {
+        if (totalFitness.isNaN || totalFitness.isInfinity || totalFitness =~ 0.0) {
             Seq.fill(population.size)(1.0 / population.size)
         } else {
             for (case (_, i) <- adjustedFitness.zipWithIndex) {

@@ -6,7 +6,7 @@ import genetics.Genotype
 import genetics.chromosomes.Chromosome
 import genetics.genes.Gene
 import operators.alteration.Alterer
-import utils.===
+import utils.Numeric.=~
 
 import scala.util.Random
 
@@ -58,7 +58,7 @@ trait Mutator[T, G <: Gene[T, G]] extends Alterer[T, G, Genotype[T, G]] {
         buildState: Seq[Individual[T, G, Genotype[T, G]]] => S
     )(using random: Random, equalityThreshold: Double): S = {
         require(outputSize == state.population.size, "Output size must match the population size.")
-        if (individualRate === 0) {
+        if (individualRate =~ 0) {
             state
         } else {
             state.map(

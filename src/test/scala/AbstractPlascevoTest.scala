@@ -14,5 +14,4 @@ abstract class AbstractPlascevoTest
     extends org.scalatest.freespec.AnyFreeSpec
         with should.Matchers
         with org.scalatestplus.scalacheck.ScalaCheckPropertyChecks
-        with org.scalatest.BeforeAndAfterEach {
-}
+        with org.scalatest.BeforeAndAfterEach

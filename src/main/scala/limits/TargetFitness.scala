@@ -5,7 +5,7 @@ import repr.{Feature, Representation}
 
 import cl.ravenhill.plascevo.evolution.states.EvolutionState
 import cl.ravenhill.plascevo.listeners.{EvolutionListener, ListenerConfiguration}
-import cl.ravenhill.plascevo.utils.===
+import cl.ravenhill.plascevo.utils.Numeric.=~
 
 class TargetFitness[T, F <: Feature[T, F], R <: Representation[T, F], S <: EvolutionState[T, F, R, S]](
     predicate: Double => Boolean
@@ -13,7 +13,7 @@ class TargetFitness[T, F <: Feature[T, F], R <: Representation[T, F], S <: Evolu
     TargetFitnessListener(),
     (_, state) => state.population.exists(individual => predicate(individual.fitness))
 ) {
-    def this(targetFitness: Double)(using equalityThreshold: Double) = this(_ === targetFitness)
+    def this(targetFitness: Double)(using equalityThreshold: Double) = this(_ =~ targetFitness)
 }
 
 private class TargetFitnessListener[T, F <: Feature[T, F], R <: Representation[T, F], S <: EvolutionState[T, F, R, S]](

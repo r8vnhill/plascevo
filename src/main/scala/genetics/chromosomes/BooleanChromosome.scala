@@ -3,7 +3,8 @@ package genetics.chromosomes
 
 import ToStringMode.SIMPLE
 import genetics.genes.BooleanGene
-import utils.{roundUpToMultipleOf, toInt}
+import utils.Numeric.roundUpToMultipleOf
+import utils.toInt
 
 private val chunkSize = 4
 
