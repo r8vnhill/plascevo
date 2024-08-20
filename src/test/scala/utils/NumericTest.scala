@@ -1,7 +1,7 @@
 package cl.ravenhill.plascevo
 package utils
 
-import matchers.beApproximatelyEqualTo
+import matchers.{beApproximatelyEqualTo, notBeApproximatelyEqualTo}
 import utils.Numeric.roundUpToMultipleOf
 
 import org.scalacheck.Gen
@@ -30,7 +30,7 @@ class NumericTest extends AbstractPlascevoTest {
             ) { case (a, b, threshold) =>
                 given Double = threshold
 
-                a shouldNot beApproximatelyEqualTo(b)
+                a should notBeApproximatelyEqualTo(b)
             }
         }
 
@@ -38,7 +38,7 @@ class NumericTest extends AbstractPlascevoTest {
             forAll { (b: Double, tolerance: Double) =>
                 given Double = tolerance
 
-                Double.NaN shouldNot beApproximatelyEqualTo(b)
+                Double.NaN should notBeApproximatelyEqualTo(b)
             }
         }
 
@@ -46,7 +46,7 @@ class NumericTest extends AbstractPlascevoTest {
             forAll { (a: Double, tolerance: Double) =>
                 given Double = tolerance
 
-                a shouldNot beApproximatelyEqualTo(Double.NaN)
+                a should notBeApproximatelyEqualTo(Double.NaN)
             }
         }
 

@@ -14,6 +14,16 @@ package object utils {
     }
 
     extension (iterable: Iterable[Long]) {
+
+        /** Calculates the average of the elements in this `Iterable[Long]`.
+         *
+         * The `average` method computes the sum of all elements in the iterable and divides it by the number of
+         * elements. It performs a check to prevent overflow in the count of elements. If the iterable is empty, the
+         * method returns `Double.NaN`.
+         *
+         * @return The average of the elements as a `Double`, or `Double.NaN` if the iterable is empty.
+         * @throws ArithmeticException if the count of elements overflows.
+         */
         def average: Double = {
             var sum = 0.0
             var count = 0
@@ -27,6 +37,27 @@ package object utils {
     }
 
     extension [T](iterable: Iterable[T]) {
+
+        /** Finds the maximum value in the collection based on a selector function, returning it as an `Option`.
+         *
+         * The `maxOfOption` method iterates through the collection, applies the `selector` function to each element,
+         * and tracks the maximum value based on the provided ordering. If the collection is empty, it returns `None`.
+         *
+         * @param selector A function that extracts the value to be compared from each element in the collection.
+         * @param ord      An implicit `Ordering` instance that defines how to compare the extracted values.
+         * @tparam R The type of the value extracted by the selector, which must have an implicit `Ordering`.
+         * @return An `Option` containing the maximum value based on the selector, or `None` if the collection is empty.
+         * @example
+         * {{{
+         * val numbers = List(1, 2, 3, 4, 5)
+         * val maxNumber = numbers.maxOfOption(identity)
+         * // maxNumber: Option[Int] = Some(5)
+         *
+         * val people = List(("Alice", 30), ("Bob", 25), ("Charlie", 35))
+         * val oldestPerson = people.maxOfOption(_._2)
+         * // oldestPerson: Option[Int] = Some(35)
+         * }}}
+         */
         def maxOfOption[R](selector: T => R)(using ord: Ordering[R]): Option[R] = {
             val iterator = iterable.iterator
             if (!iterator.hasNext) return None
@@ -38,6 +69,26 @@ package object utils {
             Some(maxValue)
         }
 
+        /** Finds the minimum value in the collection based on a selector function, returning it as an `Option`.
+         *
+         * The `minOfOption` method iterates through the collection, applies the `selector` function to each element,
+         * and tracks the minimum value based on the provided ordering. If the collection is empty, it returns `None`.
+         *
+         * @param selector A function that extracts the value to be compared from each element in the collection.
+         * @param ord      An implicit `Ordering` instance that defines how to compare the extracted values.
+         * @tparam R The type of the value extracted by the selector, which must have an implicit `Ordering`.
+         * @return An `Option` containing the minimum value based on the selector, or `None` if the collection is empty.
+         * @example
+         * {{{
+         * val numbers = List(1, 2, 3, 4, 5)
+         * val minNumber = numbers.minOfOption(identity)
+         * // minNumber: Option[Int] = Some(1)
+         *
+         * val people = List(("Alice", 30), ("Bob", 25), ("Charlie", 35))
+         * val youngestPerson = people.minOfOption(_._2)
+         * // youngestPerson: Option[Int] = Some(25)
+         * }}}
+         */
         def minOfOption[R](selector: T => R)(using ord: Ordering[R]): Option[R] = {
             val iterator = iterable.iterator
             if (!iterator.hasNext) return None
@@ -50,6 +101,17 @@ package object utils {
         }
     }
 
+    /** Checks for overflow in the count of elements during iteration.
+     *
+     * The `checkCountOverflow` method is a utility function designed to detect integer overflow when counting elements
+     * during an iteration. If the count becomes negative, which indicates an overflow, the method throws an
+     * `ArithmeticException`. This is crucial for ensuring the integrity of operations that rely on accurate element
+     * counts.
+     *
+     * @param count The current count of elements.
+     * @return The count if no overflow is detected.
+     * @throws ArithmeticException if the count overflows and becomes negative.
+     */
     private def checkCountOverflow(count: Int): Int = {
         if (count < 0) throw ArithmeticException("Count overflow detected")
         count
@@ -57,25 +119,36 @@ package object utils {
 
     extension (seq: Seq[Double]) {
 
-        /** Subtracts a specified value from each element in the sequence.
+        /** Subtracts a given `Double` value from each element in the sequence.
          *
-         * The `sub` method takes a `double` value and returns a new sequence where each element is the result of
-         * subtracting the specified value from the corresponding element in the original sequence.
+         * The `sub` method returns a new sequence where the specified `double` value is subtracted from each element of
+         * the original sequence. This is useful in situations where you need to adjust all values in the sequence by a
+         * fixed amount.
          *
-         * @param double The value to subtract from each element in the iterable.
-         * @return A new `Seq[Double]` where each element has been reduced by the specified value.
+         * @param double The `Double` value to subtract from each element in the sequence.
+         * @return A new sequence where each element is the result of the subtraction.
+         * @example
+         * {{{
+         * val numbers = Seq(5.0, 10.0, 15.0)
+         * val result = numbers sub 2.5
+         * // result: Seq[Double] = Seq(2.5, 7.5, 12.5)
+         * }}}
          */
         infix def sub(double: Double): Seq[Double] = seq.map(_ - double)
 
-        /** Computes the incremental sums of a sequence of doubles.
+        /** Computes the cumulative sum (incremental values) of the sequence.
          *
-         * The `incremental` method returns a sequence where each element is the cumulative sum of the elements in the
-         * original sequence up to that point. This is achieved by using the `scanLeft` operation, which iteratively
-         * applies a summation function across the sequence, starting with an initial value of `0.0`.
+         * The `incremental` method calculates the cumulative sum of the elements in the sequence, returning a new
+         * sequence where each element is the sum of all previous elements in the original sequence up to that point.
+         * This is useful for generating running totals or for understanding the progression of values in the sequence.
          *
-         * @return A sequence of `Double` values representing the cumulative sums of the original sequence.
-         *         The first element corresponds to the sum of the first element of the original sequence, the second
-         *         element to the sum of the first two elements, and so on.
+         * @return A sequence of cumulative sums.
+         * @example
+         * {{{
+         * val numbers = Seq(1.0, 2.0, 3.0, 4.0)
+         * val cumulativeSums = numbers.incremental
+         * // cumulativeSums: Seq[Double] = Seq(1.0, 3.0, 6.0, 10.0)
+         * }}}
          */
         def incremental: Seq[Double] = seq.scanLeft(0.0)(_ + _).tail
     }
