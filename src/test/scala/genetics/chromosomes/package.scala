@@ -83,6 +83,7 @@ package object chromosomes {
         }
     
     /** Represents a simple chromosome for testing purposes. */
-    case class SimpleChromosome(genes: Seq[SimpleGene]) extends Chromosome[Int, SimpleGene](genes):
+    case class SimpleChromosome(override val genes: Seq[SimpleGene]) extends Chromosome[Int, SimpleGene] {
         override def duplicateWithGenes(genes: Seq[SimpleGene]): Chromosome[Int, SimpleGene] = SimpleChromosome(genes)
+    }
 }

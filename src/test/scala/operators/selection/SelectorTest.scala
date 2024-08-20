@@ -8,7 +8,12 @@ import repr.*
 
 import org.scalacheck.{Arbitrary, Gen}
 
+import scala.util.Random
+
 class SelectorTest extends AbstractPlascevoTest {
+    given Random = Random()
+    given Double = 1e-6
+
     "A Selector" - {
         "should throw an exception when selecting from an empty population" in {
             forAll(
@@ -70,7 +75,7 @@ private def simpleSelectorGen[T, F <: Feature[T, F], R <: Representation[T, F]](
         override def select(
             population: Population[T, F, R], outputSize: Int,
             ranker: IndividualRanker[T, F, R]
-        ): Population[T, F, R] = ranker.sort(population).take(outputSize)
+        )(using random: Random, equalityThreshold: Double) = ranker.sort(population).take(outputSize)
     }
 }
 
