@@ -3,6 +3,10 @@ package genetics.chromosomes
 
 import genetics.genes.{BooleanGene, FalseGene, TrueGene}
 
+import cl.ravenhill.plascevo.composerr.constrained
+import cl.ravenhill.plascevo.composerr.constraints.doubles.BeInRange
+import cl.ravenhill.plascevo.exceptions.InvalidProbabilityException
+
 import scala.util.Random
 
 /** A builder class for constructing `BooleanChromosome` instances in a genetic algorithm.
@@ -31,8 +35,13 @@ class BooleanChromosomeBuilder extends ChromosomeBuilder[Boolean, BooleanGene] {
      * @return The current instance of the `BooleanChromosomeBuilder` for method chaining.
      * @throws IllegalArgumentException if `trueRate` is not between 0.0 and 1.0.
      */
-    def withTrueRate(trueRate: Double): this.type = {
-        require(_trueRate >= 0.0 && _trueRate <= 1.0, "True rate must be between 0.0 and 1.0.")
+    def withTrueRate(trueRate: Double): BooleanChromosomeBuilder = {
+        constrained {
+            "True rate must be between 0.0 and 1.0." ~ (
+                trueRate must BeInRange(0.0, 1.0),
+                InvalidProbabilityException(_)
+            )
+        }
         _trueRate = trueRate
         this
     }
