@@ -28,6 +28,12 @@ sealed trait BooleanGene extends Gene[Boolean, BooleanGene] {
      * @return A `BooleanGene` instance with the specified value.
      */
     override def duplicateWithValue(value: Boolean): BooleanGene = if value then TrueGene else FalseGene
+
+    /** Converts the boolean value of the gene to an integer representation.
+     * 
+     * @return `1` if the gene's value is `true`, `0` if the gene's value is `false`.
+     */
+    def toInt: Int = if value then 1 else 0
 }
 
 /** An object representing a `BooleanGene` with a value of `true`.

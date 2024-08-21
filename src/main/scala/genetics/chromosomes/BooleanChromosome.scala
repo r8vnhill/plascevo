@@ -40,7 +40,7 @@ case class BooleanChromosome(override val genes: Seq[BooleanGene]) extends Chrom
         case SIMPLE => {
             val stringSize = size roundUpToMultipleOf chunkSize
             val paddingZeroes = "0" * (stringSize - size)
-            (paddingZeroes + genes.map(_.value.toInt).mkString)
+            (paddingZeroes + genes.map(_.toInt).mkString)
                 .grouped(chunkSize)
                 .mkString(" ")
         }
