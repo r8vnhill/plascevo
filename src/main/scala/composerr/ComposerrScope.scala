@@ -89,7 +89,7 @@ class ComposerrScope(val configuration: ComposerrConfiguration = new ComposerrCo
          * @return A [[StringScope]] instance, providing the context and functionalities to define constraints and
          *         validation logic.
          */
-        @targetName("in")
+        @targetName("withPredicate")
         inline def |(predicate: StringScope ?=> Unit): StringScope = {
             val scope = new StringScope(value)
             predicate(using scope)
@@ -119,22 +119,22 @@ class ComposerrScope(val configuration: ComposerrConfiguration = new ComposerrCo
          * the validation fails. The rule specifies that the username must not be empty, and if it is, a custom
          * exception is generated using the provided `exceptionGenerator`.
          *
-         * @param predicate          A lambda expression with a receiver of type [[StringScope]], where the validation logic is
-         *                           defined. This is the core logic that specifies the constraints for the string.
+         * @param predicate A lambda expression with a receiver of type [[StringScope]], where the validation logic is
+         * defined. This is the core logic that specifies the constraints for the string.
          * @param exceptionGenerator A function that generates a custom [[ConstraintException]] when a validation
-         *                           rule fails. This allows for custom exception handling based on the validation result.
+         * rule fails. This allows for custom exception handling based on the validation result.
          * @return A [[StringScope]] instance, with the specified validation logic and exception handling.
          */
-        @targetName("in")
-        inline infix def in(
-            exceptionGenerator: String => ConstraintException,
-        )(predicate: StringScope ?=> Unit): StringScope = {
+        @targetName("withException")
+        inline infix def ~(
+            predicate: StringScope ?=> Unit,
+            exceptionGenerator: String => ConstraintException
+        ): StringScope = {
             val scope = new StringScope(value)
             scope.exceptionGenerator = Some(exceptionGenerator)
             predicate(using scope)
             scope
         }
-
     }
 
     /**
@@ -185,9 +185,11 @@ class ComposerrScope(val configuration: ComposerrConfiguration = new ComposerrCo
          *         exception.
          */
         private def handleValidation[T](predicate: => Boolean)
-            (using constraint: Constraint[T] = new Constraint[T] {
+            (
+                using constraint: Constraint[T] = new Constraint[T] {
                 override val validator: T => Boolean = _ => predicate
-            }): Try[?] = {
+            }
+            ): Try[?] = {
             if (!predicate) {
                 if (configuration.shortCircuit) {
                     throw exceptionGenerator.map(_.apply(message)).getOrElse(constraint.generateException(message))
@@ -221,7 +223,7 @@ class ComposerrScope(val configuration: ComposerrConfiguration = new ComposerrCo
              */
             infix def mustNot[C <: Constraint[T]](constraint: C): Unit = {
                 given Constraint[T] = constraint
-    
+
                 _results += handleValidation(!constraint.validator(value)).map(_ => value)
             }
         }

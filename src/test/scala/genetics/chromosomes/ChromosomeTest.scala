@@ -96,19 +96,14 @@ class ChromosomeTest extends AbstractPlascevoTest {
 private def simpleChromosomeAndGeneAtIndexGen(
     geneGen: Gen[SimpleGene],
     sizeGen: Gen[Int]
-): Gen[(SimpleChromosome, SimpleGene, Int)] = {
-    val genes = ListBuffer.empty[SimpleGene]
-    var geneAtIndex: Option[SimpleGene] = None
-    for {
-        size <- sizeGen
-        index <- Gen.choose(0, size - 1)
-    } yield {
-        for (_ <- 0 until size) {
-            genes += geneGen.sample.get
-            if (index == genes.size - 1) {
-                geneAtIndex = Some(genes.last)
-            }
-        }
-        (SimpleChromosome(genes.toSeq), geneAtIndex.get, index)
-    }
+): Gen[(SimpleChromosome, SimpleGene, Int)] = for {
+    size <- sizeGen
+    index <- Gen.choose(0, size - 1)
+    genesBefore <- Gen.listOfN(index, geneGen)
+    geneAtIndex <- geneGen
+    genesAfter <- Gen.listOfN(size - index - 1, geneGen)
+} yield {
+    val genes = genesBefore ++ Seq(geneAtIndex) ++ genesAfter
+    val chromosome = SimpleChromosome(genes)
+    (chromosome, geneAtIndex, index)
 }

@@ -2,16 +2,18 @@ package cl.ravenhill.plascevo
 package examples
 
 import evolution.engines.GeneticAlgorithm
+import evolution.executors.construction.{AkkaConcurrentConstructor, SequenceActor}
 import genetics.Genotype
 import genetics.chromosomes.BooleanChromosome
 import genetics.genes.BooleanGene
 import limits.{MaxGenerations, TargetFitness}
+import listeners.plotter.EvolutionPlotter
 import listeners.summary.EvolutionSummary
 import operators.alteration.crossover.UniformCrossover
 import operators.alteration.mutation.BitFlipMutator
 import operators.selection.{RouletteWheelSelector, TournamentSelector}
 
-import cl.ravenhill.plascevo.listeners.plotter.EvolutionPlotter
+import akka.actor.typed.ActorSystem
 
 import scala.util.Random
 
@@ -55,7 +57,7 @@ object OneMax {
      * - **Survivor Selector:** Tournament Selection.
      * - **Alterers:** Includes a Bit Flip Mutator and Uniform Crossover with a 60% chromosome rate.
      * - **Limits:** The algorithm runs for a maximum of 100 generations or until a fitness score of 50 is achieved.
-     * - **Listeners:** Includes an `EvolutionSummary` 
+     * - **Listeners:** Includes an `EvolutionSummary`
      */
     def main(args: Array[String]): Unit = {
         // Set up the random number generator utilized by the genetic algorithm
@@ -73,6 +75,11 @@ object OneMax {
                     BooleanChromosome.builder()
                         .withSize(50)
                         .withTrueRate(0.15)
+                        .withExecutor(
+                            AkkaConcurrentConstructor[BooleanGene](
+                                ActorSystem[SequenceActor.Command](SequenceActor(), "concurrent-system")
+                            )
+                        )
                 )
             )
             .withPopulationSize(100)
