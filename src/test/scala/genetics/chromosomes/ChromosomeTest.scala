@@ -1,5 +1,6 @@
 package cl.ravenhill.plascevo
 package genetics.chromosomes
+
 import genetics.genes.{Gene, SimpleGene, simpleGeneGen}
 import matchers.beValid
 
@@ -66,7 +67,48 @@ class ChromosomeTest extends AbstractPlascevoTest {
                 folded should be(expected)
             }
         }
+
+        "can retrieve a gene by index" in {
+            forAll(simpleChromosomeAndGeneAtIndexGen(simpleGeneGen(), Gen.choose(0, 100))) { tuple =>
+                val (chromosome, gene, index) = tuple
+                chromosome(index) should be(gene)
+            }
+        }
     }
 }
 
-private def simpleChromosomeAndGeneAtIndexGen(geneGen: Gen
+/**
+ * Generates a tuple consisting of a `SimpleChromosome`, a `SimpleGene` from that chromosome at a specific index,
+ * and the index of that gene within the chromosome.
+ *
+ * The `simpleChromosomeAndGeneAtIndexGen` function creates a `SimpleChromosome` with a sequence of `SimpleGene`
+ * instances. It ensures that one of the genes in the chromosome is specifically identified and returned as part of the
+ * result, along with its index. This generator can be useful for testing scenarios where you need to verify the
+ * behavior of operations on a specific gene within a chromosome.
+ *
+ * @param geneGen A generator for `SimpleGene` instances, used to populate the chromosome.
+ * @param sizeGen A generator for the size of the chromosome, determining how many genes it will contain.
+ * @return A generator that produces a tuple containing:
+ *         - A `SimpleChromosome` populated with `SimpleGene` instances.
+ *         - The specific `SimpleGene` located at the generated index within the chromosome.
+ *         - The index of the `SimpleGene` within the chromosome.
+ */
+private def simpleChromosomeAndGeneAtIndexGen(
+    geneGen: Gen[SimpleGene],
+    sizeGen: Gen[Int]
+): Gen[(SimpleChromosome, SimpleGene, Int)] = {
+    val genes = ListBuffer.empty[SimpleGene]
+    var geneAtIndex: Option[SimpleGene] = None
+    for {
+        size <- sizeGen
+        index <- Gen.choose(0, size - 1)
+    } yield {
+        for (_ <- 0 until size) {
+            genes += geneGen.sample.get
+            if (index == genes.size - 1) {
+                geneAtIndex = Some(genes.last)
+            }
+        }
+        (SimpleChromosome(genes.toSeq), geneAtIndex.get, index)
+    }
+}
