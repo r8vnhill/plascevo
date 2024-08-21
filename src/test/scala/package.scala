@@ -196,3 +196,20 @@ package object plascevo:
      */
     def randomGen(seed: Gen[Long] = Gen.chooseNum(Long.MinValue, Long.MaxValue)): Gen[Random] =
         seed.map(new Random(_))
+
+    /**
+     * Generates a pair of `Random` instances initialized with the same seed.
+     *
+     * The `rngPairGen` function produces a generator that creates a tuple of two `Random` instances. Both instances are
+     * initialized with the same seed, ensuring that they generate identical sequences of random numbers. This is useful
+     * in scenarios where deterministic behavior is needed, such as in testing or simulations.
+     *
+     * @param seedGen A generator for the seed value used to initialize the `Random` instances.
+     *                Defaults to generating a random seed using the full range of `Long` values.
+     * @return A generator that produces a tuple containing two `Random` instances initialized with the same seed.
+     */
+    def rngPairGen(seedGen: Gen[Long] = Gen.chooseNum(Long.MinValue, Long.MaxValue)): Gen[(Random, Random)] =
+        for
+            seed <- seedGen
+        yield (new Random(seed), new Random(seed))
+

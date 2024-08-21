@@ -23,7 +23,7 @@ import scala.util.Random
  *
  *   override def filter(predicate: Int => Boolean): Seq[Int] = Seq(value).filter(predicate)
  *
- *   override def average(genes: Seq[IntegerGene]): Int = 
+ *   override def average(genes: Seq[IntegerGene]): Int =
  *       if (genes.isEmpty) 0 else genes.map(_.value).sum / genes.size
  *
  *   override def toInt: Int = value
@@ -43,9 +43,9 @@ trait NumericGene[T, G <: NumericGene[T, G]] extends Gene[T, G] with Filterable[
      * @return A new instance of the gene with a mutated value.
      */
     final override def mutate()(using random: Random): G = {
-        var newValue = generator(using random)
+        var newValue = generate(using random)
         while (!predicate(newValue)) {
-            newValue = generator(using random)
+            newValue = generate(using random)
         }
         duplicateWithValue(newValue)
     }

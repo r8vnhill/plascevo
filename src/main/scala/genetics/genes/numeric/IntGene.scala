@@ -1,8 +1,10 @@
 package cl.ravenhill.plascevo
 package genetics.genes.numeric
 
-import mixins.Ranged
+import composerr.constrained
+import composerr.constraints.iterable.BeEmpty
 
+import java.util.Objects
 import scala.util.Random
 
 /** Represents a gene with an integer value in an evolutionary algorithm.
@@ -12,9 +14,9 @@ import scala.util.Random
  * that can be used to enforce constraints on the gene's value. It supports operations such as mutation, averaging, and
  * conversion to different numeric types.
  *
- * @param value The integer value stored by the gene.
- * @param range The inclusive range within which the gene's value is allowed to vary. The default range is from
- *              `Int.MinValue` to `Int.MaxValue`.
+ * @param value     The integer value stored by the gene.
+ * @param range     The inclusive range within which the gene's value is allowed to vary. The default range is from
+ *                  `Int.MinValue` to `Int.MaxValue`.
  * @param predicate A function that determines whether a generated or mutated value is acceptable. The default predicate
  *                  always returns `true`, allowing any value within the specified range.
  * @example
@@ -33,8 +35,6 @@ case class IntGene(
         true
     }
 ) extends NumericGene[Int, IntGene] {
-    
-    require(range._1 < range._2, "The lower bound of the range must be less than the upper bound.")
 
     /** Creates a new `IntGene` with the specified value.
      *
@@ -57,7 +57,7 @@ case class IntGene(
      * @param random An implicit random number generator used to produce the value.
      * @return A randomly generated integer value within the gene's range.
      */
-    override def generator(using random: Random): Int = random.nextInt(range._2 - range._1) + range._1
+    override def generate(using random: Random): Int = random.between(range._1, range._2)
 
     /** Calculates the average value of a sequence of `IntGene` instances.
      *
@@ -70,7 +70,11 @@ case class IntGene(
      * @throws IllegalArgumentException if the sequence of genes is empty.
      */
     override def average(genes: Seq[IntGene]): IntGene = {
-        require(genes.nonEmpty, "Cannot calculate the average of an empty sequence of genes.")
+        constrained {
+            "Cannot calculate the average of an empty sequence of genes." | {
+                genes mustNot BeEmpty()
+            }
+        }
         duplicateWithValue(
             genes.foldLeft(value.toDouble / (genes.size + 1)) { case (acc, gene) =>
                 acc + gene.toDouble / (genes.size + 1)
@@ -94,4 +98,23 @@ case class IntGene(
      * @return The double representation of the gene's value.
      */
     override def toDouble: Double = value.toDouble
+
+    /**
+     * Compares this IntGene object with the specified object for equality.
+     *
+     * @param obj The object to be compared for equality.
+     * @return true if the specified object is an instance of IntGene and has the same value, false otherwise.
+     */
+    override def equals(obj: Any): Boolean = obj match {
+        case other: IntGene => value == other.value
+        case _ => false
+    }
+
+    /**
+     * Returns the hash code value for this IntGene object.
+     * The hash code is computed based on the class of the object and its value.
+     *
+     * @return the hash code value for this IntGene object
+     */
+    override def hashCode(): Int = Objects.hash(classOf[IntGene], value)
 }

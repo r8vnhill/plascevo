@@ -38,7 +38,7 @@ trait Gene[T, G <: Gene[T, G]] extends Feature[T, G] {
      * @param random An implicit random number generator.
      * @return A new value of type `T` generated randomly.
      */
-    def generator(using random: Random): T
+    def generate(using random: Random): T
 
     /** Mutates the gene by generating a new value and returning a new instance with this value.
      *
@@ -48,7 +48,7 @@ trait Gene[T, G <: Gene[T, G]] extends Feature[T, G] {
      * @param random An implicit random number generator.
      * @return A new instance of the gene with a mutated value.
      */
-    def mutate()(using random: Random): G = duplicateWithValue(generator(using random))
+    def mutate()(using random: Random): G = duplicateWithValue(generate(using random))
 
     /** Flattens the gene into a sequence containing its value.
      *

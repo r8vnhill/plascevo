@@ -87,7 +87,7 @@ class SimpleNumericGene(override val value: Int)(override val predicate: Int => 
      * @param random The random number generator to use for generating the integer.
      * @return The generated random integer.
      */
-    override def generator(using random: Random): Int = {
+    override def generate(using random: Random): Int = {
         increased += 15
         value + increased
     }
