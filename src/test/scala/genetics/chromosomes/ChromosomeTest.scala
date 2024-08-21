@@ -1,6 +1,5 @@
 package cl.ravenhill.plascevo
 package genetics.chromosomes
-
 import genetics.genes.{Gene, SimpleGene, simpleGeneGen}
 import matchers.beValid
 
@@ -8,7 +7,7 @@ import org.scalacheck.{Arbitrary, Gen}
 
 import scala.collection.mutable.ListBuffer
 
-class ChromosomeTest extends AbstractPlascevoTest:
+class ChromosomeTest extends AbstractPlascevoTest {
     "A Chromosome" - {
         "should have a size property that" - {
             "returns the number of genes in the chromosome" in {
@@ -68,3 +67,6 @@ class ChromosomeTest extends AbstractPlascevoTest:
             }
         }
     }
+}
+
+private def simpleChromosomeAndGeneAtIndexGen(geneGen: Gen
