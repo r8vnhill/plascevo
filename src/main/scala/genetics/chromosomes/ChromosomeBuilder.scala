@@ -3,7 +3,10 @@ package genetics.chromosomes
 
 import genetics.genes.Gene
 
+import cl.ravenhill.plascevo.composerr.constrained
 import cl.ravenhill.plascevo.evolution.executors.construction.{ConstructorExecutor, SequentialConstructor}
+import cl.ravenhill.plascevo.exceptions.InvalidSizeException
+import constraints.ints.BeNegative
 
 import scala.util.Random
 
@@ -84,6 +87,9 @@ trait ChromosomeBuilder[T, G <: Gene[T, G]] {
      * @return The builder instance with the updated size.
      */
     def withSize(size: Int): this.type = {
+        constrained {
+            "Chromosome size must be a non-negative integer." ~ (size mustNot BeNegative, InvalidSizeException(_))
+        }
         _size = Some(size)
         this
     }

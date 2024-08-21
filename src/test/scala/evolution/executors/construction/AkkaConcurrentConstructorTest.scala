@@ -41,7 +41,7 @@ class AkkaConcurrentConstructorTest extends AbstractPlascevoTest {
         "concurrently generate elements in the sequence" in {
             val size = 100
             val constructor = new AkkaConcurrentConstructor[Int](system)
-            val init = (index: Int) => Random.nextInt()
+            val init = (* : Int) => Random.nextInt()
 
             val result = constructor(size, init)
 
