@@ -8,6 +8,10 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/composerr" />
+            <option value="$PROJECT_DIR$/examples" />
+            <option value="$PROJECT_DIR$/plascevo-core" />
+            <option value="$PROJECT_DIR$/plascevo-genetics" />
             <option value="$PROJECT_DIR$/project" />
           </set>
         </option>

@@ -2,16 +2,48 @@ ThisBuild / version := "0.1.0-SNAPSHOT"
 
 ThisBuild / scalaVersion := "3.5.0"
 
-lazy val root = (project in file("."))
+lazy val composerr = (project in file("composerr"))
     .settings(
         name := "plascevo",
-        idePackagePrefix := Some("cl.ravenhill.plascevo")
+        idePackagePrefix := Some("cl.ravenhill.composerr"),
+        libraryDependencies ++= Seq(
+            "org.scalactic" %% "scalactic" % "3.2.19",
+            "org.scalatest" %% "scalatest" % "3.2.19" % "test",
+            "org.scalatestplus" %% "scalacheck-1-18" % "3.2.19.0" % "test"
+        )
     )
 
-libraryDependencies += "org.scalactic" %% "scalactic" % "3.2.19"
-libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.19" % "test"
-libraryDependencies += "org.scalatestplus" %% "scalacheck-1-18" % "3.2.19.0" % "test"
-libraryDependencies += "org.jfree" % "jfreechart" % "1.5.5"
-libraryDependencies += "com.typesafe.akka" %% "akka-actor-typed" % "2.8.5"
-libraryDependencies += "com.typesafe.akka" %% "akka-stream" % "2.8.5"
-libraryDependencies += "ch.qos.logback" % "logback-classic" % "1.5.7"
+lazy val plascevoCore = (project in file("plascevo-core"))
+    .settings(
+        name := "plascevo",
+        idePackagePrefix := Some("cl.ravenhill.plascevo"),
+        libraryDependencies ++= Seq(
+            "org.scalactic" %% "scalactic" % "3.2.19",
+            "org.scalatest" %% "scalatest" % "3.2.19" % "test",
+            "org.scalatestplus" %% "scalacheck-1-18" % "3.2.19.0" % "test",
+            "org.jfree" % "jfreechart" % "1.5.5",
+            "com.typesafe.akka" %% "akka-actor-typed" % "2.8.5",
+            "com.typesafe.akka" %% "akka-stream" % "2.8.5",
+            "ch.qos.logback" % "logback-classic" % "1.5.7"
+        )
+    )
+    .dependsOn(composerr)
+
+lazy val plascevoGenetics = (project in file("plascevo-genetics"))
+    .settings(
+        name := "plascevo",
+        idePackagePrefix := Some("cl.ravenhill.plascevo"),
+        libraryDependencies ++= Seq(
+            "org.scalactic" %% "scalactic" % "3.2.19",
+            "org.scalatest" %% "scalatest" % "3.2.19" % "test",
+            "org.scalatestplus" %% "scalacheck-1-18" % "3.2.19.0" % "test",
+        )
+    )
+    .dependsOn(plascevoCore)
+
+lazy val examples = (project in file("examples"))
+    .settings(
+        name := "plascevo",
+        idePackagePrefix := Some("cl.ravenhill.plascevo"),
+    )
+    .dependsOn(plascevoGenetics)
