@@ -3,7 +3,6 @@ package genetics.chromosomes
 
 import genetics.genes.numeric.{DoubleGene, doubleGeneGen}
 
-import cl.ravenhill.plascevo.genetics.chromosomes.numeric.DoubleChromosome
 import org.scalacheck.Gen
 
 import scala.collection.mutable.ListBuffer

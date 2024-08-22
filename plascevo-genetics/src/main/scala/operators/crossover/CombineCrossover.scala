@@ -1,10 +1,16 @@
-package cl.ravenhill.plascevo
-package operators.alteration.crossover
+/*
+ * Copyright (c) 2024, Ignacio Slater M.
+ * 2-Clause BSD License.
+ */
 
-import genetics.chromosomes.Chromosome
-import genetics.genes.Gene
+package cl.ravenhill.plascevo
+package operators.crossover
+
 import utils.Exclusivity
 import utils.Exclusivity.NonExclusive
+
+import cl.ravenhill.plascevo.genetics.chromosomes.Chromosome
+import cl.ravenhill.plascevo.genetics.genes.Gene
 
 import scala.util.Random
 

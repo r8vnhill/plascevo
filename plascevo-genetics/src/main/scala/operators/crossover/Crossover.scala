@@ -1,12 +1,18 @@
+/*
+ * Copyright (c) 2024, Ignacio Slater M.
+ * 2-Clause BSD License.
+ */
+
 package cl.ravenhill.plascevo
-package operators.alteration.crossover
+package operators.crossover
 
 import evolution.states.EvolutionState
-import genetics.Genotype
-import genetics.chromosomes.Chromosome
-import genetics.genes.Gene
 import operators.alteration.Alterer
 import utils.{Exclusivity, pIndices, subsets}
+
+import cl.ravenhill.plascevo.genetics.Genotype
+import cl.ravenhill.plascevo.genetics.chromosomes.Chromosome
+import cl.ravenhill.plascevo.genetics.genes.Gene
 
 import scala.collection.mutable.ListBuffer
 import scala.util.Random

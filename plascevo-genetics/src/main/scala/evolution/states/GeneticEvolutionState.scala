@@ -1,10 +1,14 @@
+/*
+ * Copyright (c) 2024, Ignacio Slater M.
+ * 2-Clause BSD License.
+ */
+
 package cl.ravenhill.plascevo
 package evolution.states
 
 import genetics.Genotype
-
-import cl.ravenhill.plascevo.genetics.genes.Gene
-import cl.ravenhill.plascevo.ranking.IndividualRanker
+import genetics.genes.Gene
+import ranking.IndividualRanker
 
 /** A case class that represents the state of a genetic algorithm's evolution at a specific generation.
  *

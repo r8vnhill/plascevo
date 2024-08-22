@@ -1,8 +1,14 @@
+/*
+ * Copyright (c) 2024, Ignacio Slater M.
+ * 2-Clause BSD License.
+ */
+
 package cl.ravenhill.plascevo
 package genetics
 
 import genetics.genes.{Gene, SimpleGene, simpleGeneGen}
 
+import cl.ravenhill.plascevo.genetics.chromosomes.Chromosome
 import org.scalacheck.{Arbitrary, Gen}
 
 import scala.collection.mutable.ListBuffer

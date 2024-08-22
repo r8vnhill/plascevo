@@ -13,11 +13,11 @@ import genetics.genes.BooleanGene
 import limits.{MaxGenerations, TargetFitness}
 import listeners.plotter.EvolutionPlotter
 import listeners.summary.EvolutionSummary
-import operators.alteration.crossover.UniformCrossover
-import operators.alteration.mutation.BitFlipMutator
 import operators.selection.{RouletteWheelSelector, TournamentSelector}
 
 import akka.actor.typed.ActorSystem
+import cl.ravenhill.plascevo.operators.crossover.UniformCrossover
+import cl.ravenhill.plascevo.operators.mutation.BitFlipMutator
 
 import scala.util.Random
 

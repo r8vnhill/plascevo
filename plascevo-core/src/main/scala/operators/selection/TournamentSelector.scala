@@ -1,26 +1,25 @@
 package cl.ravenhill.plascevo
 package operators.selection
 
-import genetics.genes.Gene
 import ranking.IndividualRanker
-import repr.Representation
+import repr.{Feature, Representation}
 
 import scala.util.Random
 
-/** A selector that implements tournament selection in a genetic or evolutionary algorithm.
+/** A selector that implements tournament selection in an evolutionary or evolutionary algorithm.
  *
  * The `TournamentSelector` class extends the `Selector` trait and implements a tournament-based selection strategy. In
  * each tournament, a subset of individuals is randomly selected from the population, and the best individual according
  * to the provided ranker is chosen. This process is repeated until the desired number of individuals is selected.
  *
  * @param tournamentSize The number of individuals participating in each tournament. Must be greater than 0.
- * @tparam T The type of value stored by the gene.
- * @tparam G The type of gene that the individuals' representations hold, which must extend [[Gene]].
+ * @tparam T The type of value stored by the feature.
+ * @tparam F The type of feature that the individuals' representations hold, which must extend [[Feature]].
  * @tparam R The type of representation used by the individual, which must extend [[Representation]].
  */
-case class TournamentSelector[T, G <: Gene[T, G], R <: Representation[T, G]](
+case class TournamentSelector[T, F <: Feature[T, F], R <: Representation[T, F]](
     tournamentSize: Int = TournamentSelector.defaultTournamentSize
-) extends Selector[T, G, R] {
+) extends Selector[T, F, R] {
     require(tournamentSize > 0, "Tournament size must be greater than 0.")
 
     /** Selects a subset of individuals from the population using tournament selection.
@@ -35,13 +34,13 @@ case class TournamentSelector[T, G <: Gene[T, G], R <: Representation[T, G]](
      * @return A sequence of selected individuals.
      */
     override def select(
-        population: Population[T, G, R],
+        population: Population[T, F, R],
         count: Int,
-        ranker: IndividualRanker[T, G, R]
-    )(using random: Random, equalityThreshold: Double): Seq[Individual[T, G, R]] = {
+        ranker: IndividualRanker[T, F, R]
+    )(using random: Random, equalityThreshold: Double): Seq[Individual[T, F, R]] = {
         (0 until count).map { _ =>
             // Initialize variables for the tournament selection
-            var maxIndividual: Option[Individual[T, G, R]] = None
+            var maxIndividual: Option[Individual[T, F, R]] = None
 
             // Iterate through the individuals in the tournament
             val selectedIndividuals = Iterator.continually(population(random.nextInt(population.size)))
