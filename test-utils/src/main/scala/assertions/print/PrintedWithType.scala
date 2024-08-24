@@ -16,11 +16,11 @@ package assertions.print
  * @param value    The string representation of the value.
  * @param typeInfo The string representation of the type information associated with the value.
  */
-final case class PrintedWithType(value: String, typeInfo: String)
+final case class PrintedWithType(value: Option[Any], typeInfo: String)
 
 object PrintedWithType {
 
-    extension (value: String) {
+    extension (value: Option[Any]) {
         /**
          * Extension method to convert a `String` value into a `Printed` instance.
          *

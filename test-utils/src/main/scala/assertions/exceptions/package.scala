@@ -42,4 +42,31 @@ package object exceptions {
             // cause.
             case _: Throwable => ComparisonFailException(message, expected, actual, loc, None)
         }
+
+    /**
+     * Creates an `AssertionError` with an optional cause, handling potential issues with the cause's stack trace.
+     *
+     * The `createComparisonFailException` method attempts to create an `AssertionError` with a specified message and an 
+     * optional cause. It includes a safeguard against potential errors that might occur when trying to access the 
+     * stack trace of the cause. If accessing the stack trace throws an exception, the method falls back to creating 
+     * an `AssertionError` without a cause.
+     *
+     * @param message The error message to be included in the `AssertionError`.
+     * @param cause   An optional `Throwable` that caused this exception. If provided, it will be set as the cause of
+     *                the `AssertionError`. If `None` is provided, the `AssertionError` will have no cause.
+     * @return An `AssertionError` with the specified message and, if possible, the provided cause.
+     * @throws AssertionError If an error occurs while processing the cause, an `AssertionError` without a cause is
+     *                        created.
+     */
+    def createComparisonFailException(
+        message: String,
+        cause: Option[Throwable]
+    ): AssertionError = try {
+        // Attempt to access the stack trace to prevent exceptions later in the AssertionError constructor
+        cause.map(_.getStackTrace)
+        new AssertionError(message, cause.orNull)
+    } catch {
+        // If accessing the stack trace causes an exception, create an AssertionError without a cause
+        case _: Throwable => new AssertionError(message)
+    }
 }

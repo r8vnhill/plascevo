@@ -14,4 +14,4 @@ package assertions.print
  *
  * @param value The string value representing the printed content.
  */
-case class Printed(value: String)
+case class Printed(value: Option[Any])

@@ -19,18 +19,18 @@ trait ComparableMatcherResult extends MatcherResult {
      * This method returns the value that was actually produced or encountered during the test. It is used to provide
      * context when a test fails, showing what the test produced versus what was expected.
      *
-     * @return The actual value as a string.
+     * @return The actual value as an `Option`.
      */
-    def actual: String
+    def actual: Option[Any]
 
     /** The expected value that the test was comparing against.
      *
      * This method returns the value that was expected in the test. It is used in conjunction with `actual` to provide a
      * clear comparison between what was expected and what was actually produced.
      *
-     * @return The expected value as a string.
+     * @return The expected value as an `Option`.
      */
-    def expected: String
+    def expected: Option[Any]
 }
 
 /** Companion object for `ComparableMatcherResult` providing factory and extractor methods.
@@ -57,8 +57,8 @@ object ComparableMatcherResult {
         testPassed: Boolean,
         lazyFailureMessage: => String,
         lazyNegatedFailureMessage: => String,
-        actualValue: String,
-        expectedValue: String
+        actualValue: Option[Any],
+        expectedValue: Option[Any]
     ): ComparableMatcherResult = new ComparableMatcherResult {
         override def passed(): Boolean = testPassed
 
@@ -66,9 +66,9 @@ object ComparableMatcherResult {
 
         override def negatedFailureMessage(): String = lazyNegatedFailureMessage
 
-        override def actual: String = actualValue
+        override def actual: Option[Any] = actualValue
 
-        override def expected: String = expectedValue
+        override def expected: Option[Any] = expectedValue
     }
 
     /** Extracts the components of a `ComparableMatcherResult`.
@@ -79,7 +79,7 @@ object ComparableMatcherResult {
      * @param result The `ComparableMatcherResult` instance to deconstruct.
      * @return An `Option` containing a tuple of the test outcome, failure messages, and the actual and expected values.
      */
-    def unapply(result: ComparableMatcherResult): Option[(Boolean, String, String, String, String)] = {
+    def unapply(result: ComparableMatcherResult): Option[(Boolean, String, String, Option[Any], Option[Any])] = {
         Some((result.passed(), result.failureMessage(), result.negatedFailureMessage(), result.actual, result.expected))
     }
 }
