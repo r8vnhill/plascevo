@@ -13,6 +13,7 @@
             <option value="$PROJECT_DIR$/plascevo-core" />
             <option value="$PROJECT_DIR$/plascevo-genetics" />
             <option value="$PROJECT_DIR$/project" />
+            <option value="$PROJECT_DIR$/test-utils" />
           </set>
         </option>
         <option name="sbtVersion" value="1.10.1" />

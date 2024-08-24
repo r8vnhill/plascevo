@@ -6,9 +6,10 @@
 package cl.ravenhill.plascevo
 package genetics
 
+import genetics.chromosomes.Chromosome
+import genetics.genes.numeric.SimpleNumericGene
 import genetics.genes.{Gene, SimpleGene, simpleGeneGen}
 
-import cl.ravenhill.plascevo.genetics.chromosomes.Chromosome
 import org.scalacheck.{Arbitrary, Gen}
 
 import scala.collection.mutable.ListBuffer
@@ -87,9 +88,43 @@ package object chromosomes {
             genes += simpleGeneGen(Gen.const(false)).sample.get
             SimpleChromosome(genes.toSeq)
         }
-    
+
     /** Represents a simple chromosome for testing purposes. */
     case class SimpleChromosome(override val genes: Seq[SimpleGene]) extends Chromosome[Int, SimpleGene] {
         override def duplicateWithGenes(genes: Seq[SimpleGene]): Chromosome[Int, SimpleGene] = SimpleChromosome(genes)
+    }
+
+    /**
+     * A simple implementation of a numeric chromosome.
+     *
+     * The `SimpleNumericChromosome` class extends the `Chromosome` trait, providing a basic implementation for
+     * chromosomes that consist of a sequence of `SimpleNumericGene` instances. Each chromosome is represented by a
+     * sequence of genes,
+     * where each gene holds an integer value.
+     *
+     * This class is used in evolutionary algorithms where chromosomes represent potential solutions, and the genes within
+     * the chromosome represent the variables of the solution. The class provides functionality to duplicate the chromosome
+     * with a different set of genes.
+     *
+     * @param genes The sequence of `SimpleNumericGene` instances that make up the chromosome. Each gene in the sequence
+     *              represents a component of the solution.
+     */
+    final case class SimpleNumericChromosome(
+        override val genes: Seq[SimpleNumericGene]
+    ) extends Chromosome[Int, SimpleNumericGene] {
+
+        /**
+         * Creates a duplicate of this chromosome with the specified sequence of genes.
+         *
+         * The `duplicateWithGenes` method allows for creating a new instance of `SimpleNumericChromosome` with a different
+         * sequence of genes while retaining the same structure and type. This method is typically used in genetic
+         * operations where chromosomes need to be altered or combined.
+         *
+         * @param genes The new sequence of `SimpleNumericGene` instances to be used in the duplicated chromosome.
+         * @return A new `SimpleNumericChromosome` instance containing the specified sequence of genes.
+         */
+        override def duplicateWithGenes(
+            genes: Seq[SimpleNumericGene]
+        ): SimpleNumericChromosome = SimpleNumericChromosome(genes)
     }
 }

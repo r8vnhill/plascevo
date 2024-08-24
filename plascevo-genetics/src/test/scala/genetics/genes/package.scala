@@ -7,6 +7,7 @@ package cl.ravenhill.plascevo
 package genetics
 
 import cl.ravenhill.plascevo.genetics.genes.Gene
+import cl.ravenhill.plascevo.genetics.genes.numeric.NumericGene
 import org.scalacheck.{Arbitrary, Gen}
 
 import scala.util.Random

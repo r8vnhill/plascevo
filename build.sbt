@@ -13,6 +13,16 @@ lazy val composerr = (project in file("composerr"))
         )
     )
 
+lazy val testUtils = (project in file("test-utils"))
+    .settings(
+        name := "plascevo",
+        idePackagePrefix := Some("cl.ravenhill.plascevo"),
+        libraryDependencies ++= Seq(
+            "org.scalameta" %% "munit" % "1.0.0",
+        )
+    )
+    .dependsOn(composerr)
+
 lazy val plascevoCore = (project in file("plascevo-core"))
     .settings(
         name := "plascevo",
@@ -24,10 +34,12 @@ lazy val plascevoCore = (project in file("plascevo-core"))
             "org.jfree" % "jfreechart" % "1.5.5",
             "com.typesafe.akka" %% "akka-actor-typed" % "2.8.5",
             "com.typesafe.akka" %% "akka-stream" % "2.8.5",
-            "ch.qos.logback" % "logback-classic" % "1.5.7"
+            "ch.qos.logback" % "logback-classic" % "1.5.7",
+            "org.scalameta" %% "munit" % "1.0.0" % "test",
         )
     )
     .dependsOn(composerr)
+    .dependsOn(testUtils % "test->test")
 
 lazy val plascevoGenetics = (project in file("plascevo-genetics"))
     .settings(

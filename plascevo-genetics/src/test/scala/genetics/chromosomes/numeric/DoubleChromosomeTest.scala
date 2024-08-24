@@ -1,5 +1,10 @@
+/*
+ * Copyright (c) 2024, Ignacio Slater M.
+ * 2-Clause BSD License.
+ */
+
 package cl.ravenhill.plascevo
-package genetics.chromosomes
+package genetics.chromosomes.numeric
 
 import genetics.genes.numeric.{DoubleGene, doubleGeneGen}
 

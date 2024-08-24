@@ -1,3 +1,8 @@
+/*
+ * Copyright (c) 2024, Ignacio Slater M.
+ * 2-Clause BSD License.
+ */
+
 package cl.ravenhill.plascevo
 package genetics.chromosomes
 
@@ -59,7 +64,7 @@ trait ChromosomeBuilder[T, G <: Gene[T, G]] {
      * @param executor The `ConstructorExecutor` to be used for generating genes.
      * @return The builder instance with the updated executor.
      */
-    def withExecutor(executor: ConstructorExecutor[G]): this.type = {
+    final def withExecutor(executor: ConstructorExecutor[G]): this.type = {
         _executor = executor
         this
     }
