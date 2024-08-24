@@ -6,11 +6,11 @@
 package cl.ravenhill.plascevo
 package matchers
 
-import assertions.IntelliJFormatter.intellijFormatError
+import assertions.IntelliJFormatter.{intelliJFormatErrorWithType, intelliJFormatError}
 import assertions.exceptions.{ComparisonFailException, createComparisonFailException}
 import assertions.print.Printed
 import assertions.print.PrintedWithType.printed
-import assertions.{Actual, Expected, clueContextAsString, errorCollector}
+import assertions.*
 
 import munit.{Assertions, Clues, FailException, Location}
 
@@ -22,37 +22,37 @@ import munit.{Assertions, Clues, FailException, Location}
  * particularly in scenarios where detailed error reporting and context clues are essential.
  */
 object ApplyMatcher extends Assertions {
-    
+
     /** Applies a matcher to a value and handles any resulting failures.
      *
      * The `apply` method evaluates a given value `t` against a specified matcher, producing a `MatcherResult`.
      * Depending on the result, it handles potential comparison or matching failures by invoking the appropriate error
      * handling functions.
      *
-     * @param t The value of type `T` to be tested against the matcher.
+     * @param t       The value of type `T` to be tested against the matcher.
      * @param matcher The `Matcher[T]` instance used to evaluate the value `t`.
      * @tparam T The type of the value being tested.
      * @return The `MatcherResult` produced by testing the value `t` with the matcher.
-     *
-     * @throws CompositeException If an error is collected during the comparison or matching, depending on the error 
-     *         collection mode.
-     * @throws Throwable If the error collection mode is hard, the failure is thrown immediately.
+     * @throws CompositeException If an error is collected during the comparison or matching, depending on the error
+     *                            collection mode.
+     * @throws Throwable          If the error collection mode is hard, the failure is thrown immediately.
      */
     def apply[T](t: T, matcher: Matcher[T]): MatcherResult = {
-        val result = matcher.test(t)
+        val result = matcher.apply(t)
 
-        result match {
-            case ComparableMatcherResult(true, failureMessage, _, actual, expected) =>
+        (result.passed(), result) match {
+            case (false, ComparableMatcherResult(true, failureMessage, _, actual, expected)) =>
                 handleComparisonFailure(failureMessage, actual, expected)
 
-            case EqualityMatcherResult(true, actual, expected, failureMessage, _) => 
+            case (false, EqualityMatcherResult(true, actual, expected, failureMessage, _)) =>
                 handleComparisonFailure(failureMessage, actual, expected)
 
-            case MatcherResultWithError(cause, true, failureMessage, _) =>
+            case (false, MatcherResultWithError(cause, true, failureMessage, _)) =>
                 handleErrorWithCause(cause, failureMessage)
 
-            case _ =>
+            case (false, _) =>
                 handleGenericFailure(result.failureMessage())
+            case _ =>
         }
 
         result
@@ -60,16 +60,16 @@ object ApplyMatcher extends Assertions {
 
     /** Handles a comparison failure by creating and throwing or collecting an appropriate error.
      *
-     * The `handleComparisonFailure` method is used to manage situations where a comparison between expected and actual 
+     * The `handleComparisonFailure` method is used to manage situations where a comparison between expected and actual
      * values fails. It constructs an error message incorporating the failure message, the actual value, and the
      * expected value, and then processes the error based on the current error collection mode.
      *
      * @param failureMessage A message describing the nature of the comparison failure. This message will be included in
      *                       the final error message.
-     * @param actual The actual value obtained during the comparison, represented as an `Option[Any]`.
-     * @param expected The expected value against which the actual value was compared, represented as an `Option[Any]`.
-     * @param loc The location where the failure occurred, implicitly provided. This is used to annotate the failure
-     *            with the specific location in the code where the comparison failure happened.
+     * @param actual         The actual value obtained during the comparison, represented as an `Option[Any]`.
+     * @param expected       The expected value against which the actual value was compared, represented as an `Option[Any]`.
+     * @param loc            The location where the failure occurred, implicitly provided. This is used to annotate the failure
+     *                       with the specific location in the code where the comparison failure happened.
      */
     private def handleComparisonFailure(
         failureMessage: String,
@@ -92,12 +92,12 @@ object ApplyMatcher extends Assertions {
      * failure message. The resulting error is then either collected or thrown based on the current error collection
      * mode.
      *
-     * @param cause An optional `Throwable` representing the cause of the failure. If provided, this will be used as the
-     *              error to be handled.
+     * @param cause          An optional `Throwable` representing the cause of the failure. If provided, this will be used as the
+     *                       error to be handled.
      * @param failureMessage The message describing the failure, used to create a new failure if the cause is not
      *                       provided.
-     * @param loc The location where the failure occurred, implicitly provided. This is used to annotate the failure
-     *            with the specific location in the code where the error happened.
+     * @param loc            The location where the failure occurred, implicitly provided. This is used to annotate the failure
+     *                       with the specific location in the code where the error happened.
      */
     private def handleErrorWithCause(
         cause: Option[Throwable],
@@ -114,13 +114,13 @@ object ApplyMatcher extends Assertions {
      * either collects or throws it based on the current error collection mode.
      *
      * @param failureMessage The message describing the failure.
-     * @param loc The location where the failure occurred, implicitly provided. This is used to annotate the failure with
-     *            the specific location in the code where the error happened.
+     * @param loc            The location where the failure occurred, implicitly provided. This is used to annotate the failure with
+     *                       the specific location in the code where the error happened.
      */
     private def handleGenericFailure(failureMessage: String)(using loc: Location): Unit = {
         errorCollector.collectOrThrow(failure(failureMessage))
     }
-    
+
     /**
      * Creates and returns a `Throwable` representing a comparison failure between an expected and actual value.
      *
@@ -141,7 +141,7 @@ object ApplyMatcher extends Assertions {
     def fail(expected: Expected, actual: Actual, prependedMessage: String)
         (using loc: Location): Throwable = {
         createComparisonFailException(
-            message = prependedMessage + clueContextAsString + intellijFormatError(expected, actual),
+            message = prependedMessage + clueContextAsString + intelliJFormatError(expected, actual),
             cause = None,
             expected = expected,
             actual = actual,
@@ -180,4 +180,26 @@ object ApplyMatcher extends Assertions {
             message = clueContextAsString + message,
             cause = cause
         )
+
+    def failureWithTypeInformation(
+        expected: ExpectedWithType,
+        actual: ActualWithType,
+        prependMessage: String = ""
+    )(using loc: Location): Throwable = {
+        if (actual.value.typeInfo == expected.value.typeInfo) {
+            createComparisonFailException(
+                prependMessage + clueContextAsString + intelliJFormatError(expected.toExpected, actual.toActual),
+                None,
+                expected.toExpected,
+                actual.toActual
+            )
+        } else {
+            createComparisonFailException(
+                message = prependMessage + clueContextAsString + intelliJFormatErrorWithType(expected, actual),
+                cause = None,
+                expected = expected.toExpected,
+                actual = actual.toActual
+            )
+        }
+    }
 }

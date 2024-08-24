@@ -5,10 +5,13 @@
 
 package cl.ravenhill.plascevo
 
+import matchers.ShouldMatchers
+
 import munit.FunSuite
 
-class MunitTest extends FunSuite {
+class MunitTest extends FunSuite with ShouldMatchers {
     test("A test") {
-        assert(1 == 1)
+        assertEquals(1, 2)
+        2 shouldBe 1
     }
 }

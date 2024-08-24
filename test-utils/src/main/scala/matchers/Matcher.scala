@@ -25,7 +25,7 @@ trait Matcher[-T] {
      * @param value The value to be tested by the matcher.
      * @return A `MatcherResult` representing the outcome of the test.
      */
-    def test(value: T): MatcherResult
+    def apply(value: T): MatcherResult
 
     /** Transforms the input type of the matcher using a function, enabling the matcher to be applied to different types.
      *
@@ -42,7 +42,7 @@ trait Matcher[-T] {
      * val stringLengthMatcher: Matcher[String] = intMatcher.contraMap(_.length)
      * }}}
      */
-    infix def contraMap[U](f: U => T): Matcher[U] = (value: U) => test(f(value))
+    infix def contraMap[U](f: U => T): Matcher[U] = (value: U) => apply(f(value))
 
     /** Inverts the result of the matcher, turning a pass into a fail and vice versa.
      *
@@ -58,7 +58,7 @@ trait Matcher[-T] {
      * }}}
      */
     def invert: Matcher[T] = (value: T) => {
-        test(value).tap { result =>
+        apply(value).tap { result =>
             MatcherResult(
                 !result.passed(),
                 result.failureMessage(),

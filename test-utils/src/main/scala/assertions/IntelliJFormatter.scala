@@ -34,7 +34,7 @@ object IntelliJFormatter {
      * // errorMessage: String = "expected:<foo> but was:<bar>"
      * }}}
      */
-    def intellijFormatError(
+    def intelliJFormatError(
         expected: Expected,
         actual: Actual
     ): String = s"expected:<${expected.value.value}> but was:<${actual.value.value}>"
