@@ -28,7 +28,7 @@ trait ShouldMatchers {
          * @param expected The expected value or a `Matcher` that the `actual` value should satisfy.
          */
         infix def shouldBe(expected: A): Unit = expected match
-            case matcher: Matcher[?] => ApplyMatcher(actual, matcher)
+            case matcher: Matcher[?] => ApplyMatcher(actual, matcher.asInstanceOf[Matcher[A]])
             case _ => actual should be(expected)
 
         /** Creates a matcher to compare the actual value with the expected value.

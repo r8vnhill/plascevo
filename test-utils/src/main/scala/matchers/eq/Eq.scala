@@ -8,8 +8,8 @@ package matchers.eq
 
 import assertions.print.Print.print
 import matchers.ApplyMatcher
-import matchers.eq.EqualityMatcher.{NumberEquality, equal}
 import matchers.eq.EqualityMatcher.NumberEquality.NonStrict
+import matchers.eq.EqualityMatcher.{NumberEquality, equal}
 
 import munit.Assertions
 
@@ -20,7 +20,7 @@ import munit.Assertions
  *
  * @tparam T The type of values that this equality check is intended for.
  */
-trait Eq[-T] {
+trait Eq[T] {
 
     /** Compares two values of type `T` for equality.
      *
@@ -34,7 +34,8 @@ trait Eq[-T] {
      * @return An `Option[Throwable]` that is `None` if the values are considered equal, or `Some(Throwable)` containing
      *         an error if they are not equal.
      */
-    def equals(actual: T, expected: T, strictNumberEq: NumberEquality = NonStrict): Option[Throwable]
+    def equals(actual: T, expected: T)
+        (using strictNumberEq: NumberEquality = NonStrict): Option[Throwable]
 }
 
 /** Object representing equality checks for values that may be `null`.
@@ -46,7 +47,7 @@ trait Eq[-T] {
  * This implementation is used to ensure that special cases involving `null` are handled gracefully, and that
  * meaningful error messages are generated when comparisons fail due to `null` values.
  */
-object NullEq extends Eq[Any | Null] {
+object NullEq extends Eq[Any] {
 
     /** Compares two values for equality, handling `null` values.
      *
@@ -56,13 +57,13 @@ object NullEq extends Eq[Any | Null] {
      * an `Option`. If neither value is `null`, but they are not equal, the method returns an
      * `IllegalArgumentException`.
      *
-     * @param actual The actual value to be compared, which may be `null`.
-     * @param expected The expected value to be compared, which may be `null`.
+     * @param actual         The actual value to be compared, which may be `null`.
+     * @param expected       The expected value to be compared, which may be `null`.
      * @param strictNumberEq A flag indicating whether strict number equality should be enforced. This parameter is
      *                       ignored in this implementation.
      * @return An `Option[Throwable]` containing an error if the comparison fails, or `None` if the values are equal.
      */
-    override def equals(actual: Any | Null, expected: Any | Null, strictNumberEq: NumberEquality): Option[Throwable] = {
+    override def equals(actual: Any, expected: Any)(using strictNumberEq: NumberEquality): Option[Throwable] = {
         (actual, expected) match {
             case (null, null) => None
             case (null, _) => Some(actualIsNull(expected))
@@ -82,7 +83,7 @@ object NullEq extends Eq[Any | Null] {
      * @param expected The expected value, which was not `null`.
      * @return An `AssertionError` indicating that the actual value was `null`.
      */
-    private def actualIsNull(expected: Any | Null): AssertionError =
+    private def actualIsNull(expected: Any): AssertionError =
         ApplyMatcher.fail(s"Expected ${expected.print.value} but actual was null")
 
     /** Creates an error when the expected value is `null` but the actual value is not.
@@ -93,17 +94,18 @@ object NullEq extends Eq[Any | Null] {
      * @param actual The actual value, which was not `null`.
      * @return An `AssertionError` indicating that the expected value was `null`.
      */
-    private def expectedIsNull(actual: Any | Null): AssertionError =
+    private def expectedIsNull(actual: Any): AssertionError =
         ApplyMatcher.fail(s"Expected null but actual was ${actual.print.value}")
 }
 
-object MapEq extends Eq[Map[_, _]] {
+object MapEq extends Eq[Map[?, ?]] {
 
-    override def equals(actual: Map[_, _], expected: Map[_, _], strictNumberEq: NumberEquality): Option[Throwable] = {
+    override def equals(actual: Map[?, ?], expected: Map[?, ?])
+        (using strictNumberEq: NumberEquality): Option[Throwable] = {
         (actual, expected) match {
             case (null, null) => None
             case (_, null) => {
-                val haveUnequalKeys = equal(actual.keys, expected.keys, strictNumberEq)
+                val haveUnequalKeys = equal(actual.keys, expected.keys)
                 if (haveUnequalKeys.isEmpty) {
                     generateError(actual, expected)
                     ???
@@ -112,6 +114,6 @@ object MapEq extends Eq[Map[_, _]] {
             }
         }
     }
-    
+
     private def generateError(actual: Map[_, _], expected: Map[_, _]): Option[Throwable] = ???
 }

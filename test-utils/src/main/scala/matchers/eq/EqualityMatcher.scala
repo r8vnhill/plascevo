@@ -52,22 +52,19 @@ final class EqualityMatcher[T](expected: T) extends Matcher[T] {
 
 
 object EqualityMatcher {
-    def equal[T](actual: T, expected: T): Option[Throwable] = {
-        equal(actual, expected, NumberEquality.Strict)
-    }
-
-    def equal[T](actual: T, expected: T, strictNumberEq: NumberEquality): Option[Throwable] = {
+    def equal[T](actual: T, expected: T)
+        (using strictNumberEq: NumberEquality = NumberEquality.Strict): Option[Throwable] = {
         (actual, expected) match {
             // If the references are identical, there is no error
             case _ if actual.asInstanceOf[AnyRef] eq expected.asInstanceOf[AnyRef] => None
             // If either is null, handle null equality
             case (null, _) | (_, null) => NullEq.equals(actual, expected)
             // Handle specific cases based on the types of actual and expected
-            case (a: Map[_, _], e: Map[_, _]) => MapEq.equals(a, e, strictNumberEq)
+            case (a: Map[_, _], e: Map[_, _]) => MapEq.equals(a, e)
             //            case (a: Map.Entry[_, _], e: Map.Entry[_, _]) => MapEntryEq.equals(a, e, strictNumberEq)
             //            case (a: Regex, e: Regex) => RegexEq.equals(a, e)
             //            case (a: String, e: String) => StringEq.equals(a, e)
-            case (a: Number, e: Number) => NumberEq.equals(a, e, strictNumberEq)
+            case (a: Number, e: Number) => NumberEq.equals(a, e)
             //            case (a, e) if IterableEq.isValidIterable(a) && IterableEq.isValidIterable(e) =>
             //                IterableEq.equals(IterableEq.asIterable(a), IterableEq.asIterable(e), strictNumberEq)
             //            case (a: Seq[_], e: Seq[_]) => SequenceEq.equals(a, e, strictNumberEq)
@@ -75,7 +72,7 @@ object EqualityMatcher {
             //                DataClassEq.equals(actual.asInstanceOf[Any], expected.asInstanceOf[Any], strictNumberEq)
             //            case (a: Throwable, e: Throwable) => ThrowableEq.equals(a, e)
             //            // Default case for general equality
-            //            case _ => DefaultEq.equals(actual.asInstanceOf[Any], expected.asInstanceOf[Any], strictNumberEq)
+            case _ => DefaultEquality.equals(actual.asInstanceOf[Any], expected.asInstanceOf[Any])
         }
     }
 

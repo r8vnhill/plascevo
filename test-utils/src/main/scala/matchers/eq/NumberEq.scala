@@ -30,8 +30,7 @@ object NumberEq extends Eq[Number] {
     override def equals(
         actual: Number,
         expected: Number,
-        strictNumberEq: EqualityMatcher.NumberEquality
-    ): Option[Throwable] =
+    )(using strictNumberEq: EqualityMatcher.NumberEquality): Option[Throwable] =
         if compare(actual, expected, strictNumberEq) then
             None
         else
