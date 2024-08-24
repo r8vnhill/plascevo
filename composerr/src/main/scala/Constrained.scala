@@ -32,3 +32,14 @@ inline def constrained(builder: ComposerrScope ?=> Unit): Unit = {
         case errors => throw CompositeException(errors)
     }
 }
+
+extension[T] (value: T) {
+    def constrainedTo(builder: ComposerrScope ?=> Unit): T = {
+        val scope = new ComposerrScope()
+        builder(using scope)
+        scope.failures match {
+            case Nil => value
+            case errors => throw CompositeException(errors)
+        }
+    }
+}
