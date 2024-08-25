@@ -9,6 +9,12 @@ package property.context
 import property.arbitrary.generators.Sample
 import property.{PropTestConfig, RandomSource}
 
+import cl.ravenhill.plascevo.property.classifications.Output.outputClassifications
+import cl.ravenhill.plascevo.property.internal.Checks.{checkMaxDiscarded, checkMinSuccessful}
+import cl.ravenhill.plascevo.property.seed.Seed.clearFailedSeeds
+import cl.ravenhill.plascevo.property.statistics.Output.outputStatistics
+import cl.ravenhill.plascevo.property.utils.TestResult.Success
+
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
@@ -20,9 +26,9 @@ import scala.collection.mutable.ListBuffer
  * generated samples. This context is essential for coordinating the execution flow of property tests, including setting
  * up the random source and marking evaluations.
  *
- * @param config The configuration settings for the property-based testing process, provided implicitly.
+ * @param configuration The configuration settings for the property-based testing process, provided implicitly.
  */
-final class PropertyContext(using val config: PropTestConfig = PropTestConfig()) {
+final class PropertyContext(using val configuration: PropTestConfig = PropTestConfig()) {
 
     /** Tracks the number of evaluations performed in the current test context.
      *
@@ -51,7 +57,7 @@ final class PropertyContext(using val config: PropTestConfig = PropTestConfig())
      * as needed.
      */
     private var _beforePropertyContextElement: Option[BeforePropertyContextElement] = None
-    
+
     /**
      * Holds an optional `AfterPropertyContextElement` that contains logic to be executed after the property-based test.
      * This private member is initialized to `None` and can be set to a specific `AfterPropertyContextElement` as
@@ -60,13 +66,13 @@ final class PropertyContext(using val config: PropTestConfig = PropTestConfig())
     private var _afterPropertyContextElement: Option[AfterPropertyContextElement] = None
 
     /** Returns the number of evaluations performed in the current test context.
-     * 
+     *
      * @return The current number of evaluations as an `Int`.
      */
     def evaluations: Int = _evaluations
 
     /** Returns the context element for handling actions before the property-based test.
-     * 
+     *
      * @return An `Option[BeforePropertyContextElement]` containing the `BeforePropertyContextElement`, or `None` if it
      *         is not defined.
      */
@@ -74,7 +80,7 @@ final class PropertyContext(using val config: PropTestConfig = PropTestConfig())
 
     /**
      * Sets the `BeforePropertyContextElement` for this context.
-     * 
+     *
      * @param element The `BeforePropertyContextElement` to be set, containing the actions to be performed before the
      *                test.
      */
@@ -82,8 +88,8 @@ final class PropertyContext(using val config: PropTestConfig = PropTestConfig())
         _beforePropertyContextElement = Some(element)
 
     /** Returns the context element for handling actions after the property-based test.
-     * 
-     * @return An `Option[AfterPropertyContextElement]` containing the `AfterPropertyContextElement`, or `None` if it is 
+     *
+     * @return An `Option[AfterPropertyContextElement]` containing the `AfterPropertyContextElement`, or `None` if it is
      *         not defined.
      */
     def afterPropertyContextElement: Option[AfterPropertyContextElement] = _afterPropertyContextElement
@@ -95,13 +101,30 @@ final class PropertyContext(using val config: PropTestConfig = PropTestConfig())
      */
     def afterPropertyContextElement_=(element: AfterPropertyContextElement): Unit =
         _afterPropertyContextElement = Some(element)
-        
+
     def markSuccess(): Unit = ???
-    
-    def onSuccess(args: Int, random: RandomSource): Unit = ???
+
+    /**
+     * Handles the actions to be performed after a successful property-based test.
+     *
+     * The `onSuccess` method is called when a property-based test has successfully completed. It performs several
+     * tasks, including outputting statistical information, handling classifications, and checking specific constraints
+     * to ensure the test's validity. Finally, it clears any recorded failed seeds if applicable.
+     *
+     * @param numArgs The number of arguments used in the property test. If more than one argument was used, additional
+     *                checks on discarded tests are performed.
+     * @param randomSource The `RandomSource` used during the test, which contains the seed value for reproducibility.
+     */
+    def onSuccess(numArgs: Int, randomSource: RandomSource): Unit = {
+        outputStatistics(this, numArgs, Success)
+        outputClassifications(numArgs, configuration, randomSource.seed)
+        checkMinSuccessful(configuration, randomSource.seed)
+        if numArgs > 1 then checkMaxDiscarded()
+        clearFailedSeeds()
+    }
 
     def markFailure(e: Throwable): Unit = ???
-    
+
     def classify[T](value: T, label: String): Unit = ???
 
     /** Increments the evaluation count by one.

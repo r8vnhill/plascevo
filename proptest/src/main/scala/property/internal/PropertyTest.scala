@@ -9,9 +9,8 @@ package property.internal
 import property.*
 import property.arbitrary.generators.{Arbitrary, Generator}
 import property.arbitrary.shrinkers.Shrinker.shrinkFnFor
+import property.context.PropertyContext
 import property.seed.createRandom
-
-import cl.ravenhill.plascevo.property.context.PropertyContext
 
 object PropertyTest {
 
