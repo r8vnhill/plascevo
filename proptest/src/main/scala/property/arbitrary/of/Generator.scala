@@ -6,4 +6,6 @@
 package cl.ravenhill.plascevo
 package property.arbitrary.of
 
-sealed trait Generator[T]
+sealed trait Generator[+T]
+
+trait Arbitrary[+T] extends Generator[T]

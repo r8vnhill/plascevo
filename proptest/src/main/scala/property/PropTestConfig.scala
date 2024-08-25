@@ -9,6 +9,9 @@ package property
 import property.arbitrary.of.EdgeConfig
 import property.classifications.{LabelsReporter, StandardLabelsReporter}
 
+import cl.ravenhill.composerr.constrained
+import cl.ravenhill.composerr.constraints.option.BeNone
+
 /**
  * Configuration settings for property-based testing.
  *
@@ -51,10 +54,32 @@ case class PropTestConfig(
     maxFailure: Int = PropertyTesting.defaultMaxFailure,
     shrinkingMode: ShrinkingMode = PropertyTesting.defaultShrinkingMode,
     iterations: Option[Int] = None,
-    listeners: List[PropertyTestListener] = PropertyTesting.defaultListeners,
+    listeners: Seq[PropertyTestListener] = PropertyTesting.defaultListeners,
     edgeConfig: EdgeConfig = EdgeConfig.default,
     outputClassifications: Boolean = PropertyTesting.defaultOutputClassifications,
     labelsReporter: LabelsReporter = StandardLabelsReporter,
     constraints: Option[PropertyConstraints] = None,
     maxDiscardPercentage: Int = 20
-)
+) {
+    /**
+     * Validates the presence of a seed if the `failOnSeed` configuration is enabled.
+     *
+     * The `checkFailOnSeed` method ensures that a seed is provided when the `PropertyTesting.failOnSeed` configuration
+     * is enabled. This is critical for reproducibility in property-based testing, as the seed allows tests to be rerun
+     * with the same initial conditions. If the `failOnSeed` flag is set to `true`, this method will enforce that a seed
+     * is present; otherwise, it will raise a constraint violation.
+     *
+     * @throws CompositeException Containing all constraints that failed.
+     * @throws OptionConstraintException If the seed is not provided and `PropertyTesting.failOnSeed` is enabled;
+     *                                   wrapped in a `CompositeException`.
+     */
+    private[property] def checkFailOnSeed(): Unit = {
+        constrained {
+            if (PropertyTesting.failOnSeed) {
+                "Seed must be provided for reproducibility" | {
+                    seed mustNot BeNone
+                }
+            }
+        }
+    }
+}

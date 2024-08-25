@@ -7,3 +7,7 @@ package cl.ravenhill.plascevo
 package property
 
 trait PropertyConstraints
+
+object PropertyConstraints {
+    def iterations(k: Int): PropertyContext => Boolean = (context: PropertyContext) => context.evaluations < k
+}

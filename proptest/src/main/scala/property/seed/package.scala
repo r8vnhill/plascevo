@@ -6,6 +6,6 @@
 package cl.ravenhill.plascevo
 package property
 
-sealed trait ShrinkingMode
-
-case class BoundedShrinking(maxSize: Int) extends ShrinkingMode
+package object seed {
+    def createRandom(using config: PropTestConfig): RandomSource = ???
+}
