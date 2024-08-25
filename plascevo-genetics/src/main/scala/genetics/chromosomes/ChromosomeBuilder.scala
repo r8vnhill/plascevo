@@ -10,7 +10,7 @@ import evolution.executors.construction.{ConstructorExecutor, SequentialConstruc
 import exceptions.InvalidSizeException
 import genetics.genes.Gene
 
-import cl.ravenhill.composerr.constrained
+import cl.ravenhill.composerr.Constrained.constrained
 import cl.ravenhill.composerr.constraints.ints.BeNegative
 
 import scala.util.Random

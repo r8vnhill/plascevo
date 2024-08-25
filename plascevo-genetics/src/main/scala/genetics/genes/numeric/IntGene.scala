@@ -1,7 +1,7 @@
 package cl.ravenhill.plascevo
 package genetics.genes.numeric
 
-import cl.ravenhill.composerr.constrained
+import cl.ravenhill.composerr.Constrained.constrained
 import cl.ravenhill.composerr.constraints.iterable.BeEmpty
 
 import java.util.Objects

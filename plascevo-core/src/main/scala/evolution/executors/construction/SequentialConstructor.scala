@@ -3,7 +3,7 @@ package evolution.executors.construction
 
 import exceptions.InvalidSizeException
 
-import cl.ravenhill.composerr.constrained
+import cl.ravenhill.composerr.Constrained.constrained
 import cl.ravenhill.composerr.constraints.ints.BeNegative
 
 /** A sequential constructor for generating sequences of values in an evolutionary algorithm.

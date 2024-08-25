@@ -6,11 +6,11 @@
 package cl.ravenhill.plascevo
 package property
 
-import property.arbitrary.of.EdgeConfig
 import property.classifications.{LabelsReporter, StandardLabelsReporter}
 
-import cl.ravenhill.composerr.constrained
+import cl.ravenhill.composerr.Constrained.constrained
 import cl.ravenhill.composerr.constraints.option.BeNone
+import cl.ravenhill.plascevo.property.arbitrary.EdgeConfig
 
 /**
  * Configuration settings for property-based testing.

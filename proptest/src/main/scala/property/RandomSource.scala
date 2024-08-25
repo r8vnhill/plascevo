@@ -6,6 +6,11 @@
 package cl.ravenhill.plascevo
 package property
 
+import cl.ravenhill.composerr.Constrained
+import cl.ravenhill.composerr.Constrained.{constrained, constrainedTo}
+import cl.ravenhill.composerr.constraints.ints.BeAtMost
+import cl.ravenhill.composerr.constraints.iterable.BeEmpty
+
 /**
  * Represents a source of randomness, encapsulating a random number generator and its seed.
  *
@@ -20,6 +25,156 @@ package property
  */
 case class RandomSource(random: scala.util.Random, seed: Long)
 
+/**
+ * Companion object for `RandomSource`, providing methods to create instances of `RandomSource` with either a specific
+ * seed or a randomly generated seed.
+ *
+ * The `RandomSource` object provides two primary methods: `seeded`, which creates a `RandomSource` with a specified
+ * seed, and `default`, which creates a `RandomSource` with a randomly initialized seed. These methods are useful for
+ * creating reproducible random number generators or for generating random numbers in a non-deterministic manner.
+ */
 object RandomSource {
-    def seeded(seed: Long): RandomSource = ???
+
+    /**
+     * Creates a `RandomSource` initialized with the specified seed.
+     *
+     * The `seeded` method generates a `RandomSource` using the provided seed. This allows for deterministic random
+     * number generation, where the same seed will always produce the same sequence of random numbers. This is
+     * particularly useful in testing or scenarios where reproducibility is required.
+     *
+     * @param seed The seed to initialize the `RandomSource`. The same seed will always produce the same sequence of
+     *             random numbers.
+     * @return A `RandomSource` initialized with the provided seed.
+     */
+    def seeded(seed: Long): RandomSource = RandomSource(scala.util.Random(seed), seed)
+
+    /**
+     * Generates a default `RandomSource` with a randomly initialized seed.
+     *
+     * The `default` method creates a new `RandomSource` by generating a random seed using the `scala.util.Random`
+     * class. This seed is then used to initialize a new instance of `scala.util.Random`, ensuring that the resulting
+     * random number generator is both random and non-deterministic. The method returns the `RandomSource` containing
+     * the randomly generated seed and the corresponding `scala.util.Random` instance.
+     *
+     * @return A `RandomSource` initialized with a randomly generated seed. The seed is stored within the `RandomSource`
+     *         for potential reproducibility or logging purposes.
+     */
+    def default: RandomSource = {
+        val seed: Long = scala.util.Random().nextLong()
+        seeded(seed)
+    }
+
+    extension (random: scala.util.Random) {
+        /**
+         * Generates a random integer within a specified `Range`.
+         *
+         * The `nextInt` function generates a random integer within the bounds of the given `range`. The method ensures
+         * that the `range` is non-empty by applying a constraint check before proceeding.
+         * 
+         * @param range The `Range` within which to generate the random integer. The range must not be empty.
+         * @return A random integer within the specified `range`.
+         * @throws CompositeException containing all the constraints that failed.
+         * @throws IterableConstraintException if the `range` is empty; wrapped in a `CompositeException`.
+         */
+        def nextInt(range: Range): Int = {
+            range.constrainedTo {
+                "Range must not be empty" | {
+                    range mustNot BeEmpty()
+                }
+            } match {
+                case r if r.last < Int.MaxValue => random.nextInt(r.head, r.last + 1)
+                case r if r.head > Int.MinValue => random.nextInt(r.head - 1, r.last) + 1
+                case _ => random.nextInt()
+            }
+        }
+
+        /**
+         * Generates a random integer within a specified range `[from, until)`.
+         *
+         * The `nextInt` function generates a random integer within the inclusive lower bound `from` and the exclusive
+         * upper bound `until`. This method ensures that the `from` parameter is less than `until` by enforcing a
+         * constraint before proceeding.
+         *
+         * The algorithm used to generate the random integer depends on the size of the range:
+         *
+         * 1. **Power of Two Optimization:**
+         *    - If the difference `n = until - from` is a power of two, the function calculates the number of bits
+         *      required (`bitCount`) and uses them to generate a random integer. This is efficient because generating
+         *      random numbers within a power-of-two range can be done directly by masking the bits.
+         *
+         * 2. **General Case:**
+         *    - If `n` is not a power of two, the function uses rejection sampling to ensure uniformity. It repeatedly
+         *      generates random integers, adjusting them to fit within the range `[from, until)` by using a modulus
+         *      operation. The loop continues until a valid integer is produced, avoiding bias by rejecting certain
+         *      values that could lead to uneven distribution.
+         *
+         * 3. **Edge Case Handling:**
+         *    - If the difference `n` is zero or negative (other than when `n == Int.MinValue`), the function falls
+         *      back on generating random integers in a loop until one falls within the specified range. This ensures
+         *      the function handles all edge cases effectively.
+         *
+         * @param from The inclusive lower bound of the range.
+         * @param until The exclusive upper bound of the range.
+         * @return A random integer `r` such that `from <= r < until`.
+         * @throws CompositeException containing all the constraints that failed.
+         * @throws IntConstraintException if `from` is not less than `until`; wrapped in a `CompositeException`.
+         *
+         * @example
+         * {{{
+         * val randomValue = nextInt(1, 10)
+         * assert(randomValue >= 1 && randomValue < 10)
+         *
+         * // If `from` is not less than `until`, an exception is thrown
+         * intercept[IllegalArgumentException] {
+         *   nextInt(10, 5)
+         * }
+         * }}}
+         */
+        def nextInt(from: Int, until: Int): Int = {
+            constrained {
+                "From must be less than until" | {
+                    from must BeAtMost(until)
+                }
+            }
+            val n = until - from
+            if (n > 0 || n == Int.MinValue) {
+                val r = if ((n & -n) == n) {
+                    val bitCount = fast2Log(n)
+                    random.nextInt(1 << bitCount)
+                } else {
+                    var v = 0
+                    var condition = true
+
+                    while (condition) {
+                        val bits = random.nextInt() >>> 1
+                        v = bits % n
+                        condition = (bits - v + (n - 1) < 0)
+                    }
+                    v
+                }
+                from + r
+            } else {
+                while (true) {
+                    val r = random.nextInt()
+                    if (r >= from && r < until) {
+                        return r
+                    }
+                }
+                throw new IllegalStateException("Unreachable code")
+            }
+        }
+
+    }
+
+    /**
+     * Computes the base-2 logarithm (log2) of a given integer.
+     *
+     * The `fast2Log` function efficiently computes the base-2 logarithm of a given integer `n`. This is achieved by
+     * determining the position of the highest set bit (the most significant bit) in the binary representation of `n`.
+     * The result is equivalent to `floor(log2(n))`, which gives the largest integer `k` such that `2^k <= n`.
+     *
+     * @param n The integer for which the base-2 logarithm is computed. It must be a positive integer.
+     * @return The base-2 logarithm of `n`, effectively the position of the highest set bit.
+     */
+    private def fast2Log(n: Int): Int = 31 - Integer.numberOfLeadingZeros(n)
 }

@@ -4,7 +4,7 @@
  */
 
 package cl.ravenhill.plascevo
-package property.arbitrary.of
+package property.arbitrary
 
 sealed trait Generator[+T]
 

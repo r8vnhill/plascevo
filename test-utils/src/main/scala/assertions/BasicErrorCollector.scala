@@ -8,9 +8,9 @@ package assertions
 
 import assertions.print.Printed
 
+import cl.ravenhill.composerr.Constrained.{constrained, constrainedTo}
 import cl.ravenhill.composerr.constraints.ints.BePositive
 import cl.ravenhill.composerr.constraints.iterable.BeEmpty
-import cl.ravenhill.composerr.{constrained, constrainedTo}
 
 import scala.collection.mutable.ListBuffer
 

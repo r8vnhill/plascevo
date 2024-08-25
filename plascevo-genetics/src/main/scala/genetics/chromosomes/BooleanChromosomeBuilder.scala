@@ -4,7 +4,7 @@ package genetics.chromosomes
 import exceptions.InvalidProbabilityException
 import genetics.genes.{BooleanGene, FalseGene, TrueGene}
 
-import cl.ravenhill.composerr.constrained
+import cl.ravenhill.composerr.Constrained.constrained
 import cl.ravenhill.composerr.constraints.doubles.BeInRange
 
 import scala.util.Random

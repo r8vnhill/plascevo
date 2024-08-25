@@ -8,7 +8,7 @@ package genetics.chromosomes
 
 import exceptions.InvalidSizeException
 
-import cl.ravenhill.composerr.constrained
+import cl.ravenhill.composerr.Constrained.constrained
 import cl.ravenhill.composerr.constraints.iterable.HaveSize
 
 import scala.collection.mutable

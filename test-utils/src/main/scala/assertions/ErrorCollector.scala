@@ -8,7 +8,6 @@ package assertions
 
 import assertions.print.Printed
 
-import cl.ravenhill.composerr.constrained
 import cl.ravenhill.composerr.constraints.ints.BePositive
 import munit.internal.console.StackTraces
 

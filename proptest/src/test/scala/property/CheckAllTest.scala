@@ -6,9 +6,11 @@
 package cl.ravenhill.plascevo
 package property
 
+import property.arbitrary.Ints.arbInt
+
 class CheckAllTest extends munit.FunSuite with CheckAll {
     test("checkAll should run a property test") {
         given config: PropTestConfig = PropTestConfig()
-        checkAll(null) { _ => }
+        checkAll(arbInt()) { _ => }
     }
 }

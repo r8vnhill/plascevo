@@ -10,7 +10,7 @@ import exceptions.InvalidSizeException
 import genetics.chromosomes.{Chromosome, ChromosomeBuilder, ChromosomeUtils}
 import genetics.genes.numeric.NumericGene
 
-import cl.ravenhill.composerr.constrained
+import cl.ravenhill.composerr.Constrained.constrained
 import cl.ravenhill.composerr.constraints.option.BeNone
 
 import scala.collection.mutable

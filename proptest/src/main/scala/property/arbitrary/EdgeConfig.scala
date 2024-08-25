@@ -4,11 +4,11 @@
  */
 
 package cl.ravenhill.plascevo
-package property.arbitrary.of
+package property.arbitrary
 
 import property.PropertyTesting
 
-import cl.ravenhill.composerr.constrained
+import cl.ravenhill.composerr.Constrained.constrained
 import cl.ravenhill.composerr.constraints.doubles.BeInRange
 
 /**
@@ -27,7 +27,7 @@ import cl.ravenhill.composerr.constraints.doubles.BeInRange
  *
  * @throws CompositeException If the probability is not within the valid range of 0 to 1. This is enforced by the
  *                            constraint within the case class, ensuring that the configuration is always valid.
- * @throws DoubleConstraintException If the edge case generation probability is outside the range [0, 1]; wrapped in a 
+ * @throws DoubleConstraintException If the edge case generation probability is outside the range [0, 1]; wrapped in a
  *                                   `CompositeException`.
  */
 case class EdgeConfig(
