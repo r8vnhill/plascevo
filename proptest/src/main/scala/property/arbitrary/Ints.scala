@@ -8,6 +8,7 @@ package property.arbitrary
 
 import property.RandomSource.nextInt
 
+import cl.ravenhill.plascevo.property.arbitrary.generators.Arbitrary
 import cl.ravenhill.plascevo.property.arbitrary.numbers.IntClassifier
 import cl.ravenhill.plascevo.property.arbitrary.shrinkers.IntShrinker
 

@@ -9,8 +9,7 @@ package property
 import cl.ravenhill.composerr.Constrained.constrainedTo
 import cl.ravenhill.composerr.constraints.iterable.BeEmpty
 
-object Utils {
-    
+package object utils {
     extension [T](it: Iterable[T]) {
 
         /**
@@ -21,7 +20,7 @@ object Utils {
          *
          * @param random An instance of `scala.util.Random` used to generate the random index.
          * @return A random element from the `Iterable`.
-         * @throws CompositeException containing all infringed constraints.
+         * @throws CompositeException          containing all infringed constraints.
          * @throws IterableConstraintException if the iterable is empty. 
          */
         def random(random: scala.util.Random): T = {

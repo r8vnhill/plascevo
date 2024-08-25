@@ -7,7 +7,7 @@ package cl.ravenhill.plascevo
 package property
 
 import property.internal.PropertyTest
-import cl.ravenhill.plascevo.property.arbitrary.Generator
+import cl.ravenhill.plascevo.property.arbitrary.generators.Generator
 
 trait CheckAll {
     def checkAll[A](gen: Generator[A])(f: A => Unit)(using config: PropTestConfig): PropertyContext = PropertyTest(gen)(f)

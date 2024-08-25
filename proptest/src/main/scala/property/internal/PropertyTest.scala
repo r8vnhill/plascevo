@@ -8,7 +8,7 @@ package property.internal
 
 import property.*
 import property.seed.createRandom
-import cl.ravenhill.plascevo.property.arbitrary.{Arbitrary, Generator}
+import cl.ravenhill.plascevo.property.arbitrary.generators.{Arbitrary, Generator}
 
 object PropertyTest {
 
