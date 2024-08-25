@@ -12,6 +12,7 @@ import property.{PropTestConfig, RandomSource}
 import cl.ravenhill.plascevo.property.classifications.Output.outputClassifications
 import cl.ravenhill.plascevo.property.internal.Checks.{checkMaxDiscarded, checkMinSuccessful}
 import cl.ravenhill.plascevo.property.seed.Seed.clearFailedSeeds
+import cl.ravenhill.plascevo.property.statistics.Label
 import cl.ravenhill.plascevo.property.statistics.Output.outputStatistics
 import cl.ravenhill.plascevo.property.utils.TestResult.Success
 
@@ -101,6 +102,12 @@ final class PropertyContext(using val configuration: PropTestConfig = PropTestCo
      */
     def afterPropertyContextElement_=(element: AfterPropertyContextElement): Unit =
         _afterPropertyContextElement = Some(element)
+
+    def attempts: Int = ???
+
+    def labels: Set[Label] = ???
+
+    def statistics: Map[Option[Label], Map[Option[Any], Int]] = ???
 
     def markSuccess(): Unit = ???
 
