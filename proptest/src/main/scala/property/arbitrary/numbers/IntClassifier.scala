@@ -39,7 +39,7 @@ class IntClassifier(private val min: Int, private val max: Int) extends Classifi
      * @param value The integer value to classify.
      * @return An `Option[String]` containing the category name, or `None` if the value does not fit into any category.
      */
-    override def classify(value: Int): Option[String] = value match
+    override def apply(value: Int): Option[String] = value match
         case 0 => Some("ZERO")
         case `min` => Some("MIN")
         case `max` => Some("MAX")

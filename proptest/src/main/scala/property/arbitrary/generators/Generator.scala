@@ -7,11 +7,30 @@ package cl.ravenhill.plascevo
 package property.arbitrary.generators
 
 import property.RandomSource
-
-import cl.ravenhill.plascevo.property.arbitrary.Classifier
+import property.arbitrary.generators.Sample.asSample
+import property.arbitrary.{Classifier, EdgeConfiguration}
 
 sealed trait Generator[+T] {
     def classifier: Option[Classifier[? <: T]] = None
+
+    def generate(
+        rs: RandomSource,
+        edgeConfig: EdgeConfiguration = EdgeConfiguration.default
+    ): LazyList[Sample[T]] = this match {
+        case arb: Arbitrary[T] =>
+            val samples = arb.samples(rs).iterator
+
+            LazyList.continually {
+                val isEdgeCase = rs.random.between(0.0, 1.0) < edgeConfig.edgeCasesGenerationProbability
+                if (isEdgeCase) {
+                    arb.edgeCases(rs).map(asSample).getOrElse(samples.next())
+                } else {
+                    samples.next()
+                }
+            }
+
+        case _ => ???
+    }
 }
 
 /**
@@ -58,7 +77,6 @@ trait Arbitrary[+T] extends Generator[T] {
      * @param rs The `RandomSource` used to generate the sample values. Defaults to a `RandomSource` created with the
      *           `default` method.
      * @return An `Iterator` that produces an infinite stream of sample values.
-     *
      * @example
      * {{{
      *   val arbitraryInt: Arbitrary[Int] = ...
@@ -67,5 +85,5 @@ trait Arbitrary[+T] extends Generator[T] {
      *   samples.take(10).foreach(println) // Prints 10 random integers
      * }}}
      */
-    def samples(rs: RandomSource = RandomSource.default): Iterator[Any] = Iterator.continually(sample(rs))
+    def samples(rs: RandomSource = RandomSource.default): Iterator[Sample[T]] = Iterator.continually(sample(rs))
 }

@@ -30,7 +30,7 @@ import cl.ravenhill.composerr.constraints.doubles.BeInRange
  * @throws DoubleConstraintException If the edge case generation probability is outside the range [0, 1]; wrapped in a
  *                                   `CompositeException`.
  */
-case class EdgeConfig(
+case class EdgeConfiguration(
     edgeCasesGenerationProbability: Double = PropertyTesting.defaultEdgeCasesGenerationProbability
 ) {
     constrained {
@@ -45,11 +45,11 @@ case class EdgeConfig(
  *
  * The EdgeConfig object provides a convenient method to create a default edge configuration with the default edge case generation probability.
  */
-object EdgeConfig {
+object EdgeConfiguration {
     /**
      * Creates a default edge configuration with the default edge case generation probability.
      *
      * @return A new `EdgeConfig` instance with the default edge case generation probability.
      */
-    def default: EdgeConfig = EdgeConfig()
+    def default: EdgeConfiguration = EdgeConfiguration()
 }

@@ -7,13 +7,12 @@ package cl.ravenhill.plascevo
 package property.arbitrary
 
 import property.RandomSource.nextInt
-
-import cl.ravenhill.plascevo.property.arbitrary.generators.Arbitrary
-import cl.ravenhill.plascevo.property.arbitrary.numbers.IntClassifier
-import cl.ravenhill.plascevo.property.arbitrary.shrinkers.IntShrinker
+import property.arbitrary.generators.Arbitrary
+import property.arbitrary.numbers.IntClassifier
+import property.arbitrary.shrinkers.IntShrinker
 
 object Ints {
-    
+
     def arbInt(min: Int = Int.MinValue, max: Int = Int.MaxValue): Arbitrary[Int] = arbInt(min to max)
 
     /**

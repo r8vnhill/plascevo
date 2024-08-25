@@ -10,7 +10,7 @@ import cl.ravenhill.composerr.Constrained
 import cl.ravenhill.composerr.Constrained.{constrained, constrainedTo}
 import cl.ravenhill.composerr.constraints.ints.BeAtMost
 import cl.ravenhill.composerr.constraints.iterable.BeEmpty
-
+import cl.ravenhill.composerr.constraints.doubles.{BeAtMost => BeAtMostDouble}
 /**
  * Represents a source of randomness, encapsulating a random number generator and its seed.
  *
@@ -82,88 +82,11 @@ object RandomSource {
                     range mustNot BeEmpty()
                 }
             } match {
-                case r if r.last < Int.MaxValue => random.nextInt(r.head, r.last + 1)
-                case r if r.head > Int.MinValue => random.nextInt(r.head - 1, r.last) + 1
+                case r if r.last < Int.MaxValue => random.between(r.head, r.last + 1)
+                case r if r.head > Int.MinValue => random.between(r.head - 1, r.last) + 1
                 case _ => random.nextInt()
             }
         }
-
-        /**
-         * Generates a random integer within a specified range `[from, until)`.
-         *
-         * The `nextInt` function generates a random integer within the inclusive lower bound `from` and the exclusive
-         * upper bound `until`. This method ensures that the `from` parameter is less than `until` by enforcing a
-         * constraint before proceeding.
-         *
-         * The algorithm used to generate the random integer depends on the size of the range:
-         *
-         * 1. **Power of Two Optimization:**
-         *    - If the difference `n = until - from` is a power of two, the function calculates the number of bits
-         *      required (`bitCount`) and uses them to generate a random integer. This is efficient because generating
-         *      random numbers within a power-of-two range can be done directly by masking the bits.
-         *
-         * 2. **General Case:**
-         *    - If `n` is not a power of two, the function uses rejection sampling to ensure uniformity. It repeatedly
-         *      generates random integers, adjusting them to fit within the range `[from, until)` by using a modulus
-         *      operation. The loop continues until a valid integer is produced, avoiding bias by rejecting certain
-         *      values that could lead to uneven distribution.
-         *
-         * 3. **Edge Case Handling:**
-         *    - If the difference `n` is zero or negative (other than when `n == Int.MinValue`), the function falls
-         *      back on generating random integers in a loop until one falls within the specified range. This ensures
-         *      the function handles all edge cases effectively.
-         *
-         * @param from The inclusive lower bound of the range.
-         * @param until The exclusive upper bound of the range.
-         * @return A random integer `r` such that `from <= r < until`.
-         * @throws CompositeException containing all the constraints that failed.
-         * @throws IntConstraintException if `from` is not less than `until`; wrapped in a `CompositeException`.
-         *
-         * @example
-         * {{{
-         * val randomValue = nextInt(1, 10)
-         * assert(randomValue >= 1 && randomValue < 10)
-         *
-         * // If `from` is not less than `until`, an exception is thrown
-         * intercept[IllegalArgumentException] {
-         *   nextInt(10, 5)
-         * }
-         * }}}
-         */
-        def nextInt(from: Int, until: Int): Int = {
-            constrained {
-                "From must be less than until" | {
-                    from must BeAtMost(until)
-                }
-            }
-            val n = until - from
-            if (n > 0 || n == Int.MinValue) {
-                val r = if ((n & -n) == n) {
-                    val bitCount = fast2Log(n)
-                    random.nextInt(1 << bitCount)
-                } else {
-                    var v = 0
-                    var condition = true
-
-                    while (condition) {
-                        val bits = random.nextInt() >>> 1
-                        v = bits % n
-                        condition = (bits - v + (n - 1) < 0)
-                    }
-                    v
-                }
-                from + r
-            } else {
-                while (true) {
-                    val r = random.nextInt()
-                    if (r >= from && r < until) {
-                        return r
-                    }
-                }
-                throw new IllegalStateException("Unreachable code")
-            }
-        }
-
     }
 
     /**

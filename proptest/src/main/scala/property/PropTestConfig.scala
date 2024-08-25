@@ -10,7 +10,7 @@ import property.classifications.{LabelsReporter, StandardLabelsReporter}
 
 import cl.ravenhill.composerr.Constrained.constrained
 import cl.ravenhill.composerr.constraints.option.BeNone
-import cl.ravenhill.plascevo.property.arbitrary.EdgeConfig
+import cl.ravenhill.plascevo.property.arbitrary.EdgeConfiguration
 
 /**
  * Configuration settings for property-based testing.
@@ -55,7 +55,7 @@ case class PropTestConfig(
     shrinkingMode: ShrinkingMode = PropertyTesting.defaultShrinkingMode,
     iterations: Option[Int] = None,
     listeners: Seq[PropertyTestListener] = PropertyTesting.defaultListeners,
-    edgeConfig: EdgeConfig = EdgeConfig.default,
+    edgeConfig: EdgeConfiguration = EdgeConfiguration.default,
     outputClassifications: Boolean = PropertyTesting.defaultOutputClassifications,
     labelsReporter: LabelsReporter = StandardLabelsReporter,
     constraints: Option[PropertyConstraints] = None,

@@ -6,7 +6,10 @@
 package cl.ravenhill.plascevo
 package property.arbitrary.shrinkers
 
+import property.ShrinkingMode
+import property.arbitrary.generators.Sample
 import property.utils.RTree
+import cl.ravenhill.plascevo.property.context.PropertyContext
 
 /**
  * A trait for defining shrinking behavior in property-based testing.
@@ -63,5 +66,20 @@ trait Shrinker[A] {
                 shrink(value).distinct.filter(_ != value).map(rtree)
             }
         )
+    }
+}
+
+object Shrinker {
+
+    def shrinkFnFor[T](
+        sample: Sample[T],
+        propertyFn: (T) => Unit,
+        mode: ShrinkingMode,
+        seed: Long
+    )(context: PropertyContext): Seq[ShrinkResult[T]] = {
+        val property: (PropertyContext, T) => Unit = (ctx, value) => {
+            ???
+        }
+        ???
     }
 }

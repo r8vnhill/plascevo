@@ -21,7 +21,7 @@ trait Classifier[A] {
     /**
      * Classifies a given value into an optional category.
      *
-     * The `classify` method takes a value of type `A` and returns an `Option[String]` representing the category to
+     * The `apply` method takes a value of type `A` and returns an `Option[String]` representing the category to
      * which the value belongs. If the value does not belong to any specific category, the method returns `None`.
      * Classification is useful in property-based testing to ensure that test cases are properly grouped and that the
      * distribution of test cases across different categories is balanced.
@@ -29,5 +29,5 @@ trait Classifier[A] {
      * @param value The value to classify.
      * @return An `Option[String]` containing the category name, or `None` if the value does not fit into any category.
      */
-    def classify(value: A): Option[String]
+    def apply(value: A): Option[String]
 }
