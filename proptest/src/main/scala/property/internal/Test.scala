@@ -6,18 +6,22 @@
 package cl.ravenhill.plascevo
 package property.internal
 
+import assertions.print.Printed
 import property.arbitrary.Classifier
 import property.arbitrary.shrinkers.ShrinkResult
 import property.context.PropertyContext
+import property.internal.Errors.{throwPropertyFailExceptionWithResults, throwPropertyTestFailException}
+import property.stacktraces.PropertyCheckStackTraces.stackTraces
+import property.statistics.Output.outputStatistics
 import property.utils.TestResult
 import property.{AssumptionFailedException, PropTestConfig, RandomSource}
 
 import cl.ravenhill.composerr.Constrained
 import cl.ravenhill.composerr.Constrained.constrained
 import cl.ravenhill.composerr.constraints.iterable.HaveSize
-import cl.ravenhill.plascevo.property.statistics.Output.outputStatistics
+import munit.internal.console.StackTraces
 
-import scala.util.{Failure, Try}
+import scala.util.Try
 
 private[property] object Test {
     /**
@@ -55,14 +59,13 @@ private[property] object Test {
      *                                   as a failure. The exception is processed for shrinking and further analysis.
      */
     def apply(
-        context: PropertyContext,
         config: PropTestConfig,
         shrinkFn: PropertyContext => Seq[ShrinkResult[Any]],
         inputs: Seq[Any],
         classifiers: Seq[Option[Classifier[? <: Any]]],
         seed: Long,
         contextualSeed: Long,
-    )(testFunction: => Any): Try[Unit] = {
+    )(testFunction: => Any)(using context: PropertyContext): Try[Unit] = {
         // Validate that the inputs and classifiers have matching sizes
         validateInputsAndClassifiers(inputs, classifiers)
 
@@ -79,7 +82,7 @@ private[property] object Test {
             // Ignore assumption failures; they do not mark the test as a failure
             case e: Throwable =>
                 // Handle other exceptions by marking the test as a failure and initiating shrinking
-                handleFailure(context, shrinkFn, inputs, seed, e, config)
+                handleFailure(shrinkFn, inputs, seed, e, config)
         }
     }
 
@@ -189,24 +192,62 @@ private[property] object Test {
      *                 including how shrinking is performed.
      */
     private def handleFailure(
-        context: PropertyContext,
         shrinkFn: PropertyContext => Seq[ShrinkResult[Any]],
         inputs: Seq[Any],
         seed: Long,
         e: Throwable,
         config: PropTestConfig
-    ): Unit = {
-        context.markFailure(e)
+    )(using context: PropertyContext): Unit = {
+        context.markFailure()
         outputStatistics(context = context, numArgs = inputs.size, success = TestResult.Failure)
-        handleException(context, shrinkFn, inputs, seed, e, config)
+        handleException(shrinkFn, inputs, seed, e, config)
     }
-    
+
     private[property] def handleException(
-        context: PropertyContext,
         shrinkFn: PropertyContext => Seq[ShrinkResult[Any]],
         inputs: Seq[Any],
         seed: Long,
-        e: Throwable,
+        cause: Throwable,
         config: PropTestConfig
-    ): Unit = ???
+    )(using context: PropertyContext): Unit = if (config.maxFailure == 0) {
+        printFailureMessage(inputs, cause)
+        throwPropertyFailExceptionWithResults(shrinkFn(context), cause, context.attempts, seed)
+    } else if (context.failures > config.maxFailure) {
+        val error = buildMaxErrorFailureMessage(context, config, inputs)
+        throwPropertyFailExceptionWithResults(shrinkFn(context), AssertionError(error), context.attempts, seed)
+    }
+
+    private def printFailureMessage(
+        inputs: Seq[Any],
+        e: Throwable
+    )(using context: PropertyContext): Unit = {
+        val sb = new StringBuilder
+        sb.append("Property test failed for inputs\n\n")
+
+        val allInputs = inputs.iterator ++ context.generatedSamples.map(sample =>
+            s"${Printed(Some(sample.value))} (generated within property context)"
+        )
+
+        allInputs.zipWithIndex.foreach { case (input, index) =>
+            sb.append(s"$index) $input\n")
+        }
+        sb.append("\n")
+
+        val cause = stackTraces.root(e)
+        stackTraces.throwableLocation(cause, 4) match {
+            case None => sb.append(s"Caused by $e\n")
+            case Some(stack) =>
+                sb.append(s"Caused by $e at\n")
+                stack.foreach { trace => sb.append(s"\t$trace\n") }
+        }
+        sb.append("\n")
+
+        println(sb.toString())
+    }
+
+    private def buildMaxErrorFailureMessage(
+        context: PropertyContext,
+        config: PropTestConfig,
+        inputs: Seq[Any]
+    ): String = ???
 }

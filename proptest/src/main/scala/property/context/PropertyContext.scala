@@ -77,7 +77,7 @@ final class PropertyContext(val testName: String)
 
     /** A private, mutable map that tracks automatic classifications of test results. */
     private val _autoClassifications: mutable.Map[String, mutable.Map[String, Int]] = mutable.Map.empty
-
+    
     /** Returns the number of evaluations performed in the current test context.
      *
      * @return The current number of evaluations as an `Int`.
@@ -164,6 +164,13 @@ final class PropertyContext(val testName: String)
      */
     def autoClassifications: Map[String, Map[String, Int]] = _autoClassifications.view.mapValues(_.toMap).toMap
 
+    /**
+     * Retrieves the sequence of generated samples within the current property context.
+     * 
+     * @return A sequence of `Sample` objects representing the values generated within the property context.
+     */
+    def generatedSamples: Seq[Sample[?]] = _generatedSamples.toSeq
+
     def markSuccess(): Unit = ???
 
     /**
@@ -186,7 +193,13 @@ final class PropertyContext(val testName: String)
         if numArgs > 1 then checkMaxDiscarded()
     }
 
-    def markFailure(e: Throwable): Unit = ???
+    /**
+     * Increments the failure count and records the occurrence of a test failure.
+     *
+     * The `markFailure` method is called when a test fails, incrementing the internal failure counter. This allows the
+     * `PropertyContext` to keep track of how many tests have failed during the execution of property-based tests.
+     */
+    def markFailure(): Unit = _failures += 1
 
     def classify[T](value: T, label: String): Unit = ???
 

@@ -37,7 +37,6 @@ object PropertyTest {
                     val shrinkFn = shrinkFnFor(value, property, config.shrinkingMode, contextualSeed)
                     config.listeners.foreach(_.beforeTest())
                     Test(
-                        context,
                         config,
                         shrinkFn,
                         Seq(value.value),
@@ -46,7 +45,7 @@ object PropertyTest {
                         contextualSeed
                     ) {
                         property(value.value)
-                    }
+                    }.get
                     config.listeners.foreach(_.afterTest())
                 }
             case _ => ???

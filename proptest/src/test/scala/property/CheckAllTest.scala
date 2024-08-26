@@ -11,7 +11,9 @@ import property.arbitrary.Ints.arbInt
 class CheckAllTest extends CheckAllSuite {
     given config: PropTestConfig = PropTestConfig()
 
-    checkAll("Integers")(arbInt()) { i =>
-        assert(i >= 0)
+    test("Integers are non-negative") {
+        checkAll(arbInt()) { i =>
+            assert(i >= 0)
+        }
     }
 }

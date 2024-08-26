@@ -34,8 +34,32 @@ private[property] object Errors {
      *                   exception.
      */
     def throwPropertyTestFailException(
-        e: Throwable, attempts: Int, seed: Long
+        e: Throwable,
+        attempts: Int,
+        seed: Long
     ): Nothing = throw propertyFailException(e, attempts, seed, Seq.empty)
+
+    /**
+     * Throws a `Throwable` representing a failure in a property-based test, including shrinking results.
+     *
+     * The `throwPropertyFailExceptionWithResults` method constructs and throws a `Throwable` that encapsulates the
+     * details of a property test failure. It includes the original exception, the number of test attempts, the random
+     * seed used, and the results of any shrinking operations that were performed.
+     *
+     * @param results  A sequence of `ShrinkResult` instances representing the initial and shrunk values during the
+     *                 shrinking process.
+     * @param e        The original exception that caused the test to fail.
+     * @param attempts The number of attempts made before the test failed.
+     * @param seed     The seed used for the random number generator, which allows the test to be reproduced.
+     * @throws Throwable The constructed exception, which is thrown immediately, containing a detailed 
+     *                   failure message and the original exception.
+     */
+    def throwPropertyFailExceptionWithResults(
+        results: Seq[ShrinkResult[?]],
+        e: Throwable,
+        attempts: Int,
+        seed: Long
+    ): Nothing = throw propertyFailException(e, attempts, seed, results)
 
     /**
      * Creates a `Throwable` that encapsulates a detailed failure message for a property-based test.
