@@ -6,12 +6,10 @@
 package munit.checkall
 package property
 
-import munit.checkall
-import munit.checkall.{CheckAllSuite, PropTestConfig}
-import munit.checkall.arbitrary.Ints.arbInt
+import arbitrary.Ints.arbInt
 
 class CheckAllTest extends CheckAllSuite {
-    given config: PropTestConfig = checkall.PropTestConfig()
+    given config: PropTestConfig = PropTestConfig()
 
     test("Integers are non-negative") {
         checkAll(arbInt()) { i =>

@@ -76,9 +76,12 @@ object Shrinker {
         mode: ShrinkingMode,
         seed: Long
     )(context: PropertyContext): Seq[ShrinkResult[T]] = {
+        // we use a new context for the shrinks, as we don't want to affect classification etc
+        val shrinkContext = context.copy()
         val property: (PropertyContext, T) => Unit = (ctx, value) => {
-            ???
+            setupContextual(RandomSource.seeded(seed))
+            propertyFn(value)
         }
-        ???
+        val smallerA =
     }
 }
