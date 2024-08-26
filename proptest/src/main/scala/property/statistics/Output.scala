@@ -46,7 +46,7 @@ object Output {
                 context.statistics,
                 success
             )
-            PropertyTesting.statisticsReporter.output(statistics)
+            PropertyTesting.statisticsReporter.output(statistics)(using context)
         }
 
         PropertyTesting.statisticsReporterMode match {

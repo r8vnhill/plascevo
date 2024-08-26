@@ -6,6 +6,8 @@
 package cl.ravenhill.plascevo
 package property.statistics
 
+import property.context.PropertyContext
+
 /**
  * Trait for reporting statistics during property-based testing.
  *
@@ -23,6 +25,8 @@ trait StatisticsReporter {
      *
      * @param statistics The `TestStatistics` object containing data to be reported. This includes details such as the
      *                   number of iterations, labels, success or failure status, and other relevant metrics.
+     * @param context    The `PropertyContext` object containing the context of the property-based test. This context
+     *                   includes information such as the test name, seed, and other relevant details.
      */
-    def output(statistics: TestStatistics): Unit
+    def output(statistics: TestStatistics)(using context: PropertyContext): Unit
 }

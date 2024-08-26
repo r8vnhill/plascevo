@@ -8,9 +8,10 @@ package property
 
 import property.arbitrary.Ints.arbInt
 
-class CheckAllTest extends munit.FunSuite with CheckAll {
-    test("checkAll should run a property test") {
-        given config: PropTestConfig = PropTestConfig()
-        checkAll(arbInt()) { _ => }
+class CheckAllTest extends CheckAllSuite {
+    given config: PropTestConfig = PropTestConfig()
+
+    checkAll("Integers")(arbInt()) { i =>
+        assert(i >= 0)
     }
 }

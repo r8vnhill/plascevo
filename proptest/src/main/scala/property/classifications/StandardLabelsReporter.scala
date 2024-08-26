@@ -6,4 +6,8 @@
 package cl.ravenhill.plascevo
 package property.classifications
 
-object StandardLabelsReporter extends LabelsReporter
+import property.PropertyResult
+
+object StandardLabelsReporter extends LabelsReporter {
+    override def output(result: PropertyResult): Unit = ???
+}

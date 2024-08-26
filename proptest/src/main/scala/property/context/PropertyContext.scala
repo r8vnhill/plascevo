@@ -10,6 +10,7 @@ import property.arbitrary.generators.Sample
 import property.{PropTestConfig, RandomSource}
 
 import cl.ravenhill.plascevo.property.classifications.Output.outputClassifications
+import cl.ravenhill.plascevo.property.commons.{TestNameContextActor, TestNameContextElement}
 import cl.ravenhill.plascevo.property.internal.Checks.{checkMaxDiscarded, checkMinSuccessful}
 import cl.ravenhill.plascevo.property.seed.Seed.clearFailedSeeds
 import cl.ravenhill.plascevo.property.statistics.Label
@@ -29,7 +30,7 @@ import scala.collection.mutable.ListBuffer
  *
  * @param configuration The configuration settings for the property-based testing process, provided implicitly.
  */
-final class PropertyContext(using val configuration: PropTestConfig = PropTestConfig()) {
+final class PropertyContext(val testName: String)(using val configuration: PropTestConfig = PropTestConfig()) {
 
     /** Tracks the number of evaluations performed in the current test context.
      *
@@ -65,6 +66,18 @@ final class PropertyContext(using val configuration: PropTestConfig = PropTestCo
      * needed.
      */
     private var _afterPropertyContextElement: Option[AfterPropertyContextElement] = None
+
+    /** Tracks the number of successful evaluations in the property-based test; initialized to 0. */
+    private var _successes: Int = 0
+
+    /** Tracks the number of failed evaluations in the property-based test; initialized to 0. */
+    private var _failures: Int = 0
+
+    /** A mutable map storing classifications for property-based testing. */
+    private val _classifications: mutable.Map[Option[Label], mutable.Map[Option[Any], Int]] = mutable.Map.empty
+
+    /** A private, mutable map that tracks automatic classifications of test results. */
+    private val _autoClassifications: mutable.Map[String, mutable.Map[String, Int]] = mutable.Map.empty
 
     /** Returns the number of evaluations performed in the current test context.
      *
@@ -103,11 +116,53 @@ final class PropertyContext(using val configuration: PropTestConfig = PropTestCo
     def afterPropertyContextElement_=(element: AfterPropertyContextElement): Unit =
         _afterPropertyContextElement = Some(element)
 
-    def attempts: Int = ???
+    /** Returns the number of successful evaluations in the property-based test.
+     *
+     * @return The number of successful evaluations as an `Int`.
+     */
+    def successes: Int = _successes
 
-    def labels: Set[Label] = ???
+    /** Returns the number of failed evaluations in the property-based test.
+     *
+     * @return The number of failed evaluations as an `Int`.
+     */
+    def failures: Int = _failures
 
-    def statistics: Map[Option[Label], Map[Option[Any], Int]] = ???
+    /**
+     * Returns the total number of test attempts made during the property-based test.
+     *
+     * The `attempts` method calculates and returns the sum of successful and failed evaluations in the current
+     * property-based test. This value represents the total number of test cases that have been executed, regardless
+     * of whether they passed or failed.
+     */
+    def attempts: Int = _successes + _failures
+
+    /** Retrieves the set of all distinct labels used in the property-based test. */
+    def labels: Set[Label] = statistics.keys
+        .filter(_.isDefined)
+        .map(_.get) // Safe to call get since we know the label is defined
+        .toSet
+
+    /**
+     * Retrieves a snapshot of the current test case classifications and their associated counts.
+     *
+     * The `statistics` method converts the internal mutable map `_classifications` into an immutable `Map`, providing a
+     * snapshot of the classifications and their associated counts at the current state of the property-based test. Each
+     * entry in the map corresponds to an optional `Label`, which may be associated with multiple test case values
+     * (represented as `Option[Any]`), along with the count of how many times each value has been classified under that
+     * label.
+     *
+     * @return An immutable `Map` representing the classifications of test cases and their respective counts.
+     */
+    def statistics: Map[Option[Label], Map[Option[Any], Int]] =  _classifications.view.mapValues(_.toMap).toMap
+
+    /**
+     * Retrieves a snapshot of the current automatic classifications as an immutable map.
+     * 
+     * @return An immutable `Map[String, Map[String, Int]]` that reflects the current state of automatic
+     *         classifications.
+     */
+    def autoClassifications: Map[String, Map[String, Int]] = _autoClassifications.view.mapValues(_.toMap).toMap
 
     def markSuccess(): Unit = ???
 
@@ -122,7 +177,7 @@ final class PropertyContext(using val configuration: PropTestConfig = PropTestCo
      *                checks on discarded tests are performed.
      * @param randomSource The `RandomSource` used during the test, which contains the seed value for reproducibility.
      */
-    def onSuccess(numArgs: Int, randomSource: RandomSource): Unit = {
+    def onSuccess(numArgs: Int, randomSource: RandomSource)(using context: PropertyContext): Unit = {
         outputStatistics(this, numArgs, Success)
         outputClassifications(numArgs, configuration, randomSource.seed)
         checkMinSuccessful(configuration, randomSource.seed)

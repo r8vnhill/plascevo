@@ -19,6 +19,8 @@ lazy val testUtils = (project in file("test-utils"))
         idePackagePrefix := Some("cl.ravenhill.plascevo"),
         libraryDependencies ++= Seq(
             "org.scalameta" %% "munit" % "1.0.0",
+            "com.typesafe.akka" %% "akka-actor-typed" % "2.8.6",
+            "com.typesafe.akka" %% "akka-stream" % "2.8.6",
         )
     )
     .dependsOn(composerr)
@@ -29,6 +31,9 @@ lazy val proptest = (project in file("proptest"))
         idePackagePrefix := Some("cl.ravenhill.plascevo"),
         libraryDependencies ++= Seq(
             "org.scalameta" %% "munit" % "1.0.0",
+            "com.typesafe.akka" %% "akka-actor-typed" % "2.8.6",
+            "com.typesafe.akka" %% "akka-stream" % "2.8.6",
+            "org.scalameta" %% "munit-scalacheck" % "0.7.29"
         )
     )
     .dependsOn(composerr)
@@ -43,8 +48,8 @@ lazy val plascevoCore = (project in file("plascevo-core"))
             "org.scalatest" %% "scalatest" % "3.2.19" % "test",
             "org.scalatestplus" %% "scalacheck-1-18" % "3.2.19.0" % "test",
             "org.jfree" % "jfreechart" % "1.5.5",
-            "com.typesafe.akka" %% "akka-actor-typed" % "2.8.5",
-            "com.typesafe.akka" %% "akka-stream" % "2.8.5",
+            "com.typesafe.akka" %% "akka-actor-typed" % "2.8.6",
+            "com.typesafe.akka" %% "akka-stream" % "2.8.6",
             "ch.qos.logback" % "logback-classic" % "1.5.7",
             "org.scalameta" %% "munit" % "1.0.0" % "test",
         )

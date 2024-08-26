@@ -14,7 +14,7 @@ import property.seed.createRandom
 
 object PropertyTest {
 
-    def apply[A](gen: Generator[A])(property: A => Unit)(using config: PropTestConfig)
+    def apply[A](name: String, gen: Generator[A])(property: A => Unit)(using config: PropTestConfig)
         (using context: PropertyContext): PropertyContext = {
         config.checkFailOnSeed()
 
@@ -25,7 +25,7 @@ object PropertyTest {
                     .getOrElse(PropertyConstraints.iterations(PropertyTesting.defaultIterations))
             )
 
-        val context = new PropertyContext
+        val context = new PropertyContext(name)
         val random = createRandom
         val contextRandom = RandomSource.seeded(random.seed)
 
