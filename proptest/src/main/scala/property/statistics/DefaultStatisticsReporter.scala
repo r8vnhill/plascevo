@@ -81,10 +81,11 @@ object DefaultStatisticsReporter extends StatisticsReporter {
         println()
     }
 
-    private def createHeader(iterations: Int, numArgs: Int, label: Option[Label])(using context: PropertyContext): String = {
+    private def createHeader(iterations: Int, numArgs: Int, label: Option[Label])
+        (using context: PropertyContext): String = {
         val testName = context.testName
         ???
     }
-    
+
     private def printStats(stats: Map[Option[Any], Int], iterations: Int): Unit = ???
 }

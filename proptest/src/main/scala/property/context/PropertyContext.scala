@@ -7,15 +7,12 @@ package cl.ravenhill.plascevo
 package property.context
 
 import property.arbitrary.generators.Sample
+import property.classifications.Output.outputClassifications
+import property.internal.Checks.{checkMaxDiscarded, checkMinSuccessful}
+import property.statistics.Label
+import property.statistics.Output.outputStatistics
+import property.utils.TestResult.Success
 import property.{PropTestConfig, RandomSource}
-
-import cl.ravenhill.plascevo.property.classifications.Output.outputClassifications
-import cl.ravenhill.plascevo.property.commons.{TestNameContextActor, TestNameContextElement}
-import cl.ravenhill.plascevo.property.internal.Checks.{checkMaxDiscarded, checkMinSuccessful}
-import cl.ravenhill.plascevo.property.seed.Seed.clearFailedSeeds
-import cl.ravenhill.plascevo.property.statistics.Label
-import cl.ravenhill.plascevo.property.statistics.Output.outputStatistics
-import cl.ravenhill.plascevo.property.utils.TestResult.Success
 
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
@@ -28,9 +25,11 @@ import scala.collection.mutable.ListBuffer
  * generated samples. This context is essential for coordinating the execution flow of property tests, including setting
  * up the random source and marking evaluations.
  *
+ * @param testName      The name of the property-based test.
  * @param configuration The configuration settings for the property-based testing process, provided implicitly.
  */
-final class PropertyContext(val testName: String)(using val configuration: PropTestConfig = PropTestConfig()) {
+final class PropertyContext(val testName: String)
+    (using val configuration: PropTestConfig = PropTestConfig()) {
 
     /** Tracks the number of evaluations performed in the current test context.
      *
@@ -110,6 +109,7 @@ final class PropertyContext(val testName: String)(using val configuration: PropT
 
     /**
      * Sets the `AfterPropertyContextElement` for this context.
+     *
      * @param element The `AfterPropertyContextElement` to be set, containing the actions to be performed after the
      *                test.
      */
@@ -154,11 +154,11 @@ final class PropertyContext(val testName: String)(using val configuration: PropT
      *
      * @return An immutable `Map` representing the classifications of test cases and their respective counts.
      */
-    def statistics: Map[Option[Label], Map[Option[Any], Int]] =  _classifications.view.mapValues(_.toMap).toMap
+    def statistics: Map[Option[Label], Map[Option[Any], Int]] = _classifications.view.mapValues(_.toMap).toMap
 
     /**
      * Retrieves a snapshot of the current automatic classifications as an immutable map.
-     * 
+     *
      * @return An immutable `Map[String, Map[String, Int]]` that reflects the current state of automatic
      *         classifications.
      */
@@ -173,16 +173,17 @@ final class PropertyContext(val testName: String)(using val configuration: PropT
      * tasks, including outputting statistical information, handling classifications, and checking specific constraints
      * to ensure the test's validity. Finally, it clears any recorded failed seeds if applicable.
      *
-     * @param numArgs The number of arguments used in the property test. If more than one argument was used, additional
-     *                checks on discarded tests are performed.
+     * @param numArgs      The number of arguments used in the property test. If more than one argument was used,
+     *                     additional checks on discarded tests are performed.
      * @param randomSource The `RandomSource` used during the test, which contains the seed value for reproducibility.
+     * @param context      The implicit `PropertyContext` for the test, which tracks the test's progress and results.
      */
-    def onSuccess(numArgs: Int, randomSource: RandomSource)(using context: PropertyContext): Unit = {
+    def onSuccess(numArgs: Int, randomSource: RandomSource)
+        (using context: PropertyContext, configuration: PropTestConfig): Unit = {
         outputStatistics(this, numArgs, Success)
         outputClassifications(numArgs, configuration, randomSource.seed)
-        checkMinSuccessful(configuration, randomSource.seed)
+        checkMinSuccessful(randomSource.seed)
         if numArgs > 1 then checkMaxDiscarded()
-        clearFailedSeeds()
     }
 
     def markFailure(e: Throwable): Unit = ???

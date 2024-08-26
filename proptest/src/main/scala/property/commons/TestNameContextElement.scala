@@ -6,10 +6,6 @@
 package cl.ravenhill.plascevo
 package property.commons
 
-import akka.actor.typed.ActorSystem
-
-import akka.actor.typed.ActorRef
-
 /**
  * The TestNameContextElement class represents an element in a context that includes the name of a test.
  *
