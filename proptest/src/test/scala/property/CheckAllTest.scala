@@ -3,13 +3,15 @@
  * 2-Clause BSD License.
  */
 
-package cl.ravenhill.plascevo
+package munit.checkall
 package property
 
-import property.arbitrary.Ints.arbInt
+import munit.checkall
+import munit.checkall.{CheckAllSuite, PropTestConfig}
+import munit.checkall.arbitrary.Ints.arbInt
 
 class CheckAllTest extends CheckAllSuite {
-    given config: PropTestConfig = PropTestConfig()
+    given config: PropTestConfig = checkall.PropTestConfig()
 
     test("Integers are non-negative") {
         checkAll(arbInt()) { i =>

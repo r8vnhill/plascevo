@@ -13,10 +13,20 @@ lazy val composerr = (project in file("composerr"))
         )
     )
 
-lazy val testUtils = (project in file("test-utils"))
+lazy val munitUtils = (project in file("munit-utils"))
     .settings(
         name := "plascevo",
-        idePackagePrefix := Some("cl.ravenhill.plascevo"),
+        idePackagePrefix := Some("cl.ravenhill.munit"),
+        libraryDependencies ++= Seq(
+            "org.scalameta" %% "munit" % "1.0.0",
+        )
+    )
+    .dependsOn(composerr)
+
+lazy val matchers = (project in file("munit-matchers"))
+    .settings(
+        name := "plascevo",
+        idePackagePrefix := Some("munit.matchers"),
         libraryDependencies ++= Seq(
             "org.scalameta" %% "munit" % "1.0.0",
             "com.typesafe.akka" %% "akka-actor-typed" % "2.8.6",
@@ -24,11 +34,12 @@ lazy val testUtils = (project in file("test-utils"))
         )
     )
     .dependsOn(composerr)
+    .dependsOn(munitUtils)
 
 lazy val proptest = (project in file("proptest"))
     .settings(
         name := "plascevo",
-        idePackagePrefix := Some("cl.ravenhill.plascevo"),
+        idePackagePrefix := Some("munit.checkall"),
         libraryDependencies ++= Seq(
             "org.scalameta" %% "munit" % "1.0.0",
             "com.typesafe.akka" %% "akka-actor-typed" % "2.8.6",
@@ -37,7 +48,7 @@ lazy val proptest = (project in file("proptest"))
         )
     )
     .dependsOn(composerr)
-    .dependsOn(testUtils)
+    .dependsOn(munitUtils)
 
 lazy val plascevoCore = (project in file("plascevo-core"))
     .settings(
@@ -55,7 +66,7 @@ lazy val plascevoCore = (project in file("plascevo-core"))
         )
     )
     .dependsOn(composerr)
-    .dependsOn(testUtils % "test->test")
+    .dependsOn(matchers % "test->test")
     .dependsOn(proptest % "test->test")
 
 lazy val plascevoGenetics = (project in file("plascevo-genetics"))

@@ -2,6 +2,6 @@
 <project version="4">
   <component name="ScalaCompilerConfiguration">
     <option name="separateProdTestSources" value="false" />
-    <profile name="sbt 1" modules="plascevo,plascevo.plascevo,plascevo.plascevo.composerr,plascevo.plascevo.examples,plascevo.plascevo.freeSpecSuite,plascevo.plascevo.plascevoCore,plascevo.plascevo.plascevoGenetics,plascevo.plascevo.proptest,plascevo.plascevo.testUtils" />
+    <profile name="sbt 1" modules="plascevo,plascevo.plascevo,plascevo.plascevo.commons,plascevo.plascevo.composerr,plascevo.plascevo.examples,plascevo.plascevo.freeSpecSuite,plascevo.plascevo.matchers,plascevo.plascevo.munitUtils,plascevo.plascevo.plascevoCore,plascevo.plascevo.plascevoGenetics,plascevo.plascevo.proptest,plascevo.plascevo.testUtils" />
   </component>
 </project>
