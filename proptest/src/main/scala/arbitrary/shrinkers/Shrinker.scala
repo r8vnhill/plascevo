@@ -13,6 +13,7 @@ import utils.RTree
 import cl.ravenhill.munit.print.Print.printed
 
 import scala.collection.mutable.ListBuffer
+import scala.util.{Failure, Success, Try}
 
 /**
  * A trait for defining shrinking behavior in property-based testing.
@@ -92,12 +93,13 @@ object Shrinker {
      */
     def shrinkFnFor[T](
         sample: Sample[T],
-        propertyFn: T => Unit,
+        propertyFn: T => Try[Unit],
         shrinkingMode: ShrinkingMode,
         seed: Long
     )(using context: PropertyContext, config: PropTestConfig): () => Seq[ShrinkResult[?]] = () => {
         // Copy the context to avoid modifying the original
         given PropertyContext = context.copy()
+
         // Define a property function that sets up the contextual random source before testing the value
         val property: (PropertyContext, T) => Unit = (ctx, value) => {
             ctx.setupContextual(RandomSource.seeded(seed))
@@ -126,7 +128,7 @@ object Shrinker {
      * @return A `ShrinkResult[T]` containing the original value, the smallest failing value found (if any), and the
      *         exception that caused the failure, if applicable.
      */
-    private def doShrinking[T](initial: RTree[T], shrinkingMode: ShrinkingMode)(test: T => Unit): ShrinkResult[T] =
+    private def doShrinking[T](initial: RTree[T], shrinkingMode: ShrinkingMode)(test: T => Try[Unit]): ShrinkResult[T] =
         initial.children() match {
             case Nil => ShrinkResult(initial.value(), initial.value(), None)
             case _ =>
@@ -152,9 +154,91 @@ object Shrinker {
         shrinkingMode: ShrinkingMode,
         tested: ListBuffer[T],
         counter: Counter,
-        test: T => Unit,
+        test: T => Try[Unit],
         stringBuilder: StringBuilder
-    ): Option[(T, Option[Throwable])] = ???
+    ): Option[(T, Option[Throwable])] = {
+
+        if (!shrinkingMode.isShrinking(counter.value)) {
+            None
+        } else {
+            val candidates: Seq[RTree[T]] = initial.children()
+            processCandidates(candidates, shrinkingMode, tested, counter, test, stringBuilder)
+        }
+    }
+
+    /** Process the candidates for shrinking, testing each one. */
+    private def processCandidates[T](
+        candidates: Seq[RTree[T]],
+        shrinkingMode: ShrinkingMode,
+        tested: ListBuffer[T],
+        counter: Counter,
+        test: T => Try[Unit],
+        stringBuilder: StringBuilder
+    ): Option[(T, Option[Throwable])] = {
+
+        candidates.view
+            .filterNot(candidate => isAlreadyTested(candidate, tested))
+            .foreach { candidate =>
+                val value = candidate.value()
+                counter.increment()
+                testCandidate(value, candidate, shrinkingMode, tested, counter, test, stringBuilder)
+            }
+        None
+    }
+
+    /** Check if a candidate has already been tested. */
+    private def isAlreadyTested[T](candidate: RTree[T], tested: ListBuffer[T]): Boolean = {
+        val value = candidate.value()
+        tested.contains(value) || { tested += value; false }
+    }
+
+    /** Test a candidate and handle the result. */
+    private def testCandidate[T](
+        value: T,
+        candidate: RTree[T],
+        shrinkingMode: ShrinkingMode,
+        tested: ListBuffer[T],
+        counter: Counter,
+        test: T => Try[Unit],
+        stringBuilder: StringBuilder
+    ): Option[(T, Option[Throwable])] = {
+
+        test(value) match {
+            case Success(_) =>
+                logShrinkStep(value, counter, passed = true, stringBuilder)
+                None
+
+            case Failure(t) =>
+                logShrinkStep(value, counter, passed = false, stringBuilder)
+                shrinkFurther(candidate, shrinkingMode, tested, counter, test, stringBuilder)
+                    .orElse(Some((value, Some(t))))
+        }
+    }
+
+    /** Log the result of a shrink step. */
+    private def logShrinkStep[T](
+        value: T,
+        counter: Counter,
+        passed: Boolean,
+        stringBuilder: StringBuilder
+    ): Unit = {
+        if (PropertyTesting.shouldPrintShrinkSteps) {
+            val result = if (passed) "pass" else "fail"
+            stringBuilder.append(s"Shrink #${counter.value}: ${printed(value).get.value} $result\n")
+        }
+    }
+
+    /** Attempt to shrink the candidate further if it failed. */
+    private def shrinkFurther[T](
+        candidate: RTree[T],
+        shrinkingMode: ShrinkingMode,
+        tested: ListBuffer[T],
+        counter: Counter,
+        test: T => Try[Unit],
+        stringBuilder: StringBuilder
+    ): Option[(T, Option[Throwable])] = {
+        doStep(candidate, shrinkingMode, tested, counter, test, stringBuilder)
+    }
 
     private def result[T](
         stringBuilder: StringBuilder,

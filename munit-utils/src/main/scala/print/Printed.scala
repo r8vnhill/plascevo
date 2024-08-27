@@ -3,7 +3,8 @@
  * 2-Clause BSD License.
  */
 
-package cl.ravenhill.munit.print
+package cl.ravenhill.munit
+package print
 
 /** A simple case class representing a printed value.
  *
@@ -13,6 +14,4 @@ package cl.ravenhill.munit.print
  *
  * @param value The string value representing the printed content.
  */
-case class Printed(value: Option[Any]) {
-    ???
-}
+case class Printed(value: Option[Any])

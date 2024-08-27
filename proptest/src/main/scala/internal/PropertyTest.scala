@@ -7,25 +7,26 @@ package munit.checkall
 package internal
 
 import arbitrary.generators.{Arbitrary, Generator}
+import arbitrary.shrinkers.ShrinkResult
 import arbitrary.shrinkers.Shrinker.shrinkFnFor
 import context.PropertyContext
 import seed.createRandom
+import stacktraces.PropertyCheckStackTraces
 
 import cl.ravenhill.munit.collectors.ErrorCollector
-import munit.checkall.arbitrary.shrinkers.ShrinkResult
-import munit.checkall.stacktraces.PropertyCheckStackTraces
 
 import scala.util.{Failure, Success, Try}
 
 object PropertyTest {
 
-    def apply[A](name: String, gen: Generator[A])(property: A => Unit)(using config: PropTestConfig)
-        (using context: PropertyContext): Try[PropertyContext] = {
+    def apply[A](name: String, gen: Generator[A])(property: A => Unit)(using config: PropTestConfig = PropTestConfig())
+        (using context: PropertyContext = PropertyContext(name)): Try[PropertyContext] = {
         config.checkFailOnSeed()
 
         given ErrorCollector = config.errorCollector
+
         given PropertyCheckStackTraces = config.stackTraces
-        
+
         val constraints: PropertyConstraints = config.constraints
             .getOrElse(
                 config.iterations
@@ -33,7 +34,7 @@ object PropertyTest {
                     .getOrElse(PropertyConstraints.iterations(PropertyTesting.defaultIterations))
             )
 
-        val context = new PropertyContext(name)
+        val context = PropertyContext(name)
         val random = createRandom
         val contextRandom = RandomSource.seeded(random.seed)
 
@@ -42,7 +43,7 @@ object PropertyTest {
                 .takeWhile(_ => constraints(context))
                 .foreach { value =>
                     val contextualSeed = contextRandom.random.nextLong()
-                    val shrinkFn = shrinkFnFor(value, property, config.shrinkingMode, contextualSeed)
+                    val shrinkFn = shrinkFnFor(value, a => Try(property(a)), config.shrinkingMode, contextualSeed)
                     config.listeners.foreach(_.beforeTest())
                     Test(
                         config,
