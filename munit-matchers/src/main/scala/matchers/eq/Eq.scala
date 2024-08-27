@@ -6,7 +6,7 @@
 package cl.ravenhill.plascevo
 package matchers.eq
 
-import cl.ravenhill.munit.print.Print.print
+import cl.ravenhill.munit.print.Print.printed
 import matchers.ApplyMatcher
 import matchers.eq.EqualityMatcher.NumberEquality.NonStrict
 import matchers.eq.EqualityMatcher.{NumberEquality, equal}

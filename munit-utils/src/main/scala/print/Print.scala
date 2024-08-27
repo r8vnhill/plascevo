@@ -32,21 +32,21 @@ trait Print {
  * appropriate `Print` implementation based on the value's type.
  */
 object Print {
-
-    extension (value: Any) {
-        /** Extension method for printing any value to a `String`.
-         *
-         * This extension method provides a convenient way to convert any value to a `String` by utilizing the
-         * appropriate `Print` implementation. If the value is `null`, it uses the `NullPrint` implementation;
-         * otherwise, it determines the correct `Print` instance based on the value's type and uses it to produce the
-         * printed representation.
-         *
-         * @return A `String` representation of the printed value.
-         */
-        def print: Printed = value match {
-            case null => NullPrint.print(value, 0)
-            case _ => printFor(value).print(value, 0)
-        }
+    
+    /**
+     * Generates a `Printed` representation of a given value.
+     *
+     * The `printed` method takes a value of any type `T` and returns its `Printed` representation. The method handles
+     * `null` values by delegating to `NullPrint`, and for non-null values, it delegates to the appropriate `Print`
+     * instance for the type of the value.
+     *
+     * @param value The value to be printed. It can be of any type `T`.
+     * @tparam T The type of the value being printed.
+     * @return A `Printed` instance representing the formatted output of the value.
+     */
+    def printed[T](value: T): Printed = value match {
+        case null => NullPrint.print(value, 0)
+        case _ => printFor(value).print(value, 0)
     }
 
     /** Determines the appropriate `Print` implementation for a given value.

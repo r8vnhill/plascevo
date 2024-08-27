@@ -18,4 +18,3 @@ import cl.ravenhill.composerr.exceptions.ConstraintException
  * }}}
  */
 class InvalidSizeException(message: String) extends ConstraintException(message)
-

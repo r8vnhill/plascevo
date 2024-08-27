@@ -47,7 +47,7 @@ object ApplyMatcher extends Assertions {
             case (false, _) =>
                 handleGenericFailure(result.failureMessage())
             case _ =>
-        }
+        }w
 
         result
     }

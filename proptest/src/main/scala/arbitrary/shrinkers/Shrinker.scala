@@ -10,6 +10,10 @@ import arbitrary.generators.Sample
 import context.PropertyContext
 import utils.RTree
 
+import cl.ravenhill.munit.print.Print.printed
+
+import scala.collection.mutable.ListBuffer
+
 /**
  * A trait for defining shrinking behavior in property-based testing.
  *
@@ -107,8 +111,84 @@ object Shrinker {
         smallerA :: smallestContextual
     }
 
-    private def doShrinking[T](initial: RTree[T], shrinkingMode: ShrinkingMode)(test: T => Unit): ShrinkResult[T] = ???
+    /**
+     * Performs the shrinking process for a given value, attempting to find a smaller value that still fails the test.
+     *
+     * The `doShrinking` method takes an initial `RTree` of values and applies the provided test function to each
+     * possible smaller value, as determined by the shrinking mode. The goal of shrinking is to find the simplest value
+     * that still causes the test to fail. This method returns a `ShrinkResult` containing the original value, the
+     * smallest failing value found, and any associated exception that caused the failure.
+     *
+     * @param initial       The initial `RTree[T]` containing the value to be shrunk and its possible smaller values.
+     * @param shrinkingMode The mode that determines how the shrinking process should proceed.
+     * @param test          A function that tests the value. If the test fails, the shrinking process continues.
+     * @tparam T The type of the value being shrunk.
+     * @return A `ShrinkResult[T]` containing the original value, the smallest failing value found (if any), and the
+     *         exception that caused the failure, if applicable.
+     */
+    private def doShrinking[T](initial: RTree[T], shrinkingMode: ShrinkingMode)(test: T => Unit): ShrinkResult[T] =
+        initial.children() match {
+            case Nil => ShrinkResult(initial.value(), initial.value(), None)
+            case _ =>
+                val counter = Counter()
+                val tested = ListBuffer.empty[T]
+                val stringBuilder = new StringBuilder
+                stringBuilder.append(s"Attempting to shrink arg ${printed(initial.value()).value}\n")
 
+                val stepResult = doStep(initial, shrinkingMode, tested, counter, test, stringBuilder)
+                result(stringBuilder, stepResult, counter.value)
+
+                stepResult match {
+                    case None => ShrinkResult(initial.value(), initial.value(), None)
+                    case Some((failed, cause)) => ShrinkResult(initial.value(), failed, cause)
+                }
+        }
+    
     private def doContextualShrinking[T](shrinkingMode: ShrinkingMode)
         (property: (PropertyContext, T) => Unit): List[ShrinkResult[T]] = ???
+    
+    private def doStep[T](
+        initial: RTree[T],
+        shrinkingMode: ShrinkingMode,
+        tested: ListBuffer[T],
+        counter: Counter,
+        test: T => Unit,
+        stringBuilder: StringBuilder
+    ): Option[(T, Option[Throwable])] = ???
+    
+    private def result[T](
+        stringBuilder: StringBuilder,
+        stepResult: Option[(T, Option[Throwable])],
+        counter: Int
+    ): Unit = ???
+}
+
+/**
+ * A simple counter class to keep track of an integer count.
+ *
+ * The `Counter` class provides a way to maintain a mutable count that can be incremented and accessed. It encapsulates
+ * the count value and provides methods to modify and retrieve it.
+ *
+ * @constructor Creates a new `Counter` instance with an initial count of 0.
+ */
+private class Counter {
+
+    /** The current count value. */
+    private var count = 0
+
+    /**
+     * Increments the count by 1.
+     *
+     * The `increment` method increases the current count value by 1.
+     */
+    def increment(): Unit = count += 1
+
+    /**
+     * Retrieves the current count value.
+     *
+     * The `value` method returns the current value of the count.
+     *
+     * @return The current count as an `Int`.
+     */
+    def value: Int = count
 }

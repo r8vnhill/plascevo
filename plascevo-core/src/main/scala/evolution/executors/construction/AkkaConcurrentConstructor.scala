@@ -99,3 +99,13 @@ object SequenceActor {
             Behaviors.same
     }
 }
+
+object AkkaConcurrentConstructor {
+
+    def main(args: Array[String]): Unit = {
+        given system: ActorSystem[SequenceActor.Command] = ActorSystem(Behaviors.empty, "SequenceSystem")
+        val constructor = AkkaConcurrentConstructor[Int](system)
+        val sequence = constructor(5, index => index * 2)
+        println(sequence)
+    }
+}
