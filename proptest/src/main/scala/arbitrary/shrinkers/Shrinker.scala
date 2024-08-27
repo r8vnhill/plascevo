@@ -133,7 +133,7 @@ object Shrinker {
                 val counter = Counter()
                 val tested = ListBuffer.empty[T]
                 val stringBuilder = new StringBuilder
-                stringBuilder.append(s"Attempting to shrink arg ${printed(initial.value()).value}\n")
+                stringBuilder.append(s"Attempting to shrink arg ${printed(initial.value()).get}\n")
 
                 val stepResult = doStep(initial, shrinkingMode, tested, counter, test, stringBuilder)
                 result(stringBuilder, stepResult, counter.value)
@@ -143,10 +143,10 @@ object Shrinker {
                     case Some((failed, cause)) => ShrinkResult(initial.value(), failed, cause)
                 }
         }
-    
+
     private def doContextualShrinking[T](shrinkingMode: ShrinkingMode)
         (property: (PropertyContext, T) => Unit): List[ShrinkResult[T]] = ???
-    
+
     private def doStep[T](
         initial: RTree[T],
         shrinkingMode: ShrinkingMode,
@@ -155,7 +155,7 @@ object Shrinker {
         test: T => Unit,
         stringBuilder: StringBuilder
     ): Option[(T, Option[Throwable])] = ???
-    
+
     private def result[T](
         stringBuilder: StringBuilder,
         stepResult: Option[(T, Option[Throwable])],
