@@ -67,7 +67,7 @@ private[checkall] object Test {
      */
     def apply(
         config: PropTestConfig,
-        shrinkFn: () => Seq[ShrinkResult[?]],
+        shrinkFn: () => Try[Seq[ShrinkResult[?]]],
         inputs: Seq[Any],
         classifiers: Seq[Option[Classifier[?]]],
         seed: Long,
@@ -190,12 +190,13 @@ private[checkall] object Test {
      *         the failure cause if the exception is not handled by the method.
      */
     private def handleFailure(
-        shrinkFn: () => Seq[ShrinkResult[Any]],
+        shrinkFn: () => Try[Seq[ShrinkResult[Any]]],
         inputs: Seq[Any],
         seed: Long,
         e: Throwable,
         config: PropTestConfig
-    )(using
+    )(
+        using
         context: PropertyContext,
         errorCollector: ErrorCollector,
         stackTraces: PropertyCheckStackTraces
@@ -225,7 +226,7 @@ private[checkall] object Test {
      *         the failure cause if the exception is not handled by the method.
      */
     private def handleException(
-        shrinkFn: () => Seq[ShrinkResult[Any]],
+        shrinkFn: () => Try[Seq[ShrinkResult[Any]]],
         inputs: Seq[Any],
         seed: Long,
         cause: Throwable,
@@ -235,20 +236,31 @@ private[checkall] object Test {
         context: PropertyContext,
         errorCollector: ErrorCollector,
         stackTraces: PropertyCheckStackTraces
-    ): Try[PropertyFailException] = if (config.maxFailure == 0) {
-        // If the maxFailure is set to 0, immediately print the failure message and throw the failure exception with
-        // results
-        printFailureMessage(inputs, cause)
-        createPropertyFailExceptionWithResults(shrinkFn(), cause, context.attempts, seed)
-    } else if (context.failures > config.maxFailure) {
-        // If the number of failures exceeds maxFailure, build and throw an error with a detailed failure message
-        val error = buildMaxErrorFailureMessage(context, config, inputs)
-        createPropertyFailExceptionWithResults(shrinkFn(), AssertionError(error), context.attempts, seed)
-    } else {
-        // Otherwise, print the failure message and return a Failure with the exception
-        printFailureMessage(inputs, cause)
-        Failure(cause)
+    ): Try[PropertyFailException] = {
+
+        def handleShrinkResults(
+            shrinkResults: Try[Seq[ShrinkResult[Any]]],
+            cause: Throwable
+        ): Try[PropertyFailException] = shrinkResults match {
+            case Success(results) =>
+                createPropertyFailExceptionWithResults(results, cause, context.attempts, seed)
+            case Failure(e) =>
+                printFailureMessage(inputs, e)
+                createPropertyFailExceptionWithResults(Seq.empty, cause, context.attempts, seed)
+        }
+
+        if (config.maxFailure == 0) {
+            printFailureMessage(inputs, cause)
+            handleShrinkResults(shrinkFn(), cause)
+        } else if (context.failures > config.maxFailure) {
+            val error = buildMaxErrorFailureMessage(context, config, inputs)
+            handleShrinkResults(shrinkFn(), AssertionError(error))
+        } else {
+            printFailureMessage(inputs, cause)
+            Failure(cause)
+        }
     }
+
 
     /**
      * Prints a detailed failure message for a property-based test that failed.

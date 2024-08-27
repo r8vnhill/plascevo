@@ -8,6 +8,7 @@ package arbitrary.shrinkers
 
 import arbitrary.generators.Sample
 import context.PropertyContext
+import stacktraces.PropertyCheckStackTraces
 import utils.RTree
 
 import cl.ravenhill.munit.print.Print.printed
@@ -96,7 +97,9 @@ object Shrinker {
         propertyFn: T => Try[Unit],
         shrinkingMode: ShrinkingMode,
         seed: Long
-    )(using context: PropertyContext, config: PropTestConfig): () => Seq[ShrinkResult[?]] = () => {
+    )(
+        using context: PropertyContext, config: PropTestConfig, stackTraces: PropertyCheckStackTraces
+    ): () => Try[Seq[ShrinkResult[?]]] = () => {
         // Copy the context to avoid modifying the original
         given PropertyContext = context.copy()
 
@@ -110,45 +113,72 @@ object Shrinker {
         // Perform contextual shrinking based on the shrinking mode
         val smallestContextual = doContextualShrinking(shrinkingMode)(property)
         // Combine the results of standard and contextual shrinking
-        smallerA :: smallestContextual
+        smallerA.map(_ :: smallestContextual).map(_.toSeq)
     }
 
     /**
-     * Performs the shrinking process for a given value, attempting to find a smaller value that still fails the test.
+     * Performs the shrinking process on a given initial value, attempting to find the smallest input that still causes
+     * the property to fail.
      *
-     * The `doShrinking` method takes an initial `RTree` of values and applies the provided test function to each
-     * possible smaller value, as determined by the shrinking mode. The goal of shrinking is to find the simplest value
-     * that still causes the test to fail. This method returns a `ShrinkResult` containing the original value, the
-     * smallest failing value found, and any associated exception that caused the failure.
+     * The `doShrinking` method initiates the shrinking process by taking an initial value wrapped in an `RTree` and
+     * recursively testing smaller candidates. The goal is to find the smallest value that still results in a test
+     * failure. The process is guided by the provided `ShrinkingMode`, which determines how many shrinking steps are
+     * allowed.
      *
-     * @param initial       The initial `RTree[T]` containing the value to be shrunk and its possible smaller values.
-     * @param shrinkingMode The mode that determines how the shrinking process should proceed.
-     * @param test          A function that tests the value. If the test fails, the shrinking process continues.
+     * @param initial       The initial `RTree` containing the value to be shrunk and its children (potential shrinks).
+     * @param shrinkingMode The `ShrinkingMode` that controls how many shrinking attempts are allowed.
+     * @param test          A function that tests a value and returns a `Try[Unit]`, indicating success or failure.
+     * @param stackTraces   The implicit `PropertyCheckStackTraces` used for stack trace analysis and error reporting.
      * @tparam T The type of the value being shrunk.
-     * @return A `ShrinkResult[T]` containing the original value, the smallest failing value found (if any), and the
-     *         exception that caused the failure, if applicable.
+     * @return A `Try[ShrinkResult[T]]` containing the result of the shrinking process. The `ShrinkResult` includes the
+     *         initial value, the smallest failing value found (or the initial value if no failures occurred), and an
+     *         optional throwable that caused the failure.
      */
-    private def doShrinking[T](initial: RTree[T], shrinkingMode: ShrinkingMode)(test: T => Try[Unit]): ShrinkResult[T] =
+    private def doShrinking[T](initial: RTree[T], shrinkingMode: ShrinkingMode)(test: T => Try[Unit])
+        (using stackTraces: PropertyCheckStackTraces): Try[ShrinkResult[T]] = Try {
         initial.children() match {
-            case Nil => ShrinkResult(initial.value(), initial.value(), None)
+            case Nil =>
+                // No children to shrink, so return the initial value as both the original and shrunk result
+                ShrinkResult(initial.value(), initial.value(), None)
             case _ =>
                 val counter = Counter()
                 val tested = ListBuffer.empty[T]
                 val stringBuilder = new StringBuilder
                 stringBuilder.append(s"Attempting to shrink arg ${printed(initial.value()).get}\n")
 
+                // Perform the shrinking step
                 val stepResult = doStep(initial, shrinkingMode, tested, counter, test, stringBuilder)
-                result(stringBuilder, stepResult, counter.value)
+                // Log the result of the shrinking process, interrupting if a failure occurs
+                result(stringBuilder, stepResult, counter.value).get
 
                 stepResult match {
                     case None => ShrinkResult(initial.value(), initial.value(), None)
                     case Some((failed, cause)) => ShrinkResult(initial.value(), failed, cause)
                 }
         }
+    }
 
     private def doContextualShrinking[T](shrinkingMode: ShrinkingMode)
         (property: (PropertyContext, T) => Unit): List[ShrinkResult[T]] = ???
 
+    /**
+     * Performs a single step in the shrinking process, attempting to find a smaller failing input.
+     *
+     * The `doStep` method executes one iteration of the shrinking process. It takes an initial tree of candidate values
+     * and tests each candidate to see if it fails the property test. If a candidate fails, the method attempts to
+     * shrink it further. The process continues until no more candidates are available or the shrinking mode's limit is
+     * reached.
+     *
+     * @param initial       The initial `RTree` containing the value to be shrunk and its children (potential shrinks).
+     * @param shrinkingMode The `ShrinkingMode` that controls how many shrinking attempts are allowed.
+     * @param tested        A `ListBuffer` containing the values that have already been tested to avoid duplicates.
+     * @param counter       A `Counter` to track the number of shrinking attempts made.
+     * @param test          A function that tests a value and returns a `Try[Unit]`, indicating success or failure.
+     * @param stringBuilder A `StringBuilder` used to accumulate detailed logs of the shrinking process.
+     * @return An `Option[(T, Option[Throwable])]` representing the result of the shrinking step:
+     *         - `Some((failedValue, Some(cause)))` if a candidate fails and cannot be shrunk further.
+     *         - `None` if no more candidates are available or if shrinking is not allowed by the shrinking mode.
+     */
     private def doStep[T](
         initial: RTree[T],
         shrinkingMode: ShrinkingMode,
@@ -158,9 +188,11 @@ object Shrinker {
         stringBuilder: StringBuilder
     ): Option[(T, Option[Throwable])] = {
 
+        // Check if the shrinking mode allows further shrinking
         if (!shrinkingMode.isShrinking(counter.value)) {
             None
         } else {
+            // Get the list of candidate values to be tested
             val candidates: Seq[RTree[T]] = initial.children()
             processCandidates(candidates, shrinkingMode, tested, counter, test, stringBuilder)
         }
@@ -189,7 +221,10 @@ object Shrinker {
     /** Check if a candidate has already been tested. */
     private def isAlreadyTested[T](candidate: RTree[T], tested: ListBuffer[T]): Boolean = {
         val value = candidate.value()
-        tested.contains(value) || { tested += value; false }
+        tested.contains(value) || {
+            tested += value;
+            false
+        }
     }
 
     /** Test a candidate and handle the result. */
@@ -221,10 +256,10 @@ object Shrinker {
         counter: Counter,
         passed: Boolean,
         stringBuilder: StringBuilder
-    ): Unit = {
+    ): Try[Unit] = Try {
         if (PropertyTesting.shouldPrintShrinkSteps) {
             val result = if (passed) "pass" else "fail"
-            stringBuilder.append(s"Shrink #${counter.value}: ${printed(value).get.value} $result\n")
+            stringBuilder.append(s"Shrink #${counter.value}: ${printed(value).get.value.get} $result\n")
         }
     }
 
@@ -240,11 +275,57 @@ object Shrinker {
         doStep(candidate, shrinkingMode, tested, counter, test, stringBuilder)
     }
 
+    /**
+     * Processes the result of a shrinking attempt and appends relevant information to a `StringBuilder`.
+     *
+     * @param stringBuilder The `StringBuilder` to which the shrinking result information will be appended.
+     * @param stepResult    An optional tuple containing the failed value and an optional `Throwable` cause. If `None`,
+     *                      it indicates that no shrinking steps were taken.
+     * @param count         The number of shrinking steps that were attempted.
+     * @param stackTraces   Implicit instance of `PropertyCheckStackTraces` used to retrieve stack trace information.
+     * @return A `Try[Unit]` indicating the success or failure of the operation. If any errors occur while processing
+     *         the result or appending stack trace information, they will be captured in the `Try`.
+     */
     private def result[T](
         stringBuilder: StringBuilder,
         stepResult: Option[(T, Option[Throwable])],
-        counter: Int
-    ): Unit = ???
+        count: Int
+    )(using stackTraces: PropertyCheckStackTraces): Try[Unit] = Try {
+        stepResult match {
+            // Case when no shrinking was performed
+            case None | Some((_, None)) if count == 0 =>
+                stringBuilder.append("No shrinking steps were taken\n")
+
+            // Case when shrinking was performed and resulted in failure
+            case Some((failed, causeOpt)) =>
+                stringBuilder.append(s"Shrink result (after $count shrinks) => ${printed(failed).get.value}\n\n")
+                appendStackTraceInfo(stringBuilder, causeOpt)
+
+            // Case when the stepResult is not applicable, no action is needed
+            case _ =>
+        }
+
+        // Optionally print the shrinking steps if enabled in configuration
+        if (PropertyTesting.shouldPrintShrinkSteps) {
+            println(stringBuilder.toString())
+        }
+    }
+
+    /** Appends the stack trace information to the StringBuilder if available. */
+    private def appendStackTraceInfo(
+        stringBuilder: StringBuilder,
+        causeOpt: Option[Throwable]
+    )(using stackTraces: PropertyCheckStackTraces): Unit = {
+        causeOpt.foreach { cause =>
+            stackTraces.throwableLocation(Try(cause), 4) match {
+                case Failure(exception) =>
+                    stringBuilder.append(s"Caused by $exception\n")
+                case Success(location) =>
+                    stringBuilder.append(s"Caused by $cause at\n")
+                    location.foreach(line => stringBuilder.append(s"\t$line\n"))
+            }
+        }
+    }
 }
 
 /**
