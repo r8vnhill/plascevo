@@ -64,15 +64,9 @@ object OneMax {
      * - **Listeners:** Includes an `EvolutionSummary`
      */
     def main(args: Array[String]): Unit = {
-        // Set up the random number generator utilized by the genetic algorithm
         given Random = new Random()
-
-        // Set the equality threshold for floating-point comparisons
         given equalityThreshold: Double = 1e-6
-
-        // Set the string representation mode to simple for concise output
         Domain.toStringMode = ToStringMode.SIMPLE
-
         val engine = GeneticAlgorithm.of(
                 count,
                 Genotype.of(

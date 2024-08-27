@@ -12,6 +12,7 @@ import context.PropertyContext
 import seed.createRandom
 
 import cl.ravenhill.munit.collectors.ErrorCollector
+import munit.checkall.arbitrary.shrinkers.ShrinkResult
 import munit.checkall.stacktraces.PropertyCheckStackTraces
 
 import scala.util.{Failure, Success, Try}

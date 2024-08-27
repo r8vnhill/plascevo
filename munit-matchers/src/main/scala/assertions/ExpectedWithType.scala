@@ -3,11 +3,13 @@
  * 2-Clause BSD License.
  */
 
-package cl.ravenhill.plascevo
+package munit.matchers
 package assertions
 
-import cl.ravenhill.munit.print.PrintedWithType.printed
+import assertions.Expected
+
 import cl.ravenhill.munit.print.PrintedWithType
+import cl.ravenhill.munit.print.PrintedWithType.printed
 
 /**
  * A wrapper class that represents an expected value along with its type information.

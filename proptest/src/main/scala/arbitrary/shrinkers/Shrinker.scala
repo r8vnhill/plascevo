@@ -6,9 +6,9 @@
 package munit.checkall
 package arbitrary.shrinkers
 
-import munit.checkall.arbitrary.generators.Sample
-import munit.checkall.context.PropertyContext
-import munit.checkall.utils.RTree
+import arbitrary.generators.Sample
+import context.PropertyContext
+import utils.RTree
 
 /**
  * A trait for defining shrinking behavior in property-based testing.
@@ -70,18 +70,45 @@ trait Shrinker[A] {
 
 object Shrinker {
 
+    /**
+     * Generates a sequence of shrinking results for a given sample using the provided property function and shrinking
+     * mode.
+     *
+     * The `shrinkFnFor` function takes a sample and a property function, then generates potential shrinks of the
+     * sample. It applies both standard and contextual shrinking strategies based on the provided `ShrinkingMode`, and
+     * returns a sequence of `ShrinkResult` instances representing the outcomes of the shrinking process.
+     *
+     * @param sample        The initial `Sample[T]` to be shrunk.
+     * @param propertyFn    A function that tests the property on the given sample value.
+     * @param shrinkingMode The mode that determines how shrinking should be applied.
+     * @param seed          The seed used to ensure reproducibility during the shrinking process.
+     * @param context       The property context in which the shrinking is performed.
+     * @tparam T The type of the value being tested and shrunk.
+     * @return A sequence of `ShrinkResult[T]` representing the results of shrinking the sample.
+     */
     def shrinkFnFor[T](
         sample: Sample[T],
-        propertyFn: (T) => Unit,
-        mode: ShrinkingMode,
+        propertyFn: T => Unit,
+        shrinkingMode: ShrinkingMode,
         seed: Long
-    )(context: PropertyContext): Seq[ShrinkResult[T]] = {
-        // we use a new context for the shrinks, as we don't want to affect classification etc
-        val shrinkContext = context.copy()
+    )(using context: PropertyContext, config: PropTestConfig): () => Seq[ShrinkResult[?]] = () => {
+        // Copy the context to avoid modifying the original
+        given PropertyContext = context.copy()
+        // Define a property function that sets up the contextual random source before testing the value
         val property: (PropertyContext, T) => Unit = (ctx, value) => {
-            setupContextual(RandomSource.seeded(seed))
+            ctx.setupContextual(RandomSource.seeded(seed))
             propertyFn(value)
         }
-        val smallerA =
+        // Perform standard shrinking on the sample's shrinks
+        val smallerA = doShrinking(sample.shrinks, shrinkingMode)(propertyFn)
+        // Perform contextual shrinking based on the shrinking mode
+        val smallestContextual = doContextualShrinking(shrinkingMode)(property)
+        // Combine the results of standard and contextual shrinking
+        smallerA :: smallestContextual
     }
+
+    private def doShrinking[T](initial: RTree[T], shrinkingMode: ShrinkingMode)(test: T => Unit): ShrinkResult[T] = ???
+
+    private def doContextualShrinking[T](shrinkingMode: ShrinkingMode)
+        (property: (PropertyContext, T) => Unit): List[ShrinkResult[T]] = ???
 }

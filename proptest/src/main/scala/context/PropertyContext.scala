@@ -30,8 +30,7 @@ import scala.util.{Failure, Success, Try}
  * @param testName      The name of the property-based test.
  * @param configuration The configuration settings for the property-based testing process, provided implicitly.
  */
-final class PropertyContext(val testName: String)
-    (using val configuration: PropTestConfig = PropTestConfig()) {
+final case class PropertyContext(testName: String)(using val configuration: PropTestConfig = PropTestConfig()) {
 
     /** Tracks the number of evaluations performed in the current test context.
      *

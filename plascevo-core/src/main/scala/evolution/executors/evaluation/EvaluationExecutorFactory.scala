@@ -17,7 +17,7 @@ import cl.ravenhill.plascevo.repr.{Feature, Representation}
  * @tparam S The type of the evolutionary state, which must extend [[EvolutionState]].
  */
 class EvaluationExecutorFactory[T, F <: Feature[T, F], R <: Representation[T, F], S <: EvolutionState[T, F, R, S]] {
-
+    
     /** A function that creates instances of `EvaluationExecutor[T, F, R, S]`.
      *
      * This variable holds a function that returns an instance of `EvaluationExecutor[T, F, R, S]` based on the provided

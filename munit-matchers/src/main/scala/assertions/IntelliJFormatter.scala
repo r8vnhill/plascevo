@@ -3,8 +3,12 @@
  * 2-Clause BSD License.
  */
 
-package cl.ravenhill.plascevo
+package munit.matchers
 package assertions
+
+import assertions.{Actual, Expected, ExpectedWithType}
+
+import cl.ravenhill.plascevo.assertions.ActualWithType
 
 /**
  * An object that provides utilities for formatting error messages in a style consistent with IntelliJ IDEA.
@@ -25,7 +29,6 @@ object IntelliJFormatter {
      * @param actual   The actual value wrapped in an `Actual` instance.
      * @return A `String` representing the formatted error message, indicating the difference between the expected and
      *         actual values.
-     *
      * @example
      * {{{
      * val expected = Expected(Printed("foo"))
@@ -49,7 +52,6 @@ object IntelliJFormatter {
      * @param expected The expected value with its type information, wrapped in an `ExpectedWithType` instance.
      * @param actual   The actual value with its type information, wrapped in an `ActualWithType` instance.
      * @return A `String` representing the formatted error message, including both the values and their types.
-     *
      * @example
      * {{{
      * val expected = ExpectedWithType(PrintedWithType("foo", "String"))

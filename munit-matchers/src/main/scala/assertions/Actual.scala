@@ -3,10 +3,10 @@
  * 2-Clause BSD License.
  */
 
-package cl.ravenhill.plascevo
+package munit.matchers
 package assertions
 
-import assertions.print.Printed
+import cl.ravenhill.munit.print.Printed
 
 /**
  * Represents the actual value in a comparison operation.

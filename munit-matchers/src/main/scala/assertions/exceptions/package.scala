@@ -3,10 +3,12 @@
  * 2-Clause BSD License.
  */
 
-package cl.ravenhill.plascevo
+package munit.matchers
 package assertions
 
-import munit.Location
+import munit.{ComparisonFailException, Location}
+
+import scala.util.Try
 
 package object exceptions {
     /**
@@ -30,16 +32,15 @@ package object exceptions {
         cause: Option[Throwable],
         expected: Expected,
         actual: Actual
-    )(using loc: Location): Throwable =
-        try {
-            // In the case of a mock, attempting to access the cause's stack trace in the assertion error constructor
-            // can lead to another exception being thrown. To avoid this, we try to access the stack trace ourselves
-            // and catch any resulting exception.
-            cause.map(_.getStackTrace)
-            ComparisonFailException(message, expected, actual, loc, cause)
-        } catch {
-            // If an exception occurs while accessing the stack trace, create the ComparisonFailException without the
-            // cause.
-            case _: Throwable => ComparisonFailException(message, expected, actual, loc, None)
-        }
+    )(using loc: Location): Try[ComparisonFailException] = Try {
+        // In the case of a mock, attempting to access the cause's stack trace in the assertion error constructor
+        // can lead to another exception being thrown. To avoid this, we try to access the stack trace ourselves
+        // and catch any resulting exception.
+        cause.map(_.getStackTrace)
+        ComparisonFailException(message, expected, actual, loc, true)
+    }.recover {
+        // If an exception occurs while accessing the stack trace, create the ComparisonFailException without the
+        // cause.
+        case _: Throwable => ComparisonFailException(message, expected, actual, loc, true)
+    }
 }

@@ -18,50 +18,58 @@ import cl.ravenhill.composerr.Constrained
 import cl.ravenhill.composerr.Constrained.constrained
 import cl.ravenhill.composerr.constraints.iterable.HaveSize
 import cl.ravenhill.munit.collectors.ErrorCollector
-import munit.internal.console.StackTraces
 
 import scala.util.{Failure, Success, Try}
 
+/**
+ * A utility object for running and managing property-based tests.
+ *
+ * The `Test` object provides methods for executing property-based tests within a controlled context. It ensures that
+ * the test inputs are validated, classified, and processed correctly, handles exceptions, and manages the lifecycle of
+ * the property-based test. The object also handles shrinking of failing inputs and provides detailed error reporting
+ * when tests fail.
+ *
+ * This object is designed to be used internally within the `checkall` package, providing a consistent and
+ * well-structured approach to running property-based tests with error handling and classification.
+ */
 private[checkall] object Test {
+
     /**
-     * Executes a property-based test, handling input classification, evaluation, and failure recovery.
+     * Executes a property-based test with the provided configuration and input data.
      *
-     * The `apply` method is a central point for executing a property-based test with specified inputs and classifiers.
-     * It validates the inputs and classifiers, marks the test for evaluation, and sets up the contextual random source
-     * based on the provided seed. The test function is executed within this context, and any failures are caught and
-     * processed through the shrinking mechanism to simplify the failing case.
+     * The `apply` method orchestrates the execution of a property-based test by validating the inputs, setting up the
+     * test context, running the test function, and handling any failures that occur during the test. It ensures that
+     * inputs and classifiers are correctly matched, manages the lifecycle of the test context, and handles exceptions
+     * by attempting to shrink the failing inputs.
      *
-     * @param context        The `PropertyContext` that manages the state and lifecycle of the property-based test.
-     *                       This context is updated with the evaluation result, and any failure information.
-     * @param config         The configuration object (`PropTestConfig`) that contains settings and options for the
-     *                       property-based testing process. This configuration may influence how the test is executed
-     *                       and how failures are handled.
-     * @param shrinkFn       A function that generates potential shrinking results based on the provided
-     *                       `PropertyContext`. Shrinking is the process of finding simpler inputs that still cause
-     *                       the test to fail, helping to isolate the cause of the failure.
-     * @param inputs         A sequence of inputs that are provided to the test function. These inputs are validated
-     *                       and classified before the test is executed.
-     * @param classifiers    A sequence of optional classifiers that correspond to the inputs. These classifiers are
-     *                       used to categorize the inputs during the test execution.
-     * @param seed           The seed value used for the random number generator during the test. This seed is
-     *                       important for reproducibility.
-     * @param contextualSeed A contextual seed used to initialize the random source specific to the current test
-     *                       context.
-     * @param testFunction   The test function that is executed as part of the property-based test. This function is
-     *                       expected to contain the assertions or conditions being tested.
-     * @return A `Try[Unit]` representing the result of the test execution. If the test function completes successfully,
-     *         the result is `Success(())`. If an exception occurs during the test, the result is a `Failure` containing
-     *         the exception.
-     * @throws AssumptionFailedException If the test fails due to an unmet assumption. This exception is silently caught
-     *                                   and does not mark the test as a failure.
-     * @throws Throwable                 If any other exception occurs during the test execution, it is caught, and the test is marked
-     *                                   as a failure. The exception is processed for shrinking and further analysis.
+     * @param config         The `PropTestConfig` instance containing configuration settings for the property-based
+     *                       test, such as the maximum number of failures allowed and the shrinking mode.
+     * @param shrinkFn       A function that generates a sequence of `ShrinkResult` instances, representing the
+     *                       shrinking process for failing inputs.
+     * @param inputs         A sequence of input values that are passed to the test function. Each input value may be
+     *                       classified based on the provided classifiers.
+     * @param classifiers    A sequence of optional classifiers, each corresponding to an input value. Classifiers are
+     *                       used to categorize input values during the test.
+     * @param seed           The seed used for the random number generator, which allows the test to be reproduced.
+     * @param contextualSeed The seed used for setting up the contextual random source, ensuring that the random number
+     *                       generation is consistent within the context of the test.
+     * @param testFunction   The test function to be executed. This is a parameterless function that contains the logic
+     *                       for the property-based test.
+     * @param context        An implicit `PropertyContext` instance that manages the lifecycle and state of the
+     *                       property-based test.
+     * @param errorCollector An implicit `ErrorCollector` instance that collects and reports errors encountered during
+     *                       the test.
+     * @param stackTraces    An implicit `PropertyCheckStackTraces` instance used to analyze and report stack traces for
+     *                       errors encountered during the test.
+     * @return A `Try[Unit]` representing the result of the test execution. If the test passes without any errors, the
+     *         result is a `Success(Unit)`. If an exception is encountered, the result is a `Failure` containing the
+     *         exception and any associated shrinking results.
      */
     def apply(
         config: PropTestConfig,
-        shrinkFn: PropertyContext => Seq[ShrinkResult[Any]],
+        shrinkFn: () => Seq[ShrinkResult[?]],
         inputs: Seq[Any],
-        classifiers: Seq[Option[Classifier[? <: Any]]],
+        classifiers: Seq[Option[Classifier[?]]],
         seed: Long,
         contextualSeed: Long,
     )(testFunction: => Any)(
@@ -153,12 +161,6 @@ private[checkall] object Test {
     /**
      * Manages the lifecycle of the property context around the execution of a test function.
      *
-     * This method is responsible for handling the setup and teardown actions associated with a property-based test. 
-     * It interacts with the `PropertyContext` to perform any necessary preparations before the test, execute the test 
-     * function, and then mark the test as successful if it completes without exceptions. After the test, it performs
-     * any necessary cleanup actions. This function ensures that the test lifecycle is properly managed, which includes
-     * invoking any custom behaviors defined in the context before and after the test execution.
-     *
      * @param context      The `PropertyContext` that manages the lifecycle and state of the property-based test. This
      *                     context may contain custom elements that need to be executed before and after the test.
      * @param testFunction The test function to be executed within the managed context. This is a parameterless function 
@@ -172,64 +174,58 @@ private[checkall] object Test {
     }
 
     /**
-     * Handles the processing and reporting of a test failure within a property-based testing context.
+     * Handles the failure scenario during property-based testing.
      *
-     * This method is invoked when a property-based test encounters an exception or fails to meet its assertions. It
-     * performs several key actions: it records the failure in the test context, outputs relevant statistics about the
-     * test run, and initiates the shrinking process to find the minimal failing case. The function is designed to be a
-     * central point for managing the aftermath of a test failure, ensuring that all necessary steps are taken to
-     * document and analyze the failure.
-     *
-     * @param context     The `PropertyContext` that maintains the state of the property-based test. This context is
-     *                    updated to reflect the failure of the test.
-     * @param shrinkFn    A function that generates potential shrinking results based on the provided `PropertyContext`. 
-     *                    Shrinking is the process of finding simpler inputs that still cause the test to fail, helping to 
-     *                    isolate the cause of the failure.
-     * @param inputs      A sequence of inputs that were provided to the test when the failure occurred. These inputs are 
-     *                    crucial for reproducing and analyzing the failure.
-     * @param seed        The seed value used for the random number generator during the test. This seed is important for 
-     *                    reproducibility.
-     * @param e           The exception that caused the test to fail. This exception is recorded and reported as part of
-     *                    the failure handling process.
-     * @param config      The configuration object (`PropTestConfig`) that contains settings and options for the
-     *                    property-based testing process. This configuration may influence how failures are handled,
-     *                    including how shrinking is performed.
-     * @param stackTraces The stack traces utility that provides methods for analyzing and processing exceptions during
-     *                    property-based testing.
+     * @param shrinkFn A function that generates a sequence of `ShrinkResult` instances representing the shrinking
+     *                 process.
+     * @param inputs A sequence of input values that were used during the test when the failure occurred.
+     * @param seed The seed used for the random number generator, which allows the test to be reproduced.
+     * @param e The original exception that caused the test to fail.
+     * @param config The configuration settings for the property-based test, including the maximum number of failures
+     *               allowed.
+     * @param context The `PropertyContext` instance that provides context for the current test execution.
+     * @param errorCollector The `ErrorCollector` used to gather and report errors during the test.
+     * @param stackTraces The `PropertyCheckStackTraces` used to analyze and report stack traces for errors.
+     * @return A `Try[PropertyFailException]` representing either a successful creation of a `PropertyFailException` or
+     *         the failure cause if the exception is not handled by the method.
      */
     private def handleFailure(
-        shrinkFn: PropertyContext => Seq[ShrinkResult[Any]],
+        shrinkFn: () => Seq[ShrinkResult[Any]],
         inputs: Seq[Any],
         seed: Long,
         e: Throwable,
         config: PropTestConfig
-    )(using context: PropertyContext, errorCollector: ErrorCollector, stackTraces: PropertyCheckStackTraces): Unit = {
+    )(using
+        context: PropertyContext,
+        errorCollector: ErrorCollector,
+        stackTraces: PropertyCheckStackTraces
+    ): Try[PropertyFailException] = {
+        // Mark the test as a failure in the context
         context.markFailure()
+        // Output statistics related to the failure
         outputStatistics(context = context, numArgs = inputs.size, success = TestResult.Failure)
+        // Delegate further exception handling to the handleException method
         handleException(shrinkFn, inputs, seed, e, config)
     }
 
     /**
      * Handles exceptions that occur during property-based testing.
      *
-     * The `handleException` method is responsible for managing exceptions that arise while running property-based
-     * tests. Depending on the configuration and the context of the test, it either prints a detailed failure message
-     * and throws an exception or checks if the number of failures exceeds the maximum allowed and throws a
-     * corresponding failure exception.
-     *
-     * @param shrinkFn The function responsible for generating shrink results based on the current `PropertyContext`.
-     * @param inputs   A sequence of inputs that were tested before the exception occurred.
-     * @param seed     The random seed used for the test, which allows for reproducibility of the test case.
-     * @param cause    The original exception that caused the test to fail.
-     * @param config   The configuration settings for the property-based test, which dictate how failures should be
-     *                 handled.
-     * @param context  The implicit `PropertyContext` that provides additional context about the test, such as the number
-     *                 of attempts and failures.
-     * @throws Throwable Depending on the test configuration, the method may throw a `Throwable` containing detailed
-     *                   information about the failure, including shrink results and the cause of the failure.
+     * @param shrinkFn       A function that generates a sequence of `ShrinkResult` instances, representing the
+     *                       shrinking process.
+     * @param inputs         A sequence of input values that were used during the test when the exception occurred.
+     * @param seed           The seed used for the random number generator, which allows the test to be reproduced.
+     * @param cause          The original exception that was thrown during the test.
+     * @param config         The configuration settings for the property-based test, including the maximum number of
+     *                       failures allowed.
+     * @param context        The `PropertyContext` instance that provides context for the current test execution.
+     * @param errorCollector The `ErrorCollector` used to gather and report errors during the test.
+     * @param stackTraces    The `PropertyCheckStackTraces` used to analyze and report stack traces for errors.
+     * @return A `Try[PropertyFailException]` representing either a successful creation of a `PropertyFailException` or
+     *         the failure cause if the exception is not handled by the method.
      */
-    private[checkall] def handleException(
-        shrinkFn: PropertyContext => Seq[ShrinkResult[Any]],
+    private def handleException(
+        shrinkFn: () => Seq[ShrinkResult[Any]],
         inputs: Seq[Any],
         seed: Long,
         cause: Throwable,
@@ -239,15 +235,19 @@ private[checkall] object Test {
         context: PropertyContext,
         errorCollector: ErrorCollector,
         stackTraces: PropertyCheckStackTraces
-    ): Unit = if (config.maxFailure == 0) {
+    ): Try[PropertyFailException] = if (config.maxFailure == 0) {
         // If the maxFailure is set to 0, immediately print the failure message and throw the failure exception with
         // results
         printFailureMessage(inputs, cause)
-        createPropertyFailExceptionWithResults(shrinkFn(context), cause, context.attempts, seed)
+        createPropertyFailExceptionWithResults(shrinkFn(), cause, context.attempts, seed)
     } else if (context.failures > config.maxFailure) {
         // If the number of failures exceeds maxFailure, build and throw an error with a detailed failure message
         val error = buildMaxErrorFailureMessage(context, config, inputs)
-        createPropertyFailExceptionWithResults(shrinkFn(context), AssertionError(error), context.attempts, seed)
+        createPropertyFailExceptionWithResults(shrinkFn(), AssertionError(error), context.attempts, seed)
+    } else {
+        // Otherwise, print the failure message and return a Failure with the exception
+        printFailureMessage(inputs, cause)
+        Failure(cause)
     }
 
     /**

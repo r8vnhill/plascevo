@@ -3,8 +3,9 @@
  * 2-Clause BSD License.
  */
 
-package cl.ravenhill.plascevo
+package munit.matchers
 package assertions
+
 import assertions.print.Printed
 import matchers.ShouldMatchers
 

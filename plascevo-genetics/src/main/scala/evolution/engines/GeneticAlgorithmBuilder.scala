@@ -25,21 +25,6 @@ import scala.util.Random
 private type ListenerFactory[T, G <: Gene[T, G]] =
     ListenerConfiguration[T, G, Genotype[T, G]] => EvolutionListener[T, G, Genotype[T, G], GeneticEvolutionState[T, G]]
 
-/** A type alias for a factory function that creates a `Limit` based on a listener configuration.
- *
- * The `LimitFactory` type defines a function that takes a `ListenerConfiguration` and returns a `Limit`. This factory
- * pattern allows for the creation of limits that can be customized based on the specific configuration provided.
- */
-private type LimitFactory[T, G <: Gene[T, G]] =
-    ListenerConfiguration[T, G, Genotype[T, G]] =>
-        Limit[
-            T,
-            G,
-            Genotype[T, G],
-            GeneticEvolutionState[T, G],
-            EvolutionListener[T, G, Genotype[T, G], GeneticEvolutionState[T, G]]
-        ]
-
 /** Type alias for the genetic population configuration.
  *
  * `PopulationConfig` represents a shorthand for the `GeneticPopulationConfiguration` type, which is used to configure
@@ -267,7 +252,8 @@ class GeneticAlgorithmBuilder[T, G <: Gene[T, G]](
      */
     private def makeEvolutionConfig(): EvolutionConfiguration[
         T,
-        G, Genotype[T, G],
+        G,
+        Genotype[T, G],
         GeneticEvolutionState[T, G],
         EvolutionListener[T, G, Genotype[T, G], GeneticEvolutionState[T, G]]
     ] = EvolutionConfiguration(

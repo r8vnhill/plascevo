@@ -3,14 +3,9 @@
  * 2-Clause BSD License.
  */
 
-package cl.ravenhill.plascevo
+package munit.matchers
 package matchers
 
-import cl.ravenhill.munit.collectors.errorCollector
-import cl.ravenhill.plascevo.assertions.*
-import cl.ravenhill.plascevo.assertions.IntelliJFormatter.{intelliJFormatError, intelliJFormatErrorWithType}
-import cl.ravenhill.plascevo.assertions.exceptions.createComparisonFailException
-import cl.ravenhill.plascevo.assertions.print.Printed
 import munit.{Assertions, Location}
 
 /** Utility object for applying matchers and handling assertion failures.
