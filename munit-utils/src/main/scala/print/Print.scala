@@ -8,8 +8,7 @@ package print
 
 import cl.ravenhill.composerr.Constrained.constrainedTo
 import cl.ravenhill.composerr.constraints.option.BeNone
-
-import scala.util.Try
+import cl.ravenhill.composerr.exceptions.CompositeException
 
 /** Trait representing a print operation that converts a value to a `Printed` representation.
  *
@@ -52,21 +51,19 @@ object Print {
      * @return A `Try[Printed]` containing the printed representation of the value. If no suitable printer is found,
      *         the `Try` will contain a `CompositeException` that wraps an `OptionConstraintException`.
      */
-    def printed[T](value: T): Try[Printed] =
-        Try {
-            value match {
-                case null => NullPrint.print(value, 0)
-                case _ =>
-                    val print = printFor(value)
-                    print.constrainedTo {
-                            s"Could not find a printer for value of type ${value.getClass.getName}" | {
-                                print mustNot BeNone
-                            }
-                        }.get // This is safe because we already checked for a printer
-                        .print(value, 0)
-            }
+    def printed[T](value: T): Either[CompositeException, Printed] =
+        value match {
+            case null => Right(NullPrint.print(value, 0))
+            case _ =>
+                val print = printFor(value)
+                print.constrainedTo {
+                    s"Could not find a printer for value of type ${value.getClass.getName}" | {
+                        print mustNot BeNone
+                    }
+                } match
+                    case Left(e) => Left(e)
+                    case Right(p) => Right(p.get.print(value, 0))
         }
-
 
     private def printFor[T](value: T): Option[Print[T]] = {
         Printers.all

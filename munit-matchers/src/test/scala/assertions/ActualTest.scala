@@ -6,10 +6,10 @@
 package munit.matchers
 package assertions
 
-import assertions.print.Printed
 import matchers.ShouldMatchers
 
 import cl.ravenhill.munit.assertions.Actual
+import cl.ravenhill.munit.print.Printed
 
 class ActualTest extends munit.FunSuite with ShouldMatchers {
     test("Actual should wrap a value") {

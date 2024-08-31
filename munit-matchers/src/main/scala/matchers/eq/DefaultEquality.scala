@@ -11,7 +11,6 @@ import matchers.ApplyMatcher.failureWithTypeInformation
 import cl.ravenhill.munit.assertions.{ActualWithType, ExpectedWithType}
 import cl.ravenhill.munit.collectors.ErrorCollector
 import cl.ravenhill.munit.print.PrintedWithType
-import cl.ravenhill.plascevo.matchers.eq.Eq
 import munit.ComparisonFailException
 
 object DefaultEquality extends Eq[Any] {

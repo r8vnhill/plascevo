@@ -11,6 +11,7 @@ import print.Printed
 import cl.ravenhill.composerr.Constrained.{constrained, constrainedTo}
 import cl.ravenhill.composerr.constraints.ints.BePositive
 import cl.ravenhill.composerr.constraints.iterable.BeEmpty
+import cl.ravenhill.composerr.exceptions.CompositeException
 
 import scala.collection.mutable.ListBuffer
 
@@ -115,19 +116,31 @@ open class BasicErrorCollector extends ErrorCollector {
      */
     override def pushClue(clue: Clue): Unit = clues += clue
 
-    /** Removes the most recently added clue from the error context.
+    /**
+     * Pops the top clue from the internal list of clues, ensuring that the operation is only performed when clues are
+     * available.
      *
-     * This method ensures that there is at least one clue in the context before attempting to remove it, preventing
-     * errors due to empty clues.
+     * The `popClue` method attempts to remove the first clue from the internal list of clues. It validates that the
+     * list is not empty before attempting to pop the clue. If the list is empty, it returns a `CompositeException`
+     * encapsulating the failure. Otherwise, it removes the top clue and returns `Unit` indicating the successful
+     * removal.
      *
-     * @throws CompositeException          Containing all constraints that failed.
-     * @throws IterableConstraintException If the collection is empty; wrapped in a `CompositeException`.
+     * @return Either a `CompositeException` if the list of clues is empty, or `Unit` if the top clue is successfully
+     *         removed.
+     * @example
+     *   val result = popClue()
+     *   result match {
+     *     case Left(error) => // Handle the error, which means there were no clues to pop.
+     *     case Right(_) => // The clue was successfully popped.
+     *   }
      */
-    override def popClue(): Unit = clues.constrainedTo {
+    override def popClue(): Either[CompositeException, Unit] = clues.constrainedTo {
         "Cannot pop a clue when there are no clues" | {
             clues mustNot BeEmpty()
         }
-    }.remove(0)
+    } match
+        case Left(value) => Left(value)
+        case Right(value) => Right(value.remove(0, 1))
 
     /** Returns the sequence of clues in the current error context.
      *

@@ -8,6 +8,8 @@ package matchers.eq
 
 import matchers.{Matcher, MatcherResult, MatcherResultWithError}
 
+import cl.ravenhill.munit.assertions.{Actual, Expected}
+import cl.ravenhill.munit.collectors.ErrorCollector
 import cl.ravenhill.munit.print.Printed
 
 /** A matcher that checks for equality between an actual value and an expected value.
@@ -31,7 +33,7 @@ final class EqualityMatcher[T](expected: T) extends Matcher[T] {
      * @return A [[MatcherResult]] containing the outcome of the equality check. If the values are not equal, the result
      *         includes a failure message. If they are equal, the result indicates success.
      */
-    override def apply(value: T): MatcherResult = {
+    override def apply(value: T)(using ErrorCollector): MatcherResult = {
         val error = EqualityMatcher.equal(value, expected)
 
         MatcherResultWithError(
@@ -46,7 +48,9 @@ final class EqualityMatcher[T](expected: T) extends Matcher[T] {
                 .getOrElse(
                     s"${Printed(Option(expected)).value.getOrElse("null")} should " +
                         s"not be equal to ${Printed(Option(value)).value.getOrElse("null")}"
-                )
+                ),
+            actual = Actual(Printed(Option(value))),
+            expected = Expected(Printed(Option(expected)))
         )
     }
 }
@@ -54,7 +58,11 @@ final class EqualityMatcher[T](expected: T) extends Matcher[T] {
 
 object EqualityMatcher {
     def equal[T](actual: T, expected: T)
-        (using strictNumberEq: NumberEquality = NumberEquality.Strict): Option[Throwable] = {
+        (
+            using
+            strictNumberEq: NumberEquality = NumberEquality.Strict,
+            errorCollector: ErrorCollector
+        ): Option[Throwable] = {
         (actual, expected) match {
             // If the references are identical, there is no error
             case _ if actual.asInstanceOf[AnyRef] eq expected.asInstanceOf[AnyRef] => None
@@ -65,7 +73,7 @@ object EqualityMatcher {
             //            case (a: Map.Entry[_, _], e: Map.Entry[_, _]) => MapEntryEq.equals(a, e, strictNumberEq)
             //            case (a: Regex, e: Regex) => RegexEq.equals(a, e)
             //            case (a: String, e: String) => StringEq.equals(a, e)
-            case (a: Number, e: Number) => NumberEq.equals(a, e)
+            case (actual: Number, expected: Number) => NumberEq.equals(actual, expected)
             //            case (a, e) if IterableEq.isValidIterable(a) && IterableEq.isValidIterable(e) =>
             //                IterableEq.equals(IterableEq.asIterable(a), IterableEq.asIterable(e), strictNumberEq)
             //            case (a: Seq[_], e: Seq[_]) => SequenceEq.equals(a, e, strictNumberEq)

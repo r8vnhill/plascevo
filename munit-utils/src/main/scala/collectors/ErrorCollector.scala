@@ -94,7 +94,7 @@ trait ErrorCollector {
      *
      * This method allows removing the last clue that was added to the current error context.
      */
-    def popClue(): Unit
+    def popClue(): Either[Throwable, Unit]
 
     /** Returns the sequence of clues in the current error context.
      *

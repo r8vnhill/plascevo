@@ -3,13 +3,16 @@
  * 2-Clause BSD License.
  */
 
-package cl.ravenhill.plascevo
+package munit.matchers
 package matchers.eq
 
+import matchers.ApplyMatcher
+import matchers.eq.EqualityMatcher.NumberEquality.NonStrict
+import matchers.eq.EqualityMatcher.{NumberEquality, equal}
+
+import cl.ravenhill.munit.collectors.ErrorCollector
 import cl.ravenhill.munit.print.Print.printed
-import munit.Assertions
-import munit.matchers.matchers.eq.EqualityMatcher.NumberEquality
-import munit.matchers.matchers.eq.EqualityMatcher.NumberEquality.NonStrict
+import munit.ComparisonFailException
 
 /** A type class for comparing values of type `T` for equality with optional strict number comparison.
  *
@@ -33,7 +36,7 @@ trait Eq[T] {
      *         an error if they are not equal.
      */
     def equals(actual: T, expected: T)
-        (using strictNumberEq: NumberEquality = NonStrict): Option[Throwable]
+        (using strictNumberEq: NumberEquality = NonStrict, errorCollector: ErrorCollector): Option[Throwable]
 }
 
 /** Object representing equality checks for values that may be `null`.
@@ -61,7 +64,8 @@ object NullEq extends Eq[Any] {
      *                       ignored in this implementation.
      * @return An `Option[Throwable]` containing an error if the comparison fails, or `None` if the values are equal.
      */
-    override def equals(actual: Any, expected: Any)(using strictNumberEq: NumberEquality): Option[Throwable] = {
+    override def equals(actual: Any, expected: Any)
+        (using strictNumberEq: NumberEquality, errorCollector: ErrorCollector): Option[Throwable] = {
         (actual, expected) match {
             case (null, null) => None
             case (null, _) => Some(actualIsNull(expected))
@@ -81,8 +85,13 @@ object NullEq extends Eq[Any] {
      * @param expected The expected value, which was not `null`.
      * @return An `AssertionError` indicating that the actual value was `null`.
      */
-    private def actualIsNull(expected: Any): AssertionError =
-        ApplyMatcher.fail(s"Expected ${expected.print.value} but actual was null")
+    private def actualIsNull(expected: Any): ComparisonFailException = {
+        val formattedExpected = printed(expected) match {
+            case Left(_) => "<empty>" // This case should not happen
+            case Right(value) => value
+        }
+        ApplyMatcher.fail(s"Expected $formattedExpected but actual was null")
+    }
 
     /** Creates an error when the expected value is `null` but the actual value is not.
      *
@@ -93,13 +102,13 @@ object NullEq extends Eq[Any] {
      * @return An `AssertionError` indicating that the expected value was `null`.
      */
     private def expectedIsNull(actual: Any): AssertionError =
-        ApplyMatcher.fail(s"Expected null but actual was ${actual.print.value}")
+        ApplyMatcher.fail(s"Expected null but actual was ${printed(actual)}")
 }
 
 object MapEq extends Eq[Map[?, ?]] {
 
     override def equals(actual: Map[?, ?], expected: Map[?, ?])
-        (using strictNumberEq: NumberEquality): Option[Throwable] = {
+        (using strictNumberEq: NumberEquality, errorCollector: ErrorCollector): Option[Throwable] = {
         (actual, expected) match {
             case (null, null) => None
             case (_, null) => {

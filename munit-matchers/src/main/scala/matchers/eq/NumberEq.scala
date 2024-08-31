@@ -3,13 +3,15 @@
  * 2-Clause BSD License.
  */
 
-package cl.ravenhill.plascevo
+package munit.matchers
 package matchers.eq
 
-import cl.ravenhill.munit.assertions.ActualWithType
-import cl.ravenhill.munit.assertions.ExpectedWithType
-import cl.ravenhill.munit.print.PrintedWithType
 import matchers.ApplyMatcher.failureWithTypeInformation
+
+import cl.ravenhill.munit.assertions.{ActualWithType, ExpectedWithType}
+import cl.ravenhill.munit.collectors.ErrorCollector
+import cl.ravenhill.munit.print.PrintedWithType
+import munit.ComparisonFailException
 
 object NumberEq extends Eq[Number] {
 
@@ -31,7 +33,11 @@ object NumberEq extends Eq[Number] {
     override def equals(
         actual: Number,
         expected: Number,
-    )(using strictNumberEq: EqualityMatcher.NumberEquality): Option[Throwable] =
+    )(
+        using
+        strictNumberEq: EqualityMatcher.NumberEquality,
+        errorCollector: ErrorCollector
+    ): Option[ComparisonFailException] =
         if compare(actual, expected, strictNumberEq) then
             None
         else
