@@ -6,7 +6,8 @@
 package cl.ravenhill.plascevo
 package matchers.eq
 
-import assertions.{ActualWithType, ExpectedWithType}
+import cl.ravenhill.munit.assertions.ActualWithType
+import cl.ravenhill.munit.assertions.ExpectedWithType
 import cl.ravenhill.munit.print.PrintedWithType
 import matchers.ApplyMatcher.failureWithTypeInformation
 

@@ -37,7 +37,7 @@ abstract class AbstractGeneBasedEvolutionaryAlgorithm[
 
     val parentSelector: Selector[T, G, Genotype[T, G]] = selectionConfiguration.parentSelector
 
-    val offspringSelector: Selector[T, G, Genotype[T, G]] = selectionConfiguration.offspringSelector
+    val survivorSelector: Selector[T, G, Genotype[T, G]] = selectionConfiguration.offspringSelector
 
     val alterers: Seq[Alterer[T, G, Genotype[T, G]]] = alterationConfiguration.alterers
 }

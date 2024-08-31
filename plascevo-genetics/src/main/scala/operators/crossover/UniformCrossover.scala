@@ -44,7 +44,7 @@ import scala.util.Random
 class UniformCrossover[T, G <: Gene[T, G]](
     numParents: Int = UniformCrossover.defaultNumParents,
     chromosomeRate: Double = UniformCrossover.defaultChromosomeRate,
-    exclusivity: Exclusivity = UniformCrossover.defaultExclusivity
+    exclusivity: Exclusivity = UniformCrossover.defaultExclusivity,
 )(using random: Random) extends CombineCrossover[T, G](
     combiner = { genes => genes(random.nextInt(genes.size)) },
     chromosomeRate = chromosomeRate,

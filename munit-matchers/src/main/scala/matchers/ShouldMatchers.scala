@@ -3,10 +3,12 @@
  * 2-Clause BSD License.
  */
 
-package cl.ravenhill.plascevo
+package munit.matchers
 package matchers
 
 import matchers.eq.EqualityMatcher
+
+import cl.ravenhill.munit.collectors.ErrorCollector
 
 trait ShouldMatchers {
     extension [A](actual: A) {

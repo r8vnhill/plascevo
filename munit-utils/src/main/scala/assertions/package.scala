@@ -3,7 +3,7 @@
  * 2-Clause BSD License.
  */
 
-package cl.ravenhill.plascevo
+package cl.ravenhill.munit
 
 package object assertions {
 }

@@ -3,10 +3,7 @@
  * 2-Clause BSD License.
  */
 
-package munit.matchers
-package assertions
-
-import assertions.Expected
+package cl.ravenhill.munit.assertions
 
 import cl.ravenhill.munit.print.PrintedWithType
 import cl.ravenhill.munit.print.PrintedWithType.printed

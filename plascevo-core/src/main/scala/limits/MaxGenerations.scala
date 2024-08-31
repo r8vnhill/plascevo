@@ -12,6 +12,5 @@ case class MaxGenerations[T, F <: Feature[T, F], R <: Representation[T, F], S <:
     (_, state) => state.generation >= maxGenerations
 )
 
-private class MaxGenerationsListener[T, F <: Feature[T, F], R <: Representation[T, F], S <: EvolutionState[T, F, R, S]](
-    configuration: ListenerConfiguration[T, F, R] = ListenerConfiguration[T, F, R]()
-) extends EvolutionListener[T, F, R, S](configuration)
+private class MaxGenerationsListener[T, F <: Feature[T, F], R <: Representation[T, F], S <: EvolutionState[T, F, R, S]]
+    extends EvolutionListener[T, F, R, S](ListenerConfiguration[T, F, R]())

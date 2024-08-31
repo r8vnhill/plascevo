@@ -3,12 +3,7 @@
  * 2-Clause BSD License.
  */
 
-package munit.matchers
-package assertions
-
-import assertions.{Actual, Expected, ExpectedWithType}
-
-import cl.ravenhill.plascevo.assertions.ActualWithType
+package cl.ravenhill.munit.assertions
 
 /**
  * An object that provides utilities for formatting error messages in a style consistent with IntelliJ IDEA.

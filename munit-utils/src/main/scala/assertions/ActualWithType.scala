@@ -3,12 +3,10 @@
  * 2-Clause BSD License.
  */
 
-package cl.ravenhill.plascevo
-package assertions
+package cl.ravenhill.munit.assertions
 
 import cl.ravenhill.munit.print.PrintedWithType.printed
 import cl.ravenhill.munit.print.PrintedWithType
-import munit.matchers.assertions.Actual
 
 /**
  * A wrapper class that represents an actual value along with its type information.

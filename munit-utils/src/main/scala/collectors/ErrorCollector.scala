@@ -6,8 +6,8 @@
 package cl.ravenhill.munit
 package collectors
 
-import cl.ravenhill.composerr.constraints.ints.BePositive
-import cl.ravenhill.munit.print.Printed
+import print.Printed
+
 import munit.internal.console.StackTraces
 
 /** Trait for collecting and managing errors within a system.
@@ -111,7 +111,7 @@ trait ErrorCollector {
      * then checks the current error collection mode:
      *
      * - In `ErrorCollectionMode.Soft`, the error is added to the error collector's list of failures without
-     *   interrupting the execution flow.
+     * interrupting the execution flow.
      * - In `ErrorCollectionMode.Hard`, the error is immediately thrown, halting the execution.
      *
      * This method is useful in systems where different error-handling strategies are required depending on the

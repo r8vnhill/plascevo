@@ -3,11 +3,12 @@
  * 2-Clause BSD License.
  */
 
-package cl.ravenhill.plascevo
+package munit.matchers
 package matchers.eq
 
-import assertions.print.Printed
 import matchers.{Matcher, MatcherResult, MatcherResultWithError}
+
+import cl.ravenhill.munit.print.Printed
 
 /** A matcher that checks for equality between an actual value and an expected value.
  *
@@ -34,7 +35,7 @@ final class EqualityMatcher[T](expected: T) extends Matcher[T] {
         val error = EqualityMatcher.equal(value, expected)
 
         MatcherResultWithError(
-            error = error,
+            cause = error,
             matches = error.isEmpty,
             failureMessageFn = _.map(_.getMessage)
                 .getOrElse(

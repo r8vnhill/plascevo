@@ -7,6 +7,9 @@ import genetics.genes.Gene
 import genetics.{Genotype, GenotypeBuilder}
 import listeners.EvolutionListener
 
+import cl.ravenhill.composerr.Constrained
+import cl.ravenhill.composerr.Constrained.constrained
+
 import scala.math.*
 import scala.util.Random
 import scala.util.chaining.*
@@ -85,7 +88,7 @@ case class GeneticAlgorithm[
 
     def selectSurvivors(state: GeneticEvolutionState[T, G]): GeneticEvolutionState[T, G] = {
         allListeners.foreach(_.onSurvivorSelectionStart(state))
-        val selected = offspringSelector(state, ceil(survivalRate * populationSize).toInt, { individuals =>
+        val selected = survivorSelector(state, ceil(survivalRate * populationSize).toInt, { individuals =>
             state.copy(population = individuals)
         })
         allListeners.foreach(_.onSurvivorSelectionEnd(selected))

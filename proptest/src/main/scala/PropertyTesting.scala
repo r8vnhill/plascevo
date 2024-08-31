@@ -74,7 +74,7 @@ object PropertyTesting {
     var defaultStackTraces: PropertyCheckStackTraces = PropertyCheckStackTraces.default
 
     /** Whether to print the shrinking steps during property-based tests. */
-    var shouldPrintShrinkSteps: Boolean = sysprop("ravenhill.checkall.output.shrink-steps", true) {
+    var shouldPrintShrinkSteps: Boolean = sysprop("ravenhill.checkall.output.shrink-steps", false) {
         _.toBoolean
     }
 }

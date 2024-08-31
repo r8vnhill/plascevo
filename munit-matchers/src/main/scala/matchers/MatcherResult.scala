@@ -3,7 +3,7 @@
  * 2-Clause BSD License.
  */
 
-package cl.ravenhill.plascevo
+package munit.matchers
 package matchers
 
 /** Represents the result of a matcher test, encapsulating whether the test passed or failed, along with messages for

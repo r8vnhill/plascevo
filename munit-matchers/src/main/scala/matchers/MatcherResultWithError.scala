@@ -3,8 +3,12 @@
  * 2-Clause BSD License.
  */
 
-package cl.ravenhill.plascevo
+package munit.matchers
 package matchers
+
+import cl.ravenhill.munit.assertions.{Actual, Expected}
+
+import scala.util.Try
 
 /**
  * A trait that extends `MatcherResult` to include an optional error.
@@ -14,6 +18,12 @@ package matchers
  * that occurred during the evaluation of a match.
  */
 trait MatcherResultWithError extends MatcherResult {
+
+    /** The actual value that was evaluated during the match. */
+    val actualValue: Actual
+
+    /** The expected value that was used in the match. */
+    val expectedValue: Expected
 
     /** An optional error that occurred during the evaluation of the matcher.
      *
@@ -33,28 +43,23 @@ trait MatcherResultWithError extends MatcherResult {
  */
 object MatcherResultWithError {
 
-    /** Creates an instance of `MatcherResultWithError`.
-     *
-     * The `apply` method constructs a `MatcherResultWithError` with the provided error, match result, and functions 
-     * that generate the failure messages. The failure messages are evaluated lazily, ensuring they are only computed 
-     * when needed.
-     *
-     * @param error                   An optional `Throwable` representing an error that occurred during the match
-     *                                evaluation.
-     * @param matches                 A boolean indicating whether the matcher passed.
-     * @param failureMessageFn        A function that generates the failure message based on the provided error.
-     * @param negatedFailureMessageFn A function that generates the negated failure message based on the provided error.
-     * @return An instance of `MatcherResultWithError` containing the provided values and logic.
-     */
     def apply(
-        error: Option[Throwable],
+        cause: Option[Throwable],
         matches: Boolean,
+        actual: Actual,
+        expected: Expected,
         failureMessageFn: Option[Throwable] => String,
         negatedFailureMessageFn: Option[Throwable] => String
     ): MatcherResultWithError = new MatcherResultWithError {
 
+        /** The actual value that was evaluated during the match. */
+        override val actualValue: Actual = actual
+
+        /** The expected value that was used in the match. */
+        override val expectedValue: Expected = expected
+
         /** The error encountered during the match evaluation. */
-        override val error: Option[Throwable] = error
+        override val error: Option[Throwable] = cause
 
         /** Returns the failure message, generated based on the provided error.
          *
@@ -81,21 +86,17 @@ object MatcherResultWithError {
         override def passed(): Boolean = matches
     }
 
-    /**
-     * Extractor method for pattern matching on `MatcherResultWithError`.
-     *
-     * The `unapply` method is used to deconstruct an instance of `MatcherResultWithError` into its constituent parts, 
-     * making it easier to use in pattern matching expressions. This method returns an `Option` containing a tuple with 
-     * the error, match result, failure message, and negated failure message.
-     *
-     * @param result The `MatcherResultWithError` instance to be deconstructed.
-     * @return An `Option` containing a tuple with:
-     *         - `Option[Throwable]`: The optional error encountered during the match evaluation.
-     *         - `Boolean`: A boolean indicating whether the matcher passed.
-     *         - `String`: The failure message generated during the match evaluation.
-     *         - `String`: The negated failure message generated during the match evaluation.
-     */
-    def unapply(result: MatcherResultWithError): Option[(Option[Throwable], Boolean, String, String)] = {
-        Some((result.error, result.passed(), result.failureMessage(), result.negatedFailureMessage()))
-    }
+    def unapply(
+        result: MatcherResultWithError
+    ): Option[(Option[Throwable], Boolean, Actual, Expected, String, String)] =
+        Some(
+            (
+                result.error,
+                result.passed(),
+                result.actualValue,
+                result.expectedValue,
+                result.failureMessage(),
+                result.negatedFailureMessage()
+            )
+        )
 }

@@ -104,14 +104,14 @@ object Shrinker {
         given PropertyContext = context.copy()
 
         // Define a property function that sets up the contextual random source before testing the value
-        val property: (PropertyContext, T) => Unit = (ctx, value) => {
+        val property: (PropertyContext, T) => Try[Unit] = (ctx, value) => Try {
             ctx.setupContextual(RandomSource.seeded(seed))
             propertyFn(value)
         }
         // Perform standard shrinking on the sample's shrinks
-        val smallerA = doShrinking(sample.shrinks, shrinkingMode)(propertyFn)
+        val smallerA = doShrinking(sample.shrinks, shrinkingMode)(property)
         // Perform contextual shrinking based on the shrinking mode
-        val smallestContextual = doContextualShrinking(shrinkingMode)(property)
+        val smallestContextual = doContextualShrinking
         // Combine the results of standard and contextual shrinking
         smallerA.map(_ :: smallestContextual).map(_.toSeq)
     }
@@ -134,8 +134,8 @@ object Shrinker {
      *         initial value, the smallest failing value found (or the initial value if no failures occurred), and an
      *         optional throwable that caused the failure.
      */
-    private def doShrinking[T](initial: RTree[T], shrinkingMode: ShrinkingMode)(test: T => Try[Unit])
-        (using stackTraces: PropertyCheckStackTraces): Try[ShrinkResult[T]] = Try {
+    private def doShrinking[T](initial: RTree[T], shrinkingMode: ShrinkingMode)(test: (PropertyContext, T) => Try[Unit])
+        (using stackTraces: PropertyCheckStackTraces, context: PropertyContext): Try[ShrinkResult[T]] = Try {
         initial.children() match {
             case Nil =>
                 // No children to shrink, so return the initial value as both the original and shrunk result
@@ -158,8 +158,10 @@ object Shrinker {
         }
     }
 
-    private def doContextualShrinking[T](shrinkingMode: ShrinkingMode)
-        (property: (PropertyContext, T) => Unit): List[ShrinkResult[T]] = ???
+    private def doContextualShrinking[T](using context: PropertyContext): List[ShrinkResult[?]] =
+        context.generatedSamples.map { sample =>
+            ShrinkResult(sample.value, sample.value, None)
+        }.toList
 
     /**
      * Performs a single step in the shrinking process, attempting to find a smaller failing input.
@@ -184,9 +186,9 @@ object Shrinker {
         shrinkingMode: ShrinkingMode,
         tested: ListBuffer[T],
         counter: Counter,
-        test: T => Try[Unit],
+        test: (PropertyContext, T) => Try[Unit],
         stringBuilder: StringBuilder
-    ): Option[(T, Option[Throwable])] = {
+    )(using context: PropertyContext): Option[(T, Option[Throwable])] = {
 
         // Check if the shrinking mode allows further shrinking
         if (!shrinkingMode.isShrinking(counter.value)) {
@@ -204,9 +206,9 @@ object Shrinker {
         shrinkingMode: ShrinkingMode,
         tested: ListBuffer[T],
         counter: Counter,
-        test: T => Try[Unit],
+        test: (PropertyContext, T) => Try[Unit],
         stringBuilder: StringBuilder
-    ): Option[(T, Option[Throwable])] = {
+    )(using context: PropertyContext): Option[(T, Option[Throwable])] = {
 
         candidates.view
             .filterNot(candidate => isAlreadyTested(candidate, tested))
@@ -234,11 +236,11 @@ object Shrinker {
         shrinkingMode: ShrinkingMode,
         tested: ListBuffer[T],
         counter: Counter,
-        test: T => Try[Unit],
+        test: (PropertyContext, T) => Try[Unit],
         stringBuilder: StringBuilder
-    ): Option[(T, Option[Throwable])] = {
+    )(using context: PropertyContext): Option[(T, Option[Throwable])] = {
 
-        test(value) match {
+        test(context, value) match {
             case Success(_) =>
                 logShrinkStep(value, counter, passed = true, stringBuilder)
                 None
@@ -269,9 +271,9 @@ object Shrinker {
         shrinkingMode: ShrinkingMode,
         tested: ListBuffer[T],
         counter: Counter,
-        test: T => Try[Unit],
+        test: (PropertyContext, T) => Try[Unit],
         stringBuilder: StringBuilder
-    ): Option[(T, Option[Throwable])] = {
+    )(using context: PropertyContext): Option[(T, Option[Throwable])] = {
         doStep(candidate, shrinkingMode, tested, counter, test, stringBuilder)
     }
 

@@ -3,8 +3,7 @@
  * 2-Clause BSD License.
  */
 
-package munit.matchers
-package assertions
+package cl.ravenhill.munit.assertions
 
 import munit.{ComparisonFailException, Location}
 
@@ -32,7 +31,7 @@ package object exceptions {
         cause: Option[Throwable],
         expected: Expected,
         actual: Actual
-    )(using loc: Location): Try[ComparisonFailException] = Try {
+    )(using loc: Location): ComparisonFailException = Try {
         // In the case of a mock, attempting to access the cause's stack trace in the assertion error constructor
         // can lead to another exception being thrown. To avoid this, we try to access the stack trace ourselves
         // and catch any resulting exception.
@@ -42,5 +41,5 @@ package object exceptions {
         // If an exception occurs while accessing the stack trace, create the ComparisonFailException without the
         // cause.
         case _: Throwable => ComparisonFailException(message, expected, actual, loc, true)
-    }
+    }.get
 }

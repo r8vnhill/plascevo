@@ -8,7 +8,7 @@ package internal
 
 import arbitrary.shrinkers.ShrinkResult
 
-import cl.ravenhill.munit.Exceptions.failureWithCause
+import cl.ravenhill.munit.Exceptions.comparisonFailWithCause
 import cl.ravenhill.munit.collectors.ErrorCollector
 import cl.ravenhill.munit.collectors.ErrorCollector.clueContextAsString
 import cl.ravenhill.munit.print.Printed

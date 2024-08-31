@@ -7,11 +7,9 @@ package cl.ravenhill.plascevo
 package matchers.eq
 
 import cl.ravenhill.munit.print.Print.printed
-import matchers.ApplyMatcher
-import matchers.eq.EqualityMatcher.NumberEquality.NonStrict
-import matchers.eq.EqualityMatcher.{NumberEquality, equal}
-
 import munit.Assertions
+import munit.matchers.matchers.eq.EqualityMatcher.NumberEquality
+import munit.matchers.matchers.eq.EqualityMatcher.NumberEquality.NonStrict
 
 /** A type class for comparing values of type `T` for equality with optional strict number comparison.
  *

@@ -6,7 +6,16 @@
 package munit.matchers
 package matchers
 
-import munit.{Assertions, Location}
+import cl.ravenhill.munit.Exceptions.comparisonFailWithCause
+import cl.ravenhill.munit.assertions.IntelliJFormatter.{intelliJFormatError, intelliJFormatErrorWithType}
+import cl.ravenhill.munit.assertions.exceptions.createComparisonFailException
+import cl.ravenhill.munit.assertions.{Actual, ActualWithType, Expected, ExpectedWithType}
+import cl.ravenhill.munit.collectors.ErrorCollector.clueContextAsString
+import cl.ravenhill.munit.collectors.{ErrorCollector, ThreadLocalErrorCollector}
+import cl.ravenhill.munit.print.Printed
+import munit.*
+
+import scala.util.Try
 
 /** Utility object for applying matchers and handling assertion failures.
  *
@@ -17,23 +26,9 @@ import munit.{Assertions, Location}
  */
 object ApplyMatcher extends Assertions {
 
-    /** Applies a matcher to a value and handles any resulting failures.
-     *
-     * The `apply` method evaluates a given value `t` against a specified matcher, producing a `MatcherResult`.
-     * Depending on the result, it handles potential comparison or matching failures by invoking the appropriate error
-     * handling functions.
-     *
-     * @param t       The value of type `T` to be tested against the matcher.
-     * @param matcher The `Matcher[T]` instance used to evaluate the value `t`.
-     * @tparam T The type of the value being tested.
-     * @return The `MatcherResult` produced by testing the value `t` with the matcher.
-     * @throws CompositeException If an error is collected during the comparison or matching, depending on the error
-     *                            collection mode.
-     * @throws Throwable          If the error collection mode is hard, the failure is thrown immediately.
-     */
-    def apply[T](t: T, matcher: Matcher[T]): MatcherResult = {
+    def apply[T](t: T, matcher: Matcher[T])
+        (using errorCollector: ErrorCollector = ThreadLocalErrorCollector()): MatcherResult = {
         val result = matcher.apply(t)
-
         (result.passed(), result) match {
             case (false, ComparableMatcherResult(true, failureMessage, _, actual, expected)) =>
                 handleComparisonFailure(failureMessage, actual, expected)
@@ -41,14 +36,13 @@ object ApplyMatcher extends Assertions {
             case (false, EqualityMatcherResult(true, actual, expected, failureMessage, _)) =>
                 handleComparisonFailure(failureMessage, actual, expected)
 
-            case (false, MatcherResultWithError(cause, true, failureMessage, _)) =>
-                handleErrorWithCause(cause, failureMessage)
+            case (false, MatcherResultWithError(cause, _, actual, expected, failureMessage, _)) =>
+                handleErrorWithCause(cause, Option(actual.value), Option(expected.value), failureMessage)
 
             case (false, _) =>
-                handleGenericFailure(result.failureMessage())
+                handleGenericFailure(result.failureMessage(), None, None)
             case _ =>
-        }w
-
+        }
         result
     }
 
@@ -61,15 +55,18 @@ object ApplyMatcher extends Assertions {
      * @param failureMessage A message describing the nature of the comparison failure. This message will be included in
      *                       the final error message.
      * @param actual         The actual value obtained during the comparison, represented as an `Option[Any]`.
-     * @param expected       The expected value against which the actual value was compared, represented as an `Option[Any]`.
-     * @param loc            The location where the failure occurred, implicitly provided. This is used to annotate the failure
-     *                       with the specific location in the code where the comparison failure happened.
+     * @param expected       The expected value against which the actual value was compared, represented as an
+     *                       `Option[Any]`.
+     * @param loc            The location where the failure occurred, implicitly provided. This is used to annotate the
+     *                       failure with the specific location in the code where the comparison failure happened.
+     * @param errorCollector The error collector used to manage the error collection mode and handle the resulting
+     *                       errors.
      */
     private def handleComparisonFailure(
         failureMessage: String,
         actual: Option[Any],
         expected: Option[Any]
-    )(using loc: Location): Unit = {
+    )(using loc: Location, errorCollector: ErrorCollector): Unit = {
         errorCollector.collectOrThrow(
             fail(
                 expected = Expected(Printed(expected)),
@@ -79,41 +76,58 @@ object ApplyMatcher extends Assertions {
         )
     }
 
-    /** Handles errors by either using the provided cause or creating a new failure with a message.
+    /**
+     * Handles an error by either collecting or throwing it, considering an optional cause.
      *
-     * The `handleErrorWithCause` method is responsible for handling errors that may have an associated cause. If a
-     * cause is provided, it will be used directly; otherwise, a new failure `Throwable` is created using the provided
-     * failure message. The resulting error is then either collected or thrown based on the current error collection
-     * mode.
+     * The `handleErrorWithCause` method processes an error in the context of a comparison between an actual and
+     * expected value. It checks if an optional cause (`Throwable`) is provided. If the cause exists, it collects or
+     * throws it using the `ErrorCollector`. If no cause is provided, it generates a `ComparisonFailException` using the
+     * provided failure message, actual value, and expected value, and then collects or throws this exception.
      *
-     * @param cause          An optional `Throwable` representing the cause of the failure. If provided, this will be used as the
-     *                       error to be handled.
-     * @param failureMessage The message describing the failure, used to create a new failure if the cause is not
-     *                       provided.
-     * @param loc            The location where the failure occurred, implicitly provided. This is used to annotate the failure
-     *                       with the specific location in the code where the error happened.
+     * @param cause          An optional `Throwable` representing the cause of the error. If present, this cause will be
+     *                       handled by the `ErrorCollector`.
+     * @param actual         An optional value representing the actual result obtained during the comparison.
+     * @param expected       An optional value representing the expected result that the actual value was compared
+     *                       against.
+     * @param failureMessage A descriptive message indicating the nature of the failure.
+     * @param loc            The `Location` in the code where the failure occurred, providing context.
+     * @param errorCollector The `ErrorCollector` used to gather and report errors during the test. Depending on its
+     *                       configuration, it may either collect the error for later reporting or throw it immediately.
      */
     private def handleErrorWithCause(
         cause: Option[Throwable],
+        actual: Option[?],
+        expected: Option[?],
         failureMessage: String
-    )(using loc: Location): Unit = {
-        val error = cause.getOrElse(failure(failureMessage))
-        errorCollector.collectOrThrow(error)
-    }
+    )(using loc: Location, errorCollector: ErrorCollector): Unit = errorCollector.collectOrThrow(
+        cause.getOrElse(failure(failureMessage, actual, expected))
+    )
 
-    /** Handles generic failures by collecting or throwing an error.
+    /**
+     * Handles a generic failure by collecting or throwing a `ComparisonFailException`.
      *
-     * The `handleGenericFailure` method is responsible for dealing with failures that are not specific to any
-     * particular type of `MatcherResult`. It constructs a failure `Throwable` using the provided failure message and
-     * either collects or throws it based on the current error collection mode.
+     * The `handleGenericFailure` method is responsible for handling a failure that occurs when the actual result does
+     * not match the expected result in a test or comparison. It creates a `ComparisonFailException` using the provided
+     * failure message, actual value, and expected value, and then either collects the exception using the
+     * `ErrorCollector` or throws it, depending on the configuration of the `ErrorCollector`.
      *
-     * @param failureMessage The message describing the failure.
-     * @param loc            The location where the failure occurred, implicitly provided. This is used to annotate the failure with
-     *                       the specific location in the code where the error happened.
+     * @param failureMessage A descriptive message indicating the nature of the failure.
+     * @param actual         An optional value representing the actual result obtained during the comparison.
+     * @param expected       An optional value representing the expected result that the actual value was compared
+     *                       against.
+     * @param loc            The `Location` in the code where the failure occurred, providing context.
+     * @param errorCollector The `ErrorCollector` used to gather and report errors during the test. Depending on its
+     *                       configuration, it may either collect the error for later reporting or throw it immediately.
      */
-    private def handleGenericFailure(failureMessage: String)(using loc: Location): Unit = {
-        errorCollector.collectOrThrow(failure(failureMessage))
-    }
+    private def handleGenericFailure(
+        failureMessage: String,
+        actual: Option[?],
+        expected: Option[?]
+    )(
+        using
+        loc: Location,
+        errorCollector: ErrorCollector
+    ): Unit = errorCollector.collectOrThrow(failure(failureMessage, actual, expected))
 
     /**
      * Creates and returns a `Throwable` representing a comparison failure between an expected and actual value.
@@ -130,37 +144,49 @@ object ApplyMatcher extends Assertions {
      *                         failure occurred. This is automatically provided by the compiler and does not need to be
      *                         specified manually.
      * @return A `Throwable` representing the failure, including detailed information about the comparison that failed.
-     *         }}}
      */
     def fail(expected: Expected, actual: Actual, prependedMessage: String)
-        (using loc: Location): Throwable = {
-        createComparisonFailException(
-            message = prependedMessage + clueContextAsString + intelliJFormatError(expected, actual),
-            cause = None,
-            expected = expected,
-            actual = actual,
-        )
-    }
+        (using loc: Location, errorCollector: ErrorCollector): ComparisonFailException = createComparisonFailException(
+        message = prependedMessage + clueContextAsString + intelliJFormatError(expected, actual),
+        cause = None,
+        expected = expected,
+        actual = actual,
+    )
 
     /**
-     * Creates a `Throwable` representing a failure with a specified message.
+     * Creates a `ComparisonFailException` with a specified failure message and comparison details.
      *
-     * The `failure` method generates a `Throwable` with the given failure message and the current location context.
-     * It uses the `failureWithCause` method internally, passing `None` as the cause since no specific cause is
-     * provided.
+     * The `failure` method constructs a `ComparisonFailException` using the provided failure message, actual value,
+     * and expected value. This exception is used to signal that a comparison between `actual` and `expected` values
+     * has failed. The method delegates the creation of the exception to the `comparisonFailWithCause` method,
+     * which includes additional contextual information and error collection.
      *
-     * @param failureMessage A `String` representing the failure message to be included in the `Throwable`.
-     * @param loc            An implicit `Location` parameter that provides the location context of the failure.
-     * @return A `Throwable` representing the failure, containing the provided message and location context.
+     * @param failureMessage A descriptive message indicating the nature of the failure.
+     * @param actual         An optional value representing the actual result obtained during the comparison.
+     * @param expected       An optional value representing the expected result that the actual value was compared
+     *                       against.
+     * @param loc            The `Location` in the code where the failure occurred, providing context. This parameter is
+     *                       provided implicitly using Scala's `using` keyword.
+     * @param errorCollector The `ErrorCollector` used to gather and report errors during the test. This parameter is
+     *                       provided implicitly using Scala's `using` keyword.
+     * @return A `ComparisonFailException` containing the failure details, including the failure message, the actual and
+     *         expected values, and the location of the failure.
      */
-    def failure(failureMessage: String)(using loc: Location): Throwable =
-        failureWithCause(failureMessage, None)
+    private def failure(
+        failureMessage: String,
+        actual: Option[?],
+        expected: Option[?]
+    )(
+        using
+        loc: Location,
+        errorCollector: ErrorCollector
+    ): ComparisonFailException = comparisonFailWithCause(failureMessage, actual, expected, None)
 
     def failureWithTypeInformation(
         expected: ExpectedWithType,
         actual: ActualWithType,
         prependMessage: String = ""
-    )(using loc: Location): Throwable = {
+    )(using loc: Location, errorCollector: ErrorCollector): ComparisonFailException = {
         if (actual.value.typeInfo == expected.value.typeInfo) {
             createComparisonFailException(
                 prependMessage + clueContextAsString + intelliJFormatError(expected.toExpected, actual.toActual),

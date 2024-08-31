@@ -9,6 +9,8 @@ package assertions
 import assertions.print.Printed
 import matchers.ShouldMatchers
 
+import cl.ravenhill.munit.assertions.Actual
+
 class ActualTest extends munit.FunSuite with ShouldMatchers {
     test("Actual should wrap a value") {
         val actual = Actual(Printed(Some("value")))

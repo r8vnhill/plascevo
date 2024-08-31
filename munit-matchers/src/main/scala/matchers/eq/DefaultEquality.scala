@@ -3,12 +3,16 @@
  * 2-Clause BSD License.
  */
 
-package cl.ravenhill.plascevo
+package munit.matchers
 package matchers.eq
 
-import assertions.{ActualWithType, ExpectedWithType}
-import cl.ravenhill.munit.print.PrintedWithType
 import matchers.ApplyMatcher.failureWithTypeInformation
+
+import cl.ravenhill.munit.assertions.{ActualWithType, ExpectedWithType}
+import cl.ravenhill.munit.collectors.ErrorCollector
+import cl.ravenhill.munit.print.PrintedWithType
+import cl.ravenhill.plascevo.matchers.eq.Eq
+import munit.ComparisonFailException
 
 object DefaultEquality extends Eq[Any] {
 
@@ -30,16 +34,21 @@ object DefaultEquality extends Eq[Any] {
     override def equals(
         actual: Any,
         expected: Any
-    )(using strictNumberEq: EqualityMatcher.NumberEquality): Option[Throwable] = if (test(actual, expected)) {
-        None
-    } else {
-        Some(
-            failureWithTypeInformation(
-                ExpectedWithType(PrintedWithType(Some(expected), expected.getClass.getTypeName)),
-                ActualWithType(PrintedWithType(Some(actual), actual.getClass.getTypeName))
+    )(
+        using
+        strictNumberEq: EqualityMatcher.NumberEquality,
+        errorCollector: ErrorCollector
+    ): Option[ComparisonFailException] =
+        if (test(actual, expected)) {
+            None
+        } else {
+            Some(
+                failureWithTypeInformation(
+                    ExpectedWithType(PrintedWithType(Some(expected), expected.getClass.getTypeName)),
+                    ActualWithType(PrintedWithType(Some(actual), actual.getClass.getTypeName))
+                )
             )
-        )
-    }
+        }
 
     /** Compares two values for equality, with special handling for arrays.
      *
